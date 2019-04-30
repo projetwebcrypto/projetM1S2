@@ -1,6 +1,15 @@
 version: '2'
 
 services:
+  authentification:
+    image: postgres:11.2
+    container_name: postgreSQLCompte
+    ports:
+    - "5432:5432"
+    # volumes:
+    # - /home/docker/pg/:/
+
+
   sqlite:
     command: socat TCP-L:12345,fork,reuseaddr EXEC:'sqlite',pty
     build:
@@ -25,5 +34,7 @@ services:
     tty: True
     depends_on:
     - sqlite
+    - authentification
     links:
     - "sqlite:sqlite"
+    - "auth:authentification"
