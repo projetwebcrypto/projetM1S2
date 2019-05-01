@@ -1,11 +1,11 @@
 version: '2'
 
 services:
-  authentification:
-    image: postgres:11.2
-    container_name: postgreSQLCompte
-    ports:
-    - "5432:5432"
+  # authentification:
+    # image: postgres:11.2
+    # container_name: postgreSQLCompte
+    # ports:
+    # - "5432:5432"
     # volumes:
     # - /home/docker/pg/:/
 
@@ -34,7 +34,7 @@ services:
     tty: True
     depends_on:
     - sqlite
-    - authentification
+    # - authentification
     links:
     - "sqlite:sqlite"
-    - "auth:authentification"
+    # - "authentification:auth"
