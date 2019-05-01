@@ -1,11 +1,13 @@
 package fr.univtln.groupe1.webCrypto;
 
+import fr.univtln.groupe1.webCrypto.Account.FileManagment;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 
 /**
  * Hello world!
@@ -37,16 +39,39 @@ public class Main {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        final HttpServer server = startServer();
-        System.out.println(String.format("Jersey app started with WADL available at "
-                + "%sapplication.wadl\nHit enter to stop it...", BASE_URI));
-        System.in.read();
-        server.start();
-        try {
-            Thread.currentThread().join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+
+        ArrayList<String> liste;
+
+        FileManagment file = new FileManagment();
+        file.connexion("log/", "passwords.db.sc");
+
+        file.createFile("log/", "unFichier3");
+        liste = file.openFile("log/", "passwords.db.sc");
+
+        for(String e : liste) {
+            System.out.println("liste main: " + e);
         }
-        server.stop();
+
+
+
+        file.closeConnexion();
+
+//        final HttpServer server = startServer();
+//        System.out.println(String.format("Jersey app started with WADL available at "
+//                + "%sapplication.wadl\nHit enter to stop it...", BASE_URI));
+//        System.in.read();
+//        server.start();
+//
+//
+//
+//
+//
+//
+//        try {
+//            Thread.currentThread().join();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//        server.stop();
     }
 }

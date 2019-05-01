@@ -2,10 +2,13 @@ package fr.univtln.groupe1.webCrypto.Account;
 
 
 import lombok.*;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @ToString
 public class FileManagment{
@@ -64,7 +67,11 @@ public class FileManagment{
     }
 
 
-    public boolean openFile(String login, String fileName) {
+    public ArrayList<String> openFile(String login, String fileName) {
+        ArrayList<String> liste = new ArrayList<>();
+        CoupleCrypte.CoupleCrypteBuilder builder = CoupleCrypte.builder();
+
+        ObjectMapper mapper = new ObjectMapper();
 
         try {
             this.stmt = c.createStatement();
@@ -72,12 +79,27 @@ public class FileManagment{
             while (rs.next()) {
                 System.out.println(rs.getString("SITE_NAME"));
                 System.out.println(rs.getString("CRYPTO"));
+
+
+//                try {
+//
+//                }
+
+
+
+
+                liste.add(rs.getString("SITE_NAME"));
+                liste.add(rs.getString("CRYPTO"));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return true;
+        for(String e : liste) {
+           System.out.println("liste: " + e);
+        }
+
+        return liste;
     }
 
 }
