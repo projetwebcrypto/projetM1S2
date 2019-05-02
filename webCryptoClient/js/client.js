@@ -1,47 +1,33 @@
 $(document).ready(function(){
-  /*
-  * Ecoutons l'évènement click()
-  */
-  // function getXMLHttpRequest() {
-  // 	var xhr = null;
-  // 	if (window.XMLHttpRequest || window.ActiveXObject) {
-  // 		if (window.ActiveXObject) {
-  // 			try {
-  // 				xhr = new ActiveXObject("Msxml2.XMLHTTP");
-  // 			} catch(e) {
-  // 				xhr = new ActiveXObject("Microsoft.XMLHTTP");
-  // 			}
-  // 		} else {
-  // 			xhr = new XMLHttpRequest();
-  // 		}
-  // 	} else {
-  // 		alert("Votre navigateur ne supporte pas l'objet XMLHTTPRequest...");
-  // 		return null;
-  // 	}
-  // 	return xhr;
-  // }
 
   console.log("nimportequoi2");
   $("#DL").click(function(){
+
+
     $.ajax({
       type:'GET',
-      url:'http://192.168.99.100:8080/myapp/chiens',
-      data:{}, //'utilisateur=' + nom_user
+      url:'http://0.0.0.0:8080/myapp/chiens',// url serveur depot
+      data:{"{ 'login' : log, 'bd' : passwords}"},
       dataType:'json',
-      beforeSend :function(){$('bd').html("<img src='img/wait.gif'>");},
+      //beforeSend :function(){
       success:function(res){
-        console.log("rentre dans success");
-        var ch ='';
+        // crée la table html
+        var ch = '<table class="table"><thead><tr><th scope="col">#</th>'
+        ch += '<th scope="col">Site</th><th scope="Identifiants">Last</th>'
+        ch += '</tr></thead>';
+        console.log(res);
         if (res.length > 0){
           for (var i=0; i<res.length; i++){
-            ch += '<option>'+res[i].nom+'</option>';
-            console.log(res[i]);
+            // for each e€res e[i] devient un element de la table
+            ch += '<tbody><tr><th scope="row">' + i+1 + '</th><td>'
+            ch += '<li class="list-group-item">' + res[i].site+'</td>';
+            ch += '<td>' + res[i].crypto + '</td></tr>'
           }
-          // à modifier
-          ch = '<select name="villes">'+ch+'</select>';
+          // fermeture des balise
+          ch += '</tbody></table>';
         }
-        console.log(ch);
-        $('bd').html(ch);
+
+        $('body').append(ch);
       },
       error:function(){$('bd').html("");}
     })
