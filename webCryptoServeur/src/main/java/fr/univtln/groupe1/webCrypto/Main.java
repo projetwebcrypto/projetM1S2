@@ -37,25 +37,25 @@ public class Main {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-
-        String contenu;
-
-        FileManagment file = new FileManagment();
-
-//        file.createFile("log/", "unFichier3");
-//        contenu = file.openFile("log/", "passwords.db.sc");
-
-        contenu = file.existencyAccount("log", "passwords");
-        System.out.println("contenu= " + contenu);
-
-//        contenu = file.existencyAccount("log2", "passc2");
-
-        System.out.println("contenu= " + contenu);
+//
+//        String contenu;
+//
+//        FileManagment file = new FileManagment();
+//
+////        file.createFile("log/", "unFichier3");
+////        contenu = file.openFile("log/", "passwords.db.sc");
+//
+//        contenu = file.existencyAccount("log", "passwords");
+//        System.out.println("contenu= " + contenu);
+//
+////        contenu = file.existencyAccount("log2", "passc2");
+//
+//        System.out.println("contenu= " + contenu);
 
 
         final HttpServer server = startServer();
         System.out.println(String.format("Jersey app started with WADL available at "
-                + "%sapplication.wadl\nHit enter to stop it...", BASE_URI));
+                + "%sapplication.wadl\nHit CTRL+C to stop it...", BASE_URI));
         System.in.read();
         server.start();
 

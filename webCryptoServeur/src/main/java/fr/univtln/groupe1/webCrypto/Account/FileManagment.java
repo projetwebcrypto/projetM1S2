@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.sql.*;
 
 @ToString
@@ -77,7 +78,8 @@ public class FileManagment{
             // on construit la chaine de caractere dont le serveur a besoin
             while (rs.next()) {
                 contenu += "{\"site\":\"" + rs.getString("SITE_NAME") + "\",";
-                contenu += "\"crypto\":\"" + rs.getString("CRYPTO") + "\"},";
+                contenu += "\"crypto\":\"" + URLEncoder.encode(rs.getString("CRYPTO"), "UTF-8") + "\"},";
+
             }
         } catch (Exception e) {
             e.printStackTrace();
