@@ -22,11 +22,12 @@ public class serveurREST {
     public String getBDDTriplets(String listJson) {
         JSONObject request = new JSONObject(listJson);
         String login = request.getString("login");
-        String nomdb = request.getString("db");
+        String nomdb = request.getString("bd");
         FileManagment fileManagment = new FileManagment();
         String contenu = fileManagment.openFile(login, nomdb);
         String reponse = "{\"triplets\":[" + contenu + "]}";
         return reponse;
+
     }
 
     /**
