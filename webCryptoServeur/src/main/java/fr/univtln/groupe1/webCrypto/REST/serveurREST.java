@@ -1,53 +1,33 @@
 package fr.univtln.groupe1.webCrypto.REST;
 
-import org.json.JSONArray;
+import fr.univtln.groupe1.webCrypto.Account.FileManagment;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonWriter;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
 
 @Path("/moncoffre")
 @Produces({"application/json"})
 public class serveurREST {
 
     /**
-     * Méthode qui retourne tous les triplets de la BDD nomdb
+     * Méthode qui retourne tous les triplets de la BDD db
      * associé au login
-     * @return String ???
+     * @return String
      */
     @POST
     @Path("/login")
     @Consumes(MediaType.APPLICATION_JSON)
     public String getBDDTriplets(String listJson) {
-        System.out.println(listJson);
-        //JSONArray listJS = new JSONArray(listJson);
-        //JSONArray listJS = (JSONArray) new JSONTokener(listJson).nextValue();
-        //JSONObject request = new JSONObject(listJS.getJSONObject(0));
         JSONObject request = new JSONObject(listJson);
-        System.out.println(request);
-        // methodes de traitement
-        // faire JSONArray
-        String reponse = "{'triplets':'[" + contenu + "]'}";
-        //return request.toString();
-        return "{'triplets':'[{'site':'google','crypto':'zqesgh4521'},{'site':'goula','crypto':'zdfdsfg985'}]'}";
+        String login = request.getString("login");
+        String nomdb = request.getString("db");
+        FileManagment fileManagment = new FileManagment();
+        String contenu = fileManagment.openFile(login, nomdb);
+        String reponse = "{\"triplets\":[" + contenu + "]}";
+        return reponse;
     }
-//    @PUT
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    public String test(String test) {
-//        System.out.println(test);
-//        System.out.println("Apres test");
-//        return "coucou";
-//    }
-    // reception, envoie de json triplet
-    // reception de json avec login, nomdb
 
     /**
      * Méthode qui insert les triplets reçus dans la BDD nomdb

@@ -47,7 +47,7 @@ public class FileManagment{
 
     public String openFile(String login, String fileName) {
         conn = new Connect();
-        conn.connexion(path, login, fileName);
+        conn.connexion(path, login + "/", fileName);
         String contenu = "";
 
         try {
@@ -55,8 +55,8 @@ public class FileManagment{
             ResultSet rs = stmt.executeQuery("SELECT * FROM PASSWORDS");
             // on construit la chaine de caractere dont le serveur a besoin
             while (rs.next()) {
-                contenu += "{'site':'" + rs.getString("SITE_NAME") + "',";
-                contenu += "'crypto':'" + rs.getString("CRYPTO") + "'},";
+                contenu += "{\"site\":\"" + rs.getString("SITE_NAME") + "\",";
+                contenu += "\"crypto\":\"" + rs.getString("CRYPTO") + "\"},";
             }
         } catch (Exception e) {
             e.printStackTrace();
