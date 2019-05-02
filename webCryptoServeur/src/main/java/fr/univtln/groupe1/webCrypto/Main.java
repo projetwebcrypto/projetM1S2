@@ -48,7 +48,7 @@ public class Main {
         contenu = file.existencyAccount("log", "passwords");
         System.out.println("contenu= " + contenu);
 
-        contenu = file.existencyAccount("log2", "passc");
+//        contenu = file.existencyAccount("log2", "passc2");
 
         System.out.println("contenu= " + contenu);
 

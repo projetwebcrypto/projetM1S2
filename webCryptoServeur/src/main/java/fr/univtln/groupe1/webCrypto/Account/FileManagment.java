@@ -37,6 +37,7 @@ public class FileManagment{
         try {
             File completFileName = new File(path + login + "/" + fileName + ".db.sc");
             completFileName.createNewFile();
+            this.initSchemaEmptyFile(login, fileName);
             System.out.println("fichier vide cree");
             return true;
         } catch (IOException e) {
@@ -44,6 +45,24 @@ public class FileManagment{
             return false;
         }
 
+    }
+
+
+    // Creer le schema de la bd dans le fichier vide
+    public boolean initSchemaEmptyFile(String login, String fileName) {
+        conn = new Connect();
+        conn.connexion(path, login + "/", fileName + ".db.sc");
+        PreparedStatement pstmt; //= connection.prepareStatement(sql);
+        try {
+            String req = "CREATE TABLE PASSWORDS" + "(SITE_NAME TEXT not null," + "CRYPTO TEXT) not null"
+                    + "PRIMARY KEY (SITE_NAME)"+ ")";
+            pstmt = conn.getConn().prepareStatement(req);
+//            pstmt.setString(1,"PASSWORDS");
+            ResultSet rs = stmt.executeQuery(req);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 
 
@@ -82,6 +101,7 @@ public class FileManagment{
         // le "fichier" existe et est un dossier
         if (repository.exists() && repository.isDirectory()) {
             if (file.exists()) {
+                System.out.println("Le fichier et le repertoire existe");
                 return openFile(login, fileName);
             }
             else {
