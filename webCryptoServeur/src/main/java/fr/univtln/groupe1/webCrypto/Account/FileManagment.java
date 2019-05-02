@@ -35,19 +35,21 @@ public class FileManagment{
 
         // Cree le fichier
         try {
-            File completFileName = new File(path + login + fileName + ".db.sc");
+            File completFileName = new File(path + login + "/" + fileName + ".db.sc");
             completFileName.createNewFile();
             System.out.println("fichier vide cree");
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
-        return true;
+
     }
 
 
     public String openFile(String login, String fileName) {
         conn = new Connect();
-        conn.connexion(path, login + "/", fileName);
+        conn.connexion(path, login + "/", fileName + ".db.sc");
         String contenu = "";
 
         try {
@@ -70,6 +72,28 @@ public class FileManagment{
         conn.closeConnexion();
 
         return contenu;
+    }
+
+    // verifie si un utilisateur existe et le cree si non
+    // verifie si un fichier existe et le cree si non
+    public String existencyAccount(String login, String fileName) {
+        File repository = new File(path + login + "/");
+        File file = new File(path + login + "/" + fileName + ".db.sc");
+        // le "fichier" existe et est un dossier
+        if (repository.exists() && repository.isDirectory()) {
+            if (file.exists()) {
+                return openFile(login, fileName);
+            }
+            else {
+                createFile(login, fileName);
+                return "Fichier non trouvé\nCreation du fichier";
+            }
+        }
+        else {
+            createFile(login, fileName);
+            return "Creation d'un nouvel utilisateur";
+        }
+
     }
 
 }

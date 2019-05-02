@@ -1,6 +1,5 @@
 package fr.univtln.groupe1.webCrypto;
 
-import fr.univtln.groupe1.webCrypto.Account.CoupleCrypte;
 import fr.univtln.groupe1.webCrypto.Account.FileManagment;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -8,7 +7,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 
 /**
  * Hello world!
@@ -44,8 +42,13 @@ public class Main {
 
         FileManagment file = new FileManagment();
 
-        file.createFile("log/", "unFichier3");
-        contenu = file.openFile("log/", "passwords.db.sc");
+//        file.createFile("log/", "unFichier3");
+//        contenu = file.openFile("log/", "passwords.db.sc");
+
+        contenu = file.existencyAccount("log", "passwords");
+        System.out.println("contenu= " + contenu);
+
+        contenu = file.existencyAccount("log2", "passc");
 
         System.out.println("contenu= " + contenu);
 
