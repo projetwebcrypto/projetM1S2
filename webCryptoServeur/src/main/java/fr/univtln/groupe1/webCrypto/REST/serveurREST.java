@@ -36,7 +36,8 @@ public class serveurREST {
         // methodes de traitement
         // faire JSONArray
 
-        return request.toString();
+        //return request.toString();
+        return "{'triplets':'[{'site':'google':'zqesgh4521'},{'site':'goula':'zdfdsfg985'}'}";
     }
 //    @PUT
 //    @Consumes(MediaType.APPLICATION_JSON)
