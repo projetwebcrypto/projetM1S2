@@ -1,0 +1,23 @@
+# dockerfile multistage
+# stage 1
+
+FROM maven:3.5.4-jdk-8-alpine AS build
+
+WORKDIR /myapp
+
+COPY pom.xml .
+ADD settings.xml /tmp
+RUN mvn -s /tmp/settings.xml -B -e -C -T 1C org.apache.maven.plugins:maven-dependency-plugin:3.1.1:go-offline
+COPY src ./src
+RUN mvn -s /tmp/settings.xml -B -e -C -T 1C package
+
+# stage 2
+
+FROM openjdk:8u191-jre-alpine
+
+RUN mkdir -p /usr/local/monCoffre/account
+
+COPY --from=build /myapp/target/*-withdependencies.jar /App/monCoffre.jar
+CMD ["java", "-jar", "/App/monCoffre.jar"]
+
+EXPOSE 8080

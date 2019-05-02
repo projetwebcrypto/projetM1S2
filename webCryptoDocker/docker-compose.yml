@@ -1,0 +1,40 @@
+version: '2'
+
+services:
+  # authentification:
+    # image: postgres:11.2
+    # container_name: postgreSQLCompte
+    # ports:
+    # - "5432:5432"
+    # volumes:
+    # - /home/docker/pg/:/
+
+
+  sqlite:
+    command: socat TCP-L:12345,fork,reuseaddr EXEC:'sqlite',pty
+    build:
+      context: ../webCryptoServeur/
+      dockerfile: ../webCryptoDocker/DockerfileSQLite
+    container_name: SQLiteTriplet
+    ports:
+    - 2:12345
+    volumes:
+    - /home/docker/:/usr/local/monCoffre
+
+  serveur:
+    build:
+      context: ../webCryptoServeur/
+      dockerfile: ../webCryptoDocker/DockerfileServeur
+    container_name: Serveur
+    ports:
+    - "8080:8080"
+    volumes_from:
+    - sqlite:rw
+    stdin_open: True
+    tty: True
+    depends_on:
+    - sqlite
+    # - authentification
+    links:
+    - "sqlite:sqlite"
+    # - "authentification:auth"
