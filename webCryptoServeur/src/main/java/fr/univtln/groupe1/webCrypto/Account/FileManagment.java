@@ -1,21 +1,19 @@
 package fr.univtln.groupe1.webCrypto.Account;
 
 
+import fr.univtln.groupe1.webCrypto.Connexion.Connect;
 import lombok.*;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @ToString
 public class FileManagment{
     @Getter
     @Setter
     private String path = "/usr/local/monCoffre/account/";
-    private Connection c = null;
+    private Connect conn = null;
     private Statement stmt = null;
 
     public boolean createFile(String login, String fileName) {
@@ -37,69 +35,41 @@ public class FileManagment{
 
         // Cree le fichier
         try {
-                File completFileName = new File(path + login + fileName + ".db");
-                completFileName.createNewFile();
-                System.out.println("Done");
+            File completFileName = new File(path + login + fileName + ".db.sc");
+            completFileName.createNewFile();
+            System.out.println("fichier vide cree");
         } catch (IOException e) {
             e.printStackTrace();
         }
         return true;
     }
 
-    public void connexion(String login, String fileName) {
-        try{
-            Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:" + path + login + fileName);
-            System.out.println("connecté");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
-    public void closeConnexion() {
-        try {
-            c.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    public ArrayList<String> openFile(String login, String fileName) {
-        ArrayList<String> liste = new ArrayList<>();
-        CoupleCrypte.CoupleCrypteBuilder builder = CoupleCrypte.builder();
-
-        ObjectMapper mapper = new ObjectMapper();
+    public String openFile(String login, String fileName) {
+        conn = new Connect();
+        conn.connexion(path, login, fileName);
+        String contenu = "";
 
         try {
-            this.stmt = c.createStatement();
+            this.stmt = conn.getConn().createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM PASSWORDS");
+            // on construit la chaine de caractere dont le serveur a besoin
             while (rs.next()) {
-                System.out.println(rs.getString("SITE_NAME"));
-                System.out.println(rs.getString("CRYPTO"));
-
-
-//                try {
-//
-//                }
-
-
-
-
-                liste.add(rs.getString("SITE_NAME"));
-                liste.add(rs.getString("CRYPTO"));
+                contenu += "{'site':'" + rs.getString("SITE_NAME") + "',";
+                contenu += "'crypto':'" + rs.getString("CRYPTO") + "'},";
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        for(String e : liste) {
-           System.out.println("liste: " + e);
+        // on enleve la virgule de la fin
+        if (contenu != null && contenu.length() > 0) {
+            contenu = contenu.substring(0, contenu.length() - 1);
         }
 
-        return liste;
+        conn.closeConnexion();
+
+        return contenu;
     }
 
 }
