@@ -35,9 +35,9 @@ public class serveurREST {
         System.out.println(request);
         // methodes de traitement
         // faire JSONArray
-
+        String reponse = "{'triplets':'[" + contenu + "]'}";
         //return request.toString();
-        return "{'triplets':'[{'site':'google':'zqesgh4521'},{'site':'goula':'zdfdsfg985'}'}";
+        return "{'triplets':'[{'site':'google','crypto':'zqesgh4521'},{'site':'goula','crypto':'zdfdsfg985'}]'}";
     }
 //    @PUT
 //    @Consumes(MediaType.APPLICATION_JSON)
