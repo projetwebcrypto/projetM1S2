@@ -90,10 +90,11 @@ $(document).ready(function(){
       if (myobj.triplets.length > 0){
         for (var i=0; i<myobj.triplets.length; i++){
           // Pour chaque json e[i] devient un element de la table
+          var uri_dec = decodeURIComponent(myobj.triplets[i].crypto);
           ch += '<tbody><tr><th scope="row">' + i + '</th><td>'
           ch += '<li class="list-group-item">' + myobj.triplets[i].site+'</td>';
-          ch += '<td>' + myobj.triplets[i].crypto + '</td></tr>'
-          addTripletTest(myobj.triplets[i].site, myobj.triplets[i].crypto)
+          ch += '<td>' + uri_dec + '</td></tr>'
+          addTripletTest(myobj.triplets[i].site, uri_dec)
         }
         // fermeture des balise
         ch += '</tbody></table>';
