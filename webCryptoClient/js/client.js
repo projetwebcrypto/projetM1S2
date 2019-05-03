@@ -38,8 +38,12 @@ function createDb() {
 createDb();
 
 $(document).ready(function(){
+
+  // Initialisation des entrées, et les cache de base.
+  $( "#add-buttons" ).hide();
+
   // Test de raffraichissement en live de la bd
-  function getObjectStore(store_name, mode) {
+  function getObjectStore(store_name, mode){
     // console.log("Avant la transaction: " + store_name + " " + mode);
     // console.log(db);
     var tx = db.transaction(store_name, mode);
@@ -56,6 +60,18 @@ $(document).ready(function(){
       addTable(getdatas.result);
     }
   }
+  $("#add_tuple").click(function(){
+    var website = document.getElementById("Website").value;
+    var login = document.getElementById("Login").value;
+    var password = document.getElementById("Password").value;
+    addTriplet(website, login + password);
+    readTriplet();
+  });
+
+  // ajoute les champs html pour saisie pseudo + mdp + site
+  $("#ADD").click(function(){
+    $( "#add-buttons" ).show();
+  });
 
   // Fonction qui ajoute un triplet a la base de donnees
   function addTriplet(webs, crypt){
@@ -68,12 +84,12 @@ $(document).ready(function(){
       console.log("Error In addTriplet : " + e);
       throw e;
     }
-    req.onsuccess = function (evt) {
+    req.onsuccess = function (evt){
       console.log("Insertion in DB successful");
       // displayActionSuccess();
       // displayPubList(store);
     };
-    req.onerror = function() {
+    req.onerror = function(){
       console.log(this.error.name);
       if(this.error.message == "A mutation operation in the transaction failed because a constraint was not satisfied."){
         console.error("addTriplet error", this.error);

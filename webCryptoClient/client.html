@@ -33,10 +33,25 @@
     </div>
     <div class="container">
       <div class="row">
-        <div class="col-sm-4">
+        <div class="col-sm-4" id = 'div_add'>
           <h3>Ajouter site</h3>
-          <li><a href='#'>Ajouter site</a></li>
+          <li><a href='#' id='ADD'>Ajouter site</a></li>
           <p>Permet d'ajouter une entrée.</p>
+          <div class="add-trip" id='add-buttons'>
+            <p>
+              <label>Site</label>
+              <input type="text" name="Website" id="Website">
+            </p>
+            <p>
+              <label>Identifiant</label>
+              <input type="text" name="login" id="Login">
+            </p>
+            <p>
+              <label>Mot de passe</label>
+              <input type="password" name="mdp" id="Password">
+            </p>
+            <button type=\"button\" id='add_tuple'>Cliquez ici</button>
+          </div>
         </div>
         <div class="col-sm-4">
           <h3>Récupérer les sites</h3>
