@@ -10,7 +10,8 @@ if (!window.indexedDB) {
 }
 
 var db;
-function openDb() {
+
+function createDb() {
   console.log("Init openDb ...");
 
   // Version 3 car seul chromium semble marcher à la fac, et uniquement sur cette version
@@ -34,27 +35,37 @@ function openDb() {
   };
 }
 
-openDb();
-$(document).ready(function(){
+createDb();
 
+$(document).ready(function(){
   // Test de raffraichissement en live de la bd
   function getObjectStore(store_name, mode) {
-    console.log("Avant la transaction: " + store_name + " " + mode);
-    console.log(db);
+    // console.log("Avant la transaction: " + store_name + " " + mode);
+    // console.log(db);
     var tx = db.transaction(store_name, mode);
-    console.log("Après la transaction");
+    // console.log("Après la transaction");
     return tx.objectStore(store_name);
   }
 
+  //Function qui lit un triplet danss la base de donnees
+  function readTriplet(){
+    var store =  getObjectStore('Triplet', 'readonly');
+    var getdatas = store.getAll();
+    getdatas.onsuccess = function(){
+      // console.log(getdatas.result);
+      addTable(getdatas.result);
+    }
+  }
+
   // Fonction qui ajoute un triplet a la base de donnees
-  function addTripletTest(webs, crypt){
-    var site = {"Website":webs, "crypto":crypt};
+  function addTriplet(webs, crypt){
+    var tuple = {"Website":webs, "crypto":crypt};
     var store = getObjectStore('Triplet', 'readwrite');
     var req;
     try {
-      req = store.add(site);
+      req = store.add(tuple);
     } catch (e) {
-      console.log("In addTripletTest"+e);
+      console.log("Error In addTriplet : " + e);
       throw e;
     }
     req.onsuccess = function (evt) {
@@ -63,7 +74,7 @@ $(document).ready(function(){
       // displayPubList(store);
     };
     req.onerror = function() {
-      console.error("addTripletTest error", this.error);
+      console.error("addTriplet error", this.error);
       // displayActionFailure(this.error);
     };
   }
@@ -76,10 +87,10 @@ $(document).ready(function(){
     var tableau = '<table class="table"><thead><tr><th scope="col">#</th>';
     tableau += '<th scope="col">Site</th><th scope="identifiants">Crypto</th>';
     tableau += '</tr></thead>';
-    for (var i=1; i<myobj.triplets.length; i++){
+    for (var i=0; i<myobj.length; i++){
       tableau += '<tbody><tr><th scope="row">' + i + '</th><td>';
-      tableau += '<li class="list-group-item">' + myobj.triplets[i].site+'</td>';
-      tableau += '<td>' + decodeURIComponent(myobj.triplets[i].crypto) + '</td></tr>'
+      tableau += '<li class="list-group-item">' + myobj[i].Website+'</td>';
+      tableau += '<td>' + decodeURIComponent(myobj[i].crypto) + '</td></tr>'
     }
     // fermeture des balise
     tableau += '</tbody></table>';
@@ -87,37 +98,31 @@ $(document).ready(function(){
   };
   // Telechargement BD
 
+  $("#Affichage").click(function(){
+    readTriplet();
+  })
+
   $("#DL").click(function(){
-  data = {"login":'log',"bd":'passwords'};
-  var urlc = 'http://192.168.99.100:8080/monCoffre/moncoffre';
-
-  $.ajax({
-    type:'POST',
-    url:urlc + '/login',
-    data:JSON.stringify(data),
-    dataType:'text',
-    contentType:'application/json',
-    // accepts: "*/*",
-    success:function(json,status){
-
-      // variable de stockage ( liste de données post traitement)
-      // variable stockage d'un triplet
-
-      var myobj = JSON.parse(json);
-      if (myobj.triplets.length > 0){
-        for (var i=1; i<myobj.triplets.length; i++){
-
-          addTripletTest(myobj.triplets[i].site, myobj.triplets[i].crypto);
-
+    data = {"login":'log',"bd":'passwords'};
+    var urlc = 'http://192.168.99.100:8080/monCoffre/moncoffre';
+    $.ajax({
+      type:'POST',
+      url:urlc + '/login',
+      data:JSON.stringify(data),
+      dataType:'text',
+      contentType:'application/json',
+      // accepts: "*/*",
+      success:function(json,status){
+        // variable de stockage ( liste de données post traitement)
+        // variable stockage d'un triplet
+        var myobj = JSON.parse(json);
+        if (myobj.triplets.length > 0){
+          for (var i=1; i<myobj.triplets.length; i++){
+            addTriplet(myobj.triplets[i].site, myobj.triplets[i].crypto);
+          }
         }
-
-      }
-
-      addTable(myobj);
-    },
-    error:function(data,status){console.log("error POST"+data+" status :  "+status);}
+      },
+      error:function(data,status){console.log("error POST"+data+" status :  "+status);}
+    })
   })
-
-  })
-
 });
