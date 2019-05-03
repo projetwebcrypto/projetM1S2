@@ -11,7 +11,7 @@ services:
 
 
   sqlite:
-    command: socat TCP-L:12345,fork,reuseaddr EXEC:'sqlite',pty
+    command: socat TCP-L:12345,fork,reuseaddr EXEC:'sqlite3',pty
     build:
       context: ../webCryptoServeur/
       dockerfile: ../webCryptoDocker/DockerfileSQLite
