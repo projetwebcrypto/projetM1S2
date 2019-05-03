@@ -38,20 +38,21 @@ public class Main {
      */
     public static void main(String[] args) throws IOException {
 //
-//        String contenu;
+        String contenu;
 //
-//        FileManagment file = new FileManagment();
+        FileManagment file = new FileManagment();
 //
 ////        file.createFile("log/", "unFichier3");
 ////        contenu = file.openFile("log/", "passwords.db.sc");
 //
-//        contenu = file.existencyAccount("log", "passwords");
-//        System.out.println("contenu= " + contenu);
-//
-////        contenu = file.existencyAccount("log2", "passc2");
-//
-//        System.out.println("contenu= " + contenu);
+        contenu = file.existencyAccount("log", "passwords");
+        System.out.println("contenu= " + contenu);
 
+        contenu = file.existencyAccount("log2", "passc2");
+        System.out.println("contenu= " + contenu);
+
+        contenu = file.existencyAccount("log2", "passc3");
+        System.out.println("contenu= " + contenu);
 
         final HttpServer server = startServer();
         System.out.println(String.format("Jersey app started with WADL available at "
