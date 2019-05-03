@@ -74,16 +74,21 @@ $(document).ready(function(){
       // displayPubList(store);
     };
     req.onerror = function() {
-      console.error("addTriplet error", this.error);
-      // displayActionFailure(this.error);
+      console.log(this.error.name);
+      if(this.error.message == "A mutation operation in the transaction failed because a constraint was not satisfied."){
+        console.error("addTriplet error", this.error);
+        alert("Tuple(s) déjà présent(s)");
+        // displayActionFailure(this.error);
+      };
     };
   }
 
   // Function traitement donnees vers html
   function addTable(myobj){
+    // Effacement d'eventuels precedents affichage
+    $("table").remove();
 
     // Initialisation des champs du tableau
-
     var tableau = '<table class="table"><thead><tr><th scope="col">#</th>';
     tableau += '<th scope="col">Site</th><th scope="identifiants">Crypto</th>';
     tableau += '</tr></thead>';
@@ -121,6 +126,7 @@ $(document).ready(function(){
             addTriplet(myobj.triplets[i].site, myobj.triplets[i].crypto);
           }
         }
+        readTriplet();
       },
       error:function(data,status){console.log("error POST"+data+" status :  "+status);}
     })
