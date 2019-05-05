@@ -9,6 +9,41 @@ if (!window.indexedDB) {
   window.alert("Votre navigateur ne supporte pas une version stable d'IndexedDB. Quelques fonctionnalités ne seront pas disponibles.")
 }
 
+var crypto = window.crypto ;
+
+if(crypto.subtle)
+{
+    alert("Cryptography API Supported");
+
+}
+else
+{
+    alert("Cryptography API not Supported");
+}
+
+function convertByteArrayToString(buffer)
+{
+  let data_view = new DataView(buffer);
+  chaine ="" ;
+  len = data_view.byteLength;
+  for(i = 0; i < len; i++)
+    {
+        chaine += String.fromCharCode(data_view.getUint8(i));
+    }
+
+    return chaine;
+}
+
+function ascii(lettre)
+{
+  return lettre.charCodeAt(0);
+}
+
+function convertStringToByteArray(str)
+{
+  return Uint8Array.from(str.split('').map(ascii));
+}
+
 var db;
 function openDb() {
   console.log("Init openDb ...");
@@ -79,7 +114,7 @@ $(document).ready(function(){
     for (var i=1; i<myobj.triplets.length; i++){
       tableau += '<tbody><tr><th scope="row">' + i + '</th><td>';
       tableau += '<li class="list-group-item">' + myobj.triplets[i].site+'</td>';
-      tableau += '<td>' + decodeURIComponent(myobj.triplets[i].crypto) + '</td></tr>'
+      tableau += '<td id="crypto">' + decodeURIComponent(myobj.triplets[i].crypto) + '</td></tr>';
     }
     // fermeture des balise
     tableau += '</tbody></table>';
@@ -118,6 +153,66 @@ $(document).ready(function(){
     error:function(data,status){console.log("error POST"+data+" status :  "+status);}
   })
 
+  })
+
+  $("body").on("click", "td", function(){
+    let cryptogrammeComplet = $(this).text();
+    console.log(cryptogrammeComplet);
+    console.log(cryptogrammeComplet.length);
+    if (cryptogrammeComplet.length != 0) {
+      // On extrait les infos du cryptogramme complet
+      // Taille du ivChiffre 16
+      let ivChiffre = convertStringToByteArray(cryptogrammeComplet.slice(0, 16));
+      // Taille du sel 16
+      let sel = convertStringToByteArray(cryptogrammeComplet.slice(16, 32));
+      // Taille du chiffre le reste
+      let chiffre = convertStringToByteArray(cryptogrammeComplet.slice(32));
+      // Generation du IV a 0 pour faire du ECB en CBC 
+      let ivZero = new Uint8Array(16);
+      var mdp = "moncul";
+      console.log("test");
+      if (mdp.length != 0) {
+        // Recuperation du mdp en tant que cle
+        let promiseMat = crypto.subtle.importKey(
+          "raw", 
+          convertStringToByteArray(mdp), 
+          {name: "PBKDF2"}, 
+          false, 
+          ["deriveKey"]
+          );
+        promiseMat.then(function(mat){
+          // Derivation de la cle
+          console.log("test2");
+          let promiseKey = crypto.subtle.deriveKey(
+            {"name":"PBKDF2", salt: sel, "iterations":10000, "hash":"SHA-1"}, 
+            mat, 
+            {"name":"AES-CBC", length:128}, 
+            false, 
+            ["decrypt"]
+            );
+          promiseKey.then(function(key) {
+            // Dechiffrement de l'IV chiffre
+            console.log("test3");
+            let promiseIv = crypto.subtle.decrypt(
+              {name: "AES-CBC", iv: ivZero}, 
+              key, 
+              ivChiffre);
+            promiseIv.then(function(ivClair) {
+              // Dechiffrement du chiffre
+              console.log("test4");
+              let promiseClair = crypto.subtle.decrypt(
+                {name: "AES-CBC", iv: ivClair}, 
+                key, 
+                chiffre);
+              promiseClair.then(function(clair) {
+                // $("#texteresult").html("<tt>"+convertByteArrayToString(clair)+"</tt>");
+                console.log(convertByteArrayToString(clair));
+              })
+            })
+          })
+        })
+      }
+    }
   })
 
 });
