@@ -138,19 +138,24 @@ $(document).ready(function(){
   function addTable(myobj){
     // Effacement d'eventuels precedents affichage
     $("table").remove();
-
-    // Initialisation des champs du tableau
-    var tableau = '<table class="table"><thead><tr><th scope="col">#</th>';
-    tableau += '<th scope="col">Site</th><th scope="identifiants">Crypto</th>';
-    tableau += '</tr></thead>';
-    for (var i=0; i<myobj.length; i++){
-      tableau += '<tbody><tr><th scope="row">' + i + '</th><td>';
-      tableau += '<li class="list-group-item">' + myobj.triplets[i].site+'</td>';
-      tableau += '<td id="crypto">' + decodeURIComponent(myobj.triplets[i].crypto) + '</td></tr>';
+    if(myobj == 0){
+      alert("Aucun tuple contenu dans la base de données !")
     }
-    // fermeture des balise
-    tableau += '</tbody></table>';
-    $("body").append(tableau);
+
+    else{
+      // Initialisation des champs du tableau
+      var tableau = '<table class="table"><thead><tr><th scope="col">#</th>';
+      tableau += '<th scope="col">Site</th><th scope="identifiants">Crypto</th>';
+      tableau += '</tr></thead>';
+      for (var i=0; i<myobj.length; i++){
+        tableau += '<tbody><tr><th scope="row">' + i + '</th><td>';
+        tableau += '<li class="list-group-item">' + myobj[i].Website+'</td>';
+        tableau += '<td id="crypto">' + decodeURIComponent(myobj[i].crypto) + '</td></tr>';
+      }
+      // fermeture des balise
+      tableau += '</tbody></table>';
+      $("body").append(tableau);
+    }
   };
   // Telechargement BD
 
@@ -160,7 +165,7 @@ $(document).ready(function(){
 
   $("#DL").click(function(){
     data = {"login":'log',"bd":'passwords'};
-    var urlc = 'http://192.168.99.100:8080/monCoffre/moncoffre';
+    var urlc = 'https://192.168.99.100:8080/monCoffre/moncoffre';
     $.ajax({
       type:'POST',
       url:urlc + '/login',
