@@ -36,6 +36,7 @@ function convertStringToByteArray(str){
 };
 
 var db;
+var store;
 
 function createDb(){
   console.log("Init openDb ...");
@@ -56,7 +57,7 @@ function createDb(){
 
   // fonction lancee
   request.onupgradeneeded = function(event){
-    var store = event.currentTarget.result.createObjectStore("Triplet", {keyPath: "Website"});
+    store = event.currentTarget.result.createObjectStore("Triplet", {keyPath: "Website"});
     store.createIndex("Website", "Website", { unique: true, multiEntry: true});
   };
 };
@@ -154,6 +155,15 @@ $(document).ready(function(){
     };
   };
 
+  function deleteData(){
+    var transaction = db.transaction(["Triplet"], "readwrite");
+    var objectStore = transaction.objectStore("Triplet");
+    var objectStoreRequest = objectStore.clear();
+    objectStoreRequest.onsuccess = function(event){
+      console.log("Suppression de la bd" + objectStore + "réussi !");
+    };
+  };
+
   // Function traitement donnees vers html
   function addTable(myobj){
     // Effacement d'eventuels precedents affichage
@@ -161,7 +171,6 @@ $(document).ready(function(){
     if(myobj == 0){
       alert("Aucun tuple contenu dans la base de données !")
     }
-
     else{
       // Initialisation des champs du tableau
       var tableau = '<table class="table"><thead><tr><th scope="col">#</th>';
@@ -179,33 +188,56 @@ $(document).ready(function(){
   };
   // Telechargement BD
 
+  function confirmationSuppression(){
+    var conf = confirm("Voulez-vous supprimer la base de donnée locale?");
+    return conf;
+  }
+
+  $("#Delete").click(function(){
+    deleteData();
+    readTriplet();
+  })
+
   $("#Affichage").click(function(){
     readTriplet();
   });
 
   $("#DL").click(function(){
-    data = {"login":'log',"bd":'passwords'};
-    var urlc = 'http://192.168.99.100:8080/monCoffre/moncoffre';
-    $.ajax({
-      type:'POST',
-      url:urlc + '/login',
-      data:JSON.stringify(data),
-      dataType:'text',
-      contentType:'application/json',
-      // accepts: "*/*",
-      success:function(json,status){
-        // variable de stockage ( liste de données post traitement)
-        // variable stockage d'un triplet
-        var myobj = JSON.parse(json);
-        if (myobj.triplets.length > 0){
-          for (var i=1; i<myobj.triplets.length; i++){
-            addTriplet(myobj.triplets[i].site, myobj.triplets[i].crypto);
-          };
-        };
-        readTriplet();
-      },
-      error:function(data,status){console.log("error POST"+data+" status :  "+status);}
-    });
+    var store = getObjectStore('Triplet', 'readonly');
+    var getdatas = store.getAll();
+    var conf = 'true';
+    getdatas.onsuccess = function(){
+      if (getdatas.result != 0){
+        conf = confirmationSuppression();
+      }
+
+      console.log(conf);
+      if (conf){
+        deleteData();
+        data = {"login":'log',"bd":'passwords'};
+        var urlc = 'http://192.168.99.100:8080/monCoffre/moncoffre';
+        $.ajax({
+          type:'POST',
+          url:urlc + '/login',
+          data:JSON.stringify(data),
+          dataType:'text',
+          contentType:'application/json',
+          // accepts: "*/*",
+          success:function(json,status){
+            // variable de stockage ( liste de données post traitement)
+            // variable stockage d'un triplet
+            var myobj = JSON.parse(json);
+            if (myobj.triplets.length > 0){
+              for (var i=1; i<myobj.triplets.length; i++){
+                addTriplet(myobj.triplets[i].site, myobj.triplets[i].crypto);
+              };
+            };
+            readTriplet();
+          },
+          error:function(data,status){console.log("error POST"+data+" status :  "+status);}
+        });
+      }
+    }
   });
 
   $("body").on("click", "#crypto", function(){
