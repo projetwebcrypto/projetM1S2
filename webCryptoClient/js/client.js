@@ -1,81 +1,83 @@
-
 // variables de verification de support d'IndexedDB
 window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
 window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
 
 // Test de support d'IndexedDB
-if (!window.indexedDB) {
+if (!window.indexedDB){
   window.alert("Votre navigateur ne supporte pas une version stable d'IndexedDB. Quelques fonctionnalités ne seront pas disponibles.")
+};
+
+var crypto = window.crypto;
+
+if(crypto.subtle){
+  // alert("Cryptography API Supported");
 }
+else{
+  alert("Cryptography API not Supported");
+};
 
-var crypto = window.crypto ;
-
-if(crypto.subtle)
-{
-    alert("Cryptography API Supported");
-
-}
-else
-{
-    alert("Cryptography API not Supported");
-}
-
-function convertByteArrayToString(buffer)
-{
+function convertByteArrayToString(buffer){
   let data_view = new DataView(buffer);
-  chaine ="" ;
+  chaine ="";
   len = data_view.byteLength;
-  for(i = 0; i < len; i++)
-    {
-        chaine += String.fromCharCode(data_view.getUint8(i));
-    }
+  for(i = 0; i < len; i++){
+    chaine += String.fromCharCode(data_view.getUint8(i));
+  };
+  return chaine;
+};
 
-    return chaine;
-}
-
-function ascii(lettre)
-{
+function ascii(lettre){
   return lettre.charCodeAt(0);
-}
+};
 
-function convertStringToByteArray(str)
-{
+function convertStringToByteArray(str){
   return Uint8Array.from(str.split('').map(ascii));
-}
+};
 
 var db;
 
-function createDb() {
+function createDb(){
   console.log("Init openDb ...");
 
   // Version 3 car seul chromium semble marcher à la fac, et uniquement sur cette version
   var request = window.indexedDB.open("MyTestDatabase", 3);
 
   // fonction lancee si le demarrage reussit
-  request.onsuccess = function (event) {
+  request.onsuccess = function (event){
     db = this.result;
     console.log("Creation: " + db);
     alert("Creation reussie");
   };
 
-  request.onerror = function(event) {
+  request.onerror = function(event){
     alert("Erreur onerror:" + event.target.errorCode);
   };
 
   // fonction lancee
-  request.onupgradeneeded = function(event) {
+  request.onupgradeneeded = function(event){
     var store = event.currentTarget.result.createObjectStore("Triplet", {keyPath: "Website"});
     store.createIndex("Website", "Website", { unique: true, multiEntry: true});
   };
-}
+};
 
 createDb();
+
+
+function checkEmpty(){
+  if((document.getElementById("Website").value !="") && (document.getElementById("Login").value!="") && (document.getElementById("Password").value!="")){
+    document.getElementById('add_tuple').disabled = false;
+  }
+  else{
+    document.getElementById('add_tuple').disabled = true;
+  }
+}
+
 
 $(document).ready(function(){
 
   // Initialisation des entrées, et les cache de base.
-  $( "#add-buttons" ).hide();
+  $("#add-buttons").hide();
 
   // Test de raffraichissement en live de la bd
   function getObjectStore(store_name, mode){
@@ -84,7 +86,7 @@ $(document).ready(function(){
     var tx = db.transaction(store_name, mode);
     // console.log("Après la transaction");
     return tx.objectStore(store_name);
-  }
+  };
 
   //Function qui lit un triplet danss la base de donnees
   function readTriplet(){
@@ -93,19 +95,37 @@ $(document).ready(function(){
     getdatas.onsuccess = function(){
       // console.log(getdatas.result);
       addTable(getdatas.result);
-    }
-  }
+    };
+  };
+
   $("#add_tuple").click(function(){
     var website = document.getElementById("Website").value;
     var login = document.getElementById("Login").value;
     var password = document.getElementById("Password").value;
     addTriplet(website, login + password);
     readTriplet();
+    $("#add-buttons").hide();
+  });
+
+  function reset(){
+    document.getElementById("Website").value = "";
+    document.getElementById("Login").value = "";
+    document.getElementById("Password").value = "";
+  };
+
+  // $("#reset").click(function(){
+  //   reset();
+  // })
+
+  $("#abort").click(function(){
+    reset();
+    $("#add-buttons").hide();
   });
 
   // ajoute les champs html pour saisie pseudo + mdp + site
   $("#ADD").click(function(){
-    $( "#add-buttons" ).show();
+    $("#add-buttons").show();
+    document.getElementById('add_tuple').disabled = true;
   });
 
   // Fonction qui ajoute un triplet a la base de donnees
@@ -118,7 +138,7 @@ $(document).ready(function(){
     } catch (e) {
       console.log("Error In addTriplet : " + e);
       throw e;
-    }
+    };
     req.onsuccess = function (evt){
       console.log("Insertion in DB successful");
       // displayActionSuccess();
@@ -132,7 +152,7 @@ $(document).ready(function(){
         // displayActionFailure(this.error);
       };
     };
-  }
+  };
 
   // Function traitement donnees vers html
   function addTable(myobj){
@@ -150,18 +170,18 @@ $(document).ready(function(){
       for (var i=0; i<myobj.length; i++){
         tableau += '<tbody><tr><th scope="row">' + i + '</th><td>';
         tableau += '<li class="list-group-item">' + myobj[i].Website+'</td>';
-        tableau += '<td>' + decodeURIComponent(myobj[i].crypto) + '</td></tr>';
-      }
+        tableau += '<td id="crypto">' + decodeURIComponent(myobj[i].crypto) + '</td></tr>';
+      };
       // fermeture des balise
       tableau += '</tbody></table>';
       $("body").append(tableau);
-    }
+    };
   };
   // Telechargement BD
 
   $("#Affichage").click(function(){
     readTriplet();
-  })
+  });
 
   $("#DL").click(function(){
     data = {"login":'log',"bd":'passwords'};
@@ -180,15 +200,15 @@ $(document).ready(function(){
         if (myobj.triplets.length > 0){
           for (var i=1; i<myobj.triplets.length; i++){
             addTriplet(myobj.triplets[i].site, myobj.triplets[i].crypto);
-          }
-        }
+          };
+        };
         readTriplet();
       },
       error:function(data,status){console.log("error POST"+data+" status :  "+status);}
-    })
-  })
+    });
+  });
 
-  $("body").on("click", "td", function(){
+  $("body").on("click", "#crypto", function(){
     let cryptogrammeComplet = $(this).text();
     console.log(cryptogrammeComplet);
     console.log(cryptogrammeComplet.length);
@@ -240,12 +260,11 @@ $(document).ready(function(){
               promiseClair.then(function(clair) {
                 // $("#texteresult").html("<tt>"+convertByteArrayToString(clair)+"</tt>");
                 console.log(convertByteArrayToString(clair));
-              })
-            })
-          })
-        })
-      }
-    }
-  })
-
+              });
+            });
+          });
+        });
+      };
+    };
+  });
 });
