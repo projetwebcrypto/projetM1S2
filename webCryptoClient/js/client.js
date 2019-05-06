@@ -149,8 +149,8 @@ $(document).ready(function(){
       tableau += '</tr></thead>';
       for (var i=0; i<myobj.length; i++){
         tableau += '<tbody><tr><th scope="row">' + i + '</th><td>';
-        tableau += '<li class="list-group-item">' + myobj.triplets[i].site+'</td>';
-        tableau += '<td id="crypto">' + decodeURIComponent(myobj.triplets[i].crypto) + '</td></tr>';
+        tableau += '<li class="list-group-item">' + myobj[i].Website+'</td>';
+        tableau += '<td>' + decodeURIComponent(myobj[i].crypto) + '</td></tr>';
       }
       // fermeture des balise
       tableau += '</tbody></table>';
