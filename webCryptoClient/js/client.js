@@ -340,6 +340,10 @@ $(document).ready(function(){
   // Initialisation d'interactions avec les champs site
   $("body").on("click", "#website", function(){
     let website = $(this).text();
+    decryptAES128(website);
+  })
+
+  function decryptAES128(website){
     var store =  getObjectStore('Triplet', 'readonly');
     var objectStoreRequest = store.get(website);
     objectStoreRequest.onsuccess = function() {
@@ -398,5 +402,6 @@ $(document).ready(function(){
         }
       }
     }
-  });
+  };
+
 });
