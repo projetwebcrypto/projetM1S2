@@ -1,6 +1,6 @@
 package fr.univtln.groupe1.webCrypto;
 
-import fr.univtln.groupe1.webCrypto.Account.FileManagment;
+import fr.univtln.groupe1.webCrypto.REST.CORSFilter;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -24,7 +24,7 @@ public class Main {
      */
     public static HttpServer startServer() {
         // create a resource config that scans for JAX-RS resources and providers
-        final ResourceConfig rc = new ResourceConfig().packages("fr.univtln.groupe1.webCrypto");
+        final ResourceConfig rc = new ResourceConfig().packages("fr.univtln.groupe1.webCrypto").register(new CORSFilter());
 
         // create and start a new instance of grizzly http server
         // exposing the Jersey application at BASE_URI

@@ -13,7 +13,7 @@
 
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-</head> -->
+  </head> -->
   <head>
   <title>Test Client!</title>
   <meta charset="utf-8">
@@ -25,23 +25,40 @@
   <script type="text/javascript" src="js/jquery-ui/jquery-ui.min.js"></script>
   <!-- <script type="text/javascript" src="js/firefox.js"></script> -->
   <script type="text/javascript" src="js/client.js"></script>
-</head>
-  <body>
+  </head>
+  <body onload="checkEmpty()">
     <div class="jumbotron text-center">
       <h1>Client monCoffre</h1>
       <p>Simple test</p>
     </div>
     <div class="container">
       <div class="row">
-        <div class="col-sm-4">
+        <div class="col-sm-4" id = 'div_add'>
           <h3>Ajouter site</h3>
-          <li><a href='#'>Ajouter site</a></li>
+          <li><a href='#' id='ADD'>Ajouter site</a></li>
           <p>Permet d'ajouter une entrée.</p>
+          <div class="add-trip" id='add-buttons'>
+            <div class="form-group">
+              <label for="Website">Site</label>
+              <input type="text" name="Website" class="form-control" id="Website" placeholder="Entrez le site"onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
+            </div>
+            <div class="form-group">
+              <label for="Login">Identifiant</label>
+              <input type="text" name="login" class="form-control" id="Login" placeholder="Entrez votre login"onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
+            </div>
+            <div class="form-group">
+              <label for="Password">Mot de passe</label>
+              <input type="password" name="mdp" class="form-control" id="Password" placeholder="Entrez votre mot de passe"onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
+            </div>
+            <button type="button" id="add_tuple">Ajouter</button>
+            <!-- <button type="reset" id="reset">Reset</button> -->
+            <button type="button" id="abort">Annuler</button>
+          </div>
         </div>
         <div class="col-sm-4">
-          <h3>Lister les sites</h3>
-          <li><a href='#' id='DL'>Lister les sites</a></li>
-          <p>Permet de lister vos sites.</p>
+          <h3>Récupérer les sites</h3>
+          <li><a href='#' id='DL'>Récupérer les sites</a></li>
+          <p>Permet de récupérer vos sites depuis le serveur.</p>
         </div>
         <div class="col-sm-4">
           <h3>Changer de mot de passe Maître</h3>
@@ -50,7 +67,7 @@
         </div>
         <div class="col-sm-4">
           <h3>Supprimer tout</h3>
-          <li><a href='#'>Supprimer tout</a></li>
+          <li><a href='#' id='Delete'>Supprimer tout</a></li>
           <p>Purification.</p>
         </div>
         <div class="col-sm-4">
@@ -62,6 +79,11 @@
           <h3>A propos</h3>
           <li><a href='#'>A propos</a></li>
           <p>A propos de nous.</p>
+        </div>
+        <div class="col-sm-4">
+          <h3>Afficher les sites</h3>
+          <li><a href='#' id='Affichage'>Afficher les sites</a></li>
+          <p>Afficher les sites</p>
         </div>
       </div>
     </div>

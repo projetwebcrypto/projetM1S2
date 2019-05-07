@@ -5,6 +5,7 @@ import org.json.JSONObject;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 
 @Path("/moncoffre")
@@ -27,7 +28,6 @@ public class serveurREST {
         String contenu = fileManagment.openFile(login, nomdb);
         String reponse = "{\"triplets\":[" + contenu + "]}";
         return reponse;
-
     }
 
     /**
