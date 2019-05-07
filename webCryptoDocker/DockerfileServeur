@@ -25,6 +25,6 @@ RUN mkdir -p /usr/local/monCoffre/certificats
 RUN mkdir -p /usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/security/cacerts
 
 COPY --from=build /myapp/target/*-withdependencies.jar /App/monCoffre.jar
-CMD ["java", "-jar", "-Djavax.net.debug=all", "/App/monCoffre.jar"]
+CMD ["java", "-jar", "/App/monCoffre.jar"]
 
 EXPOSE 8080

@@ -1,6 +1,5 @@
 package fr.univtln.groupe1.webCrypto;
 
-import fr.univtln.groupe1.webCrypto.Account.FileManagment;
 import fr.univtln.groupe1.webCrypto.Connexion.GenerationCertificats;
 import fr.univtln.groupe1.webCrypto.REST.CORSFilter;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -21,10 +20,13 @@ import java.net.URI;
 public class Main {
     // Base URI the Grizzly HTTP server will listen on
     public static final String BASE_URI = "https://0.0.0.0:8080/monCoffre/";
+
+    // chemin dans le container pour trouver le certificat du serveur
     private static final String KEYSTORE_LOC = "/usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/security/cacerts/keystore_server";
     private static final String KEYSTORE_PASS= "passee";
 
-    private static final String TRUSTSTORE_LOC = "//usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/security/cacerts/truststore_server";
+    // chemin dans le container pour trouver le trustore du serveur
+    private static final String TRUSTSTORE_LOC = "/usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/security/cacerts/truststore_server";
     private static final String TRUSTSTORE_PASS = "passee";
 
     /**
@@ -38,21 +40,17 @@ public class Main {
         SSLContextConfigurator sslCon = new SSLContextConfigurator();
 
         sslCon.setKeyStoreFile(KEYSTORE_LOC);
-        System.out.println("sgdg");
         sslCon.setKeyStorePass(KEYSTORE_PASS);
-        System.out.println("ggggggg");
 
         sslCon.setTrustStoreFile(TRUSTSTORE_LOC);
-        System.out.println("fffff");
         sslCon.setTrustStorePass(TRUSTSTORE_PASS);
-        System.out.println("dddddd");
 
 
         // create a resource config that scans for JAX-RS resources and providers
         final ResourceConfig rc = new ResourceConfig().packages("fr.univtln.groupe1.webCrypto").register(new CORSFilter());
 
+        // on rajoute apres le rc pour la connection https (true => secure)
         return GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc, true,new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(false));
-//        return GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc);
     }
 
     /**
@@ -61,28 +59,6 @@ public class Main {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-//
-//        String contenu;
-////
-//        FileManagment file = new FileManagment();
-////
-//////        file.createFile("log/", "unFichier3");
-//////        contenu = file.openFile("log/", "passwords.db.sc");
-////
-//        contenu = file.existencyAccount("log", "passwords");
-//        System.out.println("contenu= " + contenu);
-//
-//        contenu = file.existencyAccount("log2", "passc2");
-//        System.out.println("contenu= " + contenu);
-//
-//        contenu = file.existencyAccount("log2", "passc3");
-//        System.out.println("contenu= " + contenu);
-
-
-
-
-
-
 
 
         final HttpServer server = startServer();
