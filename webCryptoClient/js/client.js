@@ -1,4 +1,4 @@
-// variables de verification de support d'IndexedDB
+var passwordCourant = '' // variables de verification de support d'IndexedDB
 window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
 window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
@@ -390,8 +390,10 @@ $(document).ready(function(){
                   chiffre);
                 promiseClair.then(function(clair){
                   messageClair = convertByteArrayToString(clair);
-                  tailleLogin = parseInt(messageClair[0])
-                  alert("Identifiants :" + messageClair.slice(1, tailleLogin + 1)+ "\n" + "mdp :" + messageClair.slice( tailleLogin + 1));
+                  passwordCourant = messageClair;
+
+                  // tailleLogin = parseInt(messageClair[0])
+                  // alert("Identifiants :" + messageClair.slice(1, tailleLogin + 1)+ "\n" + "mdp :" + messageClair.slice( tailleLogin + 1));
                 })
               })
             })
@@ -401,10 +403,21 @@ $(document).ready(function(){
     }
   };
 
+  function decoupage(message){
+    // messageClair = convertByteArrayToString(message);
+    tailleLogin = parseInt(message[0]);
+    var array = [message.slice(1, tailleLogin + 1), message.slice( tailleLogin + 1)]
+    console.log("array :" + array);
+    return(array);
+  }
+
   // Initialisation d'interactions avec les champs site
   $("body").on("click", "#website", function(){
     var website = $(this).text();
     decryptAES128(website);
+    var identifiants = decoupage(passwordCourant)
+    alert("Identifiants :" + identifiants[0] + "mdp :" + identifiants[1]);
+    passwordCourant = '';
   })
 
 
