@@ -141,8 +141,9 @@ $(document).ready(function(){
     var website = document.getElementById("Website").value;
     var login = document.getElementById("Login").value;
     var password = document.getElementById("Password").value;
-    var identifiants = (login.length + login+password).split('').map(ascii)
-    message = Uint8Array.from(identifiants);//
+    message = login.length + login+password;
+    // var identifiants = (login.length + login+password).split('').map(ascii)
+    // message = Uint8Array.from(identifiants);//
     encryptAES128(website, message);
     // addTriplet(website, login + password);
     // readTriplet();
@@ -288,8 +289,8 @@ $(document).ready(function(){
   // Fonction de chiffrement des identifiants
   function encryptAES128(website, word){
       var mdp = "moncul";
-      console.log("encrypt : "+word);
       sel = new Uint8Array(16);
+      text = convertStringToByteArray(word);
       window.crypto.getRandomValues(sel);
       // Recuperation du mdp en tant que cle
       let promiseMat = crypto.subtle.importKey(
@@ -324,7 +325,7 @@ $(document).ready(function(){
             let promiseChiffre = crypto.subtle.encrypt(
               {name: "AES-CBC", iv: myiv2},
               key,
-              word);
+              text);
             promiseChiffre.then(function(chiffre) {
               // Construction du cryptogramme complet (sel + ivChiffre + chiffre)
               cryptogrammeComplet = convertByteArrayToString(ivChiffre)
