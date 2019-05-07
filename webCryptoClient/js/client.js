@@ -141,7 +141,10 @@ $(document).ready(function(){
     var website = document.getElementById("Website").value;
     var login = document.getElementById("Login").value;
     var password = document.getElementById("Password").value;
-    encryptAES128(website, login+password);
+    message = login.length + login+password;
+    // var identifiants = (login.length + login+password).split('').map(ascii)
+    // message = Uint8Array.from(identifiants);//
+    encryptAES128(website, message);
     // addTriplet(website, login + password);
     // readTriplet();
     $("#add-buttons").hide();
@@ -286,8 +289,8 @@ $(document).ready(function(){
   // Fonction de chiffrement des identifiants
   function encryptAES128(website, word){
       var mdp = "moncul";
-      var texte = word;
       sel = new Uint8Array(16);
+      text = convertStringToByteArray(word);
       window.crypto.getRandomValues(sel);
       // Recuperation du mdp en tant que cle
       let promiseMat = crypto.subtle.importKey(
@@ -318,16 +321,15 @@ $(document).ready(function(){
             key,
             myiv2);
           promiseIv.then(function(ivChiffre) {
-            let texteAr = convertStringToByteArray(texte);
             // Chiffrement du texte avec l'IV aleatoire et la cle
             let promiseChiffre = crypto.subtle.encrypt(
               {name: "AES-CBC", iv: myiv2},
               key,
-              texteAr);
+              text);
             promiseChiffre.then(function(chiffre) {
               // Construction du cryptogramme complet (sel + ivChiffre + chiffre)
-              cryptogrammeComplet = convertByteArrayToString(sel.buffer)
-              cryptogrammeComplet += convertByteArrayToString(ivChiffre) + convertByteArrayToString(chiffre);
+              cryptogrammeComplet = convertByteArrayToString(ivChiffre)
+              cryptogrammeComplet += convertByteArrayToString(sel.buffer) + convertByteArrayToString(chiffre);
               addTriplet(website, cryptogrammeComplet);
             })
           })
@@ -347,9 +349,9 @@ $(document).ready(function(){
       if (cryptogrammeComplet.length != 0) {
         // On extrait les infos du cryptogramme complet
         // Taille du sel 16
-        let sel = convertStringToByteArray(cryptogrammeComplet.slice(0, 16));
+        let ivChiffre = convertStringToByteArray(cryptogrammeComplet.slice(0, 32));
         // Taille du ivChiffre 32
-        let ivChiffre = convertStringToByteArray(cryptogrammeComplet.slice(16, 48));
+        let sel = convertStringToByteArray(cryptogrammeComplet.slice(32, 48));
         // Taille du chiffre le reste
         let chiffre = convertStringToByteArray(cryptogrammeComplet.slice(48));
         // Generation du IV a 0 pour faire du ECB en CBC
@@ -386,7 +388,9 @@ $(document).ready(function(){
                   key,
                   chiffre);
                 promiseClair.then(function(clair) {
-                  alert(convertByteArrayToString(clair));
+                  messageClair = convertByteArrayToString(clair);
+                  tailleLogin = parseInt(messageClair[0])
+                  alert("Identifiants :" + messageClair.slice(1, tailleLogin + 1)+ "\n" + "mdp :" + messageClair.slice( tailleLogin + 1));
                 })
               })
             })
