@@ -173,6 +173,7 @@ $(document).ready(function(){
     req.onsuccess = function (evt){
       readTriplet();
       console.log("Insertion in DB successful");
+      reset();
       // displayActionSuccess();
       // displayPubList(store);
     };
@@ -206,12 +207,14 @@ $(document).ready(function(){
     else{
       // Initialisation des champs du tableau
       var tableau = '<table class="table"><thead><tr><th scope="col">#</th>';
-      tableau += '<th scope="col">Site</th><th scope="identifiants">Crypto</th>';
-      tableau += '</tr></thead>';
+      tableau += '<th scope="col">Site</th><th scope="col">Crypto</th>';
+      tableau += '<th score="col">Modifier</th><th score="col">Supprimer</th></tr></thead>';
       for (var i=0; i<myobj.length; i++){
         tableau += '<tbody><tr><th scope="row">' + i + '</th><td>';
-        tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">' + myobj[i].Website+'</td>';
-        tableau += '<td id="crypto">' + myobj[i].crypto + '</td></tr>';
+        tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">' + myobj[i].Website + '</td>';
+        tableau += '<td id="crypto">' + myobj[i].crypto + '</td>';
+        tableau += '<td id="edit" name="' + myobj[i].Website + '"><img src="js/jquery-ui/images/modifier.png" onmouseover="this.style.cursor=\'pointer\'"></td>';
+        tableau += '<td id="deleteTrip" name="' + myobj[i].Website + '"><img src="js/jquery-ui/images/effacer.png" onmouseover="this.style.cursor=\'pointer\'"></td></tr>';
       }
       // Fermeture des balises et du tableau
       tableau += '</tbody></table>';
@@ -285,85 +288,84 @@ $(document).ready(function(){
 
   // Fonction de chiffrement des identifiants
   function encryptAES128(website, word){
-      var mdp = "moncul";
-      var texte = word;
-      sel = new Uint8Array(16);
-      window.crypto.getRandomValues(sel);
-      // Recuperation du mdp en tant que cle
-      let promiseMat = crypto.subtle.importKey(
-        "raw",
-        convertStringToByteArray(mdp),
-        {name: "PBKDF2"},
+    var mdp = "moncul";
+    var texte = word;
+    sel = new Uint8Array(16);
+    window.crypto.getRandomValues(sel);
+    // Recuperation du mdp en tant que cle
+    let promiseMat = crypto.subtle.importKey(
+      "raw",
+      convertStringToByteArray(mdp),
+      {name: "PBKDF2"},
+      false,
+      ["deriveKey"]
+      );
+    promiseMat.then(function(mat){
+      // Derivation de la cle
+      let promiseKey = crypto.subtle.deriveKey(
+        {"name":"PBKDF2", salt: sel, "iterations":10000, "hash":"SHA-1"},
+        mat,
+        {"name":"AES-CBC", length:128},
         false,
-        ["deriveKey"]
+        ["encrypt"]
         );
-      promiseMat.then(function(mat){
-        // Derivation de la cle
-        let promiseKey = crypto.subtle.deriveKey(
-          {"name":"PBKDF2", salt: sel, "iterations":10000, "hash":"SHA-1"},
-          mat,
-          {"name":"AES-CBC", length:128},
-          false,
-          ["encrypt"]
-          );
-        promiseKey.then(function(key) {
-          // Generation du IV aleatoire
-          let myiv2 = new Uint8Array(16);
-          crypto.getRandomValues(myiv2);
-          // Generation du IV a 0 pour faire du ECB en CBC
-          let ivZero = new Uint8Array(16);
-          // Chiffrement de l'IV aleatoire
-          let promiseIv = crypto.subtle.encrypt(
-            {name: "AES-CBC", iv: ivZero},
+      promiseKey.then(function(key){
+        // Generation du IV aleatoire
+        let myiv2 = new Uint8Array(16);
+        crypto.getRandomValues(myiv2);
+        // Generation du IV a 0 pour faire du ECB en CBC
+        let ivZero = new Uint8Array(16);
+        // Chiffrement de l'IV aleatoire
+        let promiseIv = crypto.subtle.encrypt(
+          {name: "AES-CBC", iv: ivZero},
+          key,
+          myiv2);
+        promiseIv.then(function(ivChiffre){
+          let texteAr = convertStringToByteArray(texte);
+          // Chiffrement du texte avec l'IV aleatoire et la cle
+          let promiseChiffre = crypto.subtle.encrypt(
+            {name: "AES-CBC", iv: myiv2},
             key,
-            myiv2);
-          promiseIv.then(function(ivChiffre) {
-            let texteAr = convertStringToByteArray(texte);
-            // Chiffrement du texte avec l'IV aleatoire et la cle
-            let promiseChiffre = crypto.subtle.encrypt(
-              {name: "AES-CBC", iv: myiv2},
-              key,
-              texteAr);
-            promiseChiffre.then(function(chiffre) {
-              // Construction du cryptogramme complet (sel + ivChiffre + chiffre)
-              cryptogrammeComplet = convertByteArrayToString(sel.buffer)
-              cryptogrammeComplet += convertByteArrayToString(ivChiffre) + convertByteArrayToString(chiffre);
-              addTriplet(website, cryptogrammeComplet);
-            })
+            texteAr);
+          promiseChiffre.then(function(chiffre){
+            // Construction du cryptogramme complet (sel + ivChiffre + chiffre)
+            cryptogrammeComplet += convertByteArrayToString(ivChiffre);
+            cryptogrammeComplet = convertByteArrayToString(sel.buffer) + convertByteArrayToString(chiffre);
+            addTriplet(website, cryptogrammeComplet);
           })
         })
       })
-    };
+    })
+  };
 
-  // Initialisation d'interactions avec les champs site
-  $("body").on("click", "#website", function(){
-    let website = $(this).text();
-    var store =  getObjectStore('Triplet', 'readonly');
-    var objectStoreRequest = store.get(website);
-    objectStoreRequest.onsuccess = function() {
-      cryptogrammeComplet = objectStoreRequest.result.crypto;
-      console.log(objectStoreRequest);
-      console.log("crypto : "  + cryptogrammeComplet);
-      if (cryptogrammeComplet.length != 0) {
-        // On extrait les infos du cryptogramme complet
-        // Taille du sel 16
-        let sel = convertStringToByteArray(cryptogrammeComplet.slice(0, 16));
-        // Taille du ivChiffre 32
-        let ivChiffre = convertStringToByteArray(cryptogrammeComplet.slice(16, 48));
-        // Taille du chiffre le reste
-        let chiffre = convertStringToByteArray(cryptogrammeComplet.slice(48));
-        // Generation du IV a 0 pour faire du ECB en CBC
-        let ivZero = new Uint8Array(16);
-        var mdp = "moncul";
-        if (mdp.length != 0) {
-          // Recuperation du mdp en tant que cle
-          let promiseMat = crypto.subtle.importKey(
-            "raw",
-            convertStringToByteArray(mdp),
-            {name: "PBKDF2"},
-            false,
-            ["deriveKey"]
-            );
+  // Fonction de dechiffrement des identifiants
+  function decryptAES128(website){
+  var store =  getObjectStore('Triplet', 'readonly');
+  var objectStoreRequest = store.get(website);
+  objectStoreRequest.onsuccess = function(){
+    cryptogrammeComplet = objectStoreRequest.result.crypto;
+    console.log(objectStoreRequest);
+    console.log("crypto : "  + cryptogrammeComplet);
+    if (cryptogrammeComplet.length != 0){
+      // On extrait les infos du cryptogramme complet
+      // Taille du sel 16
+      let ivChiffre = convertStringToByteArray(cryptogrammeComplet.slice(0, 32));
+      // Taille du ivChiffre 32
+      let sel = convertStringToByteArray(cryptogrammeComplet.slice(32, 48));
+      // Taille du chiffre le reste
+      let chiffre = convertStringToByteArray(cryptogrammeComplet.slice(48));
+      // Generation du IV a 0 pour faire du ECB en CBC
+      let ivZero = new Uint8Array(16);
+      var mdp = "moncul";
+      if (mdp.length != 0){
+        // Recuperation du mdp en tant que cle
+        let promiseMat = crypto.subtle.importKey(
+          "raw",
+          convertStringToByteArray(mdp),
+          {name: "PBKDF2"},
+          false,
+          ["deriveKey"]
+          );
           promiseMat.then(function(mat){
             // Derivation de la cle
             let promiseKey = crypto.subtle.deriveKey(
@@ -373,25 +375,59 @@ $(document).ready(function(){
               false,
               ["decrypt"]
               );
-            promiseKey.then(function(key) {
+            promiseKey.then(function(key){
               // Dechiffrement de l'IV chiffre
               let promiseIv = crypto.subtle.decrypt(
                 {name: "AES-CBC", iv: ivZero},
                 key,
                 ivChiffre);
-              promiseIv.then(function(ivClair) {
+              promiseIv.then(function(ivClair){
                 // Dechiffrement du chiffre
                 let promiseClair = crypto.subtle.decrypt(
                   {name: "AES-CBC", iv: ivClair},
                   key,
                   chiffre);
-                promiseClair.then(function(clair) {
-                  alert(convertByteArrayToString(clair));
+                promiseClair.then(function(clair){
+                  messageClair = convertByteArrayToString(clair);
+                  tailleLogin = parseInt(messageClair[0])
+                  alert("Identifiants :" + messageClair.slice(1, tailleLogin + 1)+ "\n" + "mdp :" + messageClair.slice( tailleLogin + 1));
                 })
               })
             })
           })
         }
+      }
+    }
+  };
+
+  // Initialisation d'interactions avec les champs site
+  $("body").on("click", "#website", function(){
+    var website = $(this).text();
+    decryptAES128(website);
+  })
+
+
+  // Initialisation d'interactions avec les images "Modifier"
+  $("body").on("click", "#edit", function(){
+    var website = $(this).attr('name');
+    var store =  getObjectStore('Triplet', 'readonly');
+    var objectStoreRequest = store.get(website);
+    objectStoreRequest.onsuccess = function(){
+
+    }
+  });
+
+  // Initialisation d'interactions avec les images "Effacer"
+  $("body").on("click", "#deleteTrip", function(){
+    var website = $(this).attr('name');
+    var store =  getObjectStore('Triplet', 'readonly');
+    var objectStoreRequest = store.get(website);
+    objectStoreRequest.onsuccess = function(){
+      var transaction = db.transaction(["Triplet"], "readwrite");
+      var objectStore = transaction.objectStore("Triplet");
+      var supprStoreRequest = objectStore.delete(website);
+      supprStoreRequest.onsuccess = function(){
+        readTriplet();
       }
     }
   });
