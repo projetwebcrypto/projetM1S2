@@ -202,7 +202,7 @@ $(document).ready(function(){
       for (var i=0; i<myobj.length; i++){
         tableau += '<tbody><tr><th scope="row">' + i + '</th><td>';
         tableau += '<li class="list-group-item" id="website">' + myobj[i].Website+'</td>';
-        tableau += '<td id="crypto">' + decodeURIComponent(myobj[i].crypto) + '</td></tr>';
+        tableau += '<td id="crypto">' + myobj[i].crypto + '</td></tr>';
       }
       // fermeture des balise
       tableau += '</tbody></table>';
@@ -252,7 +252,7 @@ $(document).ready(function(){
             var myobj = JSON.parse(json);
             if (myobj.triplets.length > 0){
               for (var i=1; i<myobj.triplets.length; i++){
-                addTriplet(myobj.triplets[i].site, myobj.triplets[i].crypto);
+                addTriplet(myobj.triplets[i].site, decodeURIComponent(myobj.triplets[i].crypto));
               };
             };
             readTriplet();
