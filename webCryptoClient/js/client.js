@@ -141,7 +141,10 @@ $(document).ready(function(){
     var website = document.getElementById("Website").value;
     var login = document.getElementById("Login").value;
     var password = document.getElementById("Password").value;
-    encryptAES128(website, login+password);
+    message = login.length + login+password;
+    // var identifiants = (login.length + login+password).split('').map(ascii)
+    // message = Uint8Array.from(identifiants);//
+    encryptAES128(website, message);
     // addTriplet(website, login + password);
     // readTriplet();
     $("#add-buttons").hide();
@@ -289,8 +292,8 @@ $(document).ready(function(){
   // Fonction de chiffrement des identifiants
   function encryptAES128(website, word){
     var mdp = "moncul";
-    var texte = word;
     sel = new Uint8Array(16);
+    text = convertStringToByteArray(word);
     window.crypto.getRandomValues(sel);
     // Recuperation du mdp en tant que cle
     let promiseMat = crypto.subtle.importKey(
@@ -320,17 +323,16 @@ $(document).ready(function(){
           {name: "AES-CBC", iv: ivZero},
           key,
           myiv2);
-        promiseIv.then(function(ivChiffre){
-          let texteAr = convertStringToByteArray(texte);
+        promiseIv.then(function(ivChiffre) {
           // Chiffrement du texte avec l'IV aleatoire et la cle
           let promiseChiffre = crypto.subtle.encrypt(
             {name: "AES-CBC", iv: myiv2},
             key,
-            texteAr);
-          promiseChiffre.then(function(chiffre){
+            text);
+          promiseChiffre.then(function(chiffre) {
             // Construction du cryptogramme complet (sel + ivChiffre + chiffre)
-            cryptogrammeComplet += convertByteArrayToString(ivChiffre);
-            cryptogrammeComplet = convertByteArrayToString(sel.buffer) + convertByteArrayToString(chiffre);
+            cryptogrammeComplet = convertByteArrayToString(ivChiffre)
+            cryptogrammeComplet += convertByteArrayToString(sel.buffer) + convertByteArrayToString(chiffre);
             addTriplet(website, cryptogrammeComplet);
           })
         })
@@ -338,34 +340,33 @@ $(document).ready(function(){
     })
   };
 
-  // Fonction de dechiffrement des identifiants
   function decryptAES128(website){
-  var store =  getObjectStore('Triplet', 'readonly');
-  var objectStoreRequest = store.get(website);
-  objectStoreRequest.onsuccess = function(){
-    cryptogrammeComplet = objectStoreRequest.result.crypto;
-    console.log(objectStoreRequest);
-    console.log("crypto : "  + cryptogrammeComplet);
-    if (cryptogrammeComplet.length != 0){
-      // On extrait les infos du cryptogramme complet
-      // Taille du sel 16
-      let ivChiffre = convertStringToByteArray(cryptogrammeComplet.slice(0, 32));
-      // Taille du ivChiffre 32
-      let sel = convertStringToByteArray(cryptogrammeComplet.slice(32, 48));
-      // Taille du chiffre le reste
-      let chiffre = convertStringToByteArray(cryptogrammeComplet.slice(48));
-      // Generation du IV a 0 pour faire du ECB en CBC
-      let ivZero = new Uint8Array(16);
-      var mdp = "moncul";
-      if (mdp.length != 0){
-        // Recuperation du mdp en tant que cle
-        let promiseMat = crypto.subtle.importKey(
-          "raw",
-          convertStringToByteArray(mdp),
-          {name: "PBKDF2"},
-          false,
-          ["deriveKey"]
-          );
+    var store =  getObjectStore('Triplet', 'readonly');
+    var objectStoreRequest = store.get(website);
+    objectStoreRequest.onsuccess = function() {
+      cryptogrammeComplet = objectStoreRequest.result.crypto;
+      console.log(objectStoreRequest);
+      console.log("crypto : "  + cryptogrammeComplet);
+      if (cryptogrammeComplet.length != 0) {
+        // On extrait les infos du cryptogramme complet
+        // Taille du sel 16
+        let ivChiffre = convertStringToByteArray(cryptogrammeComplet.slice(0, 32));
+        // Taille du ivChiffre 32
+        let sel = convertStringToByteArray(cryptogrammeComplet.slice(32, 48));
+        // Taille du chiffre le reste
+        let chiffre = convertStringToByteArray(cryptogrammeComplet.slice(48));
+        // Generation du IV a 0 pour faire du ECB en CBC
+        let ivZero = new Uint8Array(16);
+        var mdp = "moncul";
+        if (mdp.length != 0) {
+          // Recuperation du mdp en tant que cle
+          let promiseMat = crypto.subtle.importKey(
+            "raw",
+            convertStringToByteArray(mdp),
+            {name: "PBKDF2"},
+            false,
+            ["deriveKey"]
+            );
           promiseMat.then(function(mat){
             // Derivation de la cle
             let promiseKey = crypto.subtle.deriveKey(
@@ -413,7 +414,6 @@ $(document).ready(function(){
     var store =  getObjectStore('Triplet', 'readonly');
     var objectStoreRequest = store.get(website);
     objectStoreRequest.onsuccess = function(){
-
     }
   });
 
