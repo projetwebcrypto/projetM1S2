@@ -190,6 +190,45 @@ $(document).ready(function(){
     };
   };
 
+  /* Décoder un tableau d'octets depuis une chaîne en base64 */
+  function b64ToUint6 (nChr) {
+
+    return nChr > 64 && nChr < 91 ?
+        nChr - 65
+      : nChr > 96 && nChr < 123 ?
+        nChr - 71
+      : nChr > 47 && nChr < 58 ?
+        nChr + 4
+      : nChr === 43 ?
+        62
+      : nChr === 47 ?
+        63
+      :
+        0;
+
+  }
+  function base64DecToArr (sBase64, nBlockSize) {
+
+    var
+      sB64Enc = sBase64.replace(/[^A-Za-z0-9\+\/]/g, ""), nInLen = sB64Enc.length,
+      nOutLen = nBlockSize ? Math.ceil((nInLen * 3 + 1 >>> 2) / nBlockSize) * nBlockSize : nInLen * 3 + 1 >>> 2, aBytes = new Uint8Array(nOutLen);
+
+    for (var nMod3, nMod4, nUint24 = 0, nOutIdx = 0, nInIdx = 0; nInIdx < nInLen; nInIdx++) {
+      nMod4 = nInIdx & 3;
+      nUint24 |= b64ToUint6(sB64Enc.charCodeAt(nInIdx)) << 18 - 6 * nMod4;
+      if (nMod4 === 3 || nInLen - nInIdx === 1) {
+        for (nMod3 = 0; nMod3 < 3 && nOutIdx < nOutLen; nMod3++, nOutIdx++) {
+          aBytes[nOutIdx] = nUint24 >>> (16 >>> nMod3 & 24) & 255;
+        }
+        nUint24 = 0;
+      }
+    }
+
+    return aBytes;
+  }
+
+  // var myArray = base64DecToArr("tWuTrJyzoWGAFuwRGVWeTe7Ts5wvLGy1e1bkkO57mMEFY9fnAi3XbEFWx/iH+Q+5s8/IGt5DXSw85+NVT2H8aw=="); // "Base 64 \u2014 Mozilla Developer Network" (as UTF-8)
+  // console.log(myArray);
   // Fonction qui supprime la base de donnees locale
   function deleteData(){
     var transaction = db.transaction(["Triplet"], "readwrite");
@@ -278,7 +317,7 @@ $(document).ready(function(){
             var myobj = JSON.parse(json);
             if (myobj.triplets.length > 0){
               for (var i=1; i<myobj.triplets.length; i++){
-                addTriplet(myobj.triplets[i].site, atob(myobj.triplets[i].crypto));
+                addTriplet(myobj.triplets[i].site, myobj.triplets[i].crypto);
               };
             };
             readTriplet();
@@ -291,7 +330,7 @@ $(document).ready(function(){
 
   // Fonction de chiffrement des identifiants
   function encryptAES128(website, word){
-    var mdp = "moncul";
+    var mdp = "bonjour";
     sel = new Uint8Array(16);
     text = convertStringToByteArray(word);
     window.crypto.getRandomValues(sel);
@@ -344,25 +383,25 @@ $(document).ready(function(){
     var store =  getObjectStore('Triplet', 'readonly');
     var objectStoreRequest = store.get(website);
     objectStoreRequest.onsuccess = function() {
-      cryptogrammeComplet = objectStoreRequest.result.crypto;
-      console.log(objectStoreRequest);
-      console.log("crypto : "  + cryptogrammeComplet);
-      if (cryptogrammeComplet.length != 0) {
+      cryptogrammeCompletB64 = objectStoreRequest.result.crypto;
+      cryptogrammeComplet = base64DecToArr(cryptogrammeCompletB64);
         // On extrait les infos du cryptogramme complet
         // Taille du sel 16
-        let ivChiffre = convertStringToByteArray(cryptogrammeComplet.slice(0, 32));
+        let ivChiffre = cryptogrammeComplet.slice(0, 32)
+        console.log(ivChiffre);
         // Taille du ivChiffre 32
-        let sel = convertStringToByteArray(cryptogrammeComplet.slice(32, 48));
+        let sel = cryptogrammeComplet.slice(32, 48)
+        console.log(sel);
         // Taille du chiffre le reste
-        let chiffre = convertStringToByteArray(cryptogrammeComplet.slice(48));
+        let chiffre = cryptogrammeComplet.slice(48)
         // Generation du IV a 0 pour faire du ECB en CBC
         let ivZero = new Uint8Array(16);
-        var mdp = "moncul";
+        var mdp = convertStringToByteArray("azerty");
         if (mdp.length != 0) {
           // Recuperation du mdp en tant que cle
           let promiseMat = crypto.subtle.importKey(
             "raw",
-            convertStringToByteArray(mdp),
+            mdp,
             {name: "PBKDF2"},
             false,
             ["deriveKey"]
@@ -391,9 +430,8 @@ $(document).ready(function(){
                 promiseClair.then(function(clair){
                   messageClair = convertByteArrayToString(clair);
                   passwordCourant = messageClair;
-
-                  // tailleLogin = parseInt(messageClair[0])
-                  // alert("Identifiants :" + messageClair.slice(1, tailleLogin + 1)+ "\n" + "mdp :" + messageClair.slice( tailleLogin + 1));
+                  tailleLogin = new Uint8Array(clair)[0];
+                  alert("Identifiants :" + messageClair.slice(1, tailleLogin + 1)+ "\n" + "mdp :" + messageClair.slice( tailleLogin + 1));
                 })
               })
             })
