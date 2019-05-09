@@ -1,7 +1,10 @@
 package fr.univtln.groupe1.webCrypto;
 
+import fr.univtln.groupe1.webCrypto.Connexion.GenerationCertificats;
 import fr.univtln.groupe1.webCrypto.REST.CORSFilter;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.ssl.SSLContextConfigurator;
+import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -16,19 +19,38 @@ import java.net.URI;
 
 public class Main {
     // Base URI the Grizzly HTTP server will listen on
-    public static final String BASE_URI = "http://0.0.0.0:8080/monCoffre/";
+    public static final String BASE_URI = "https://0.0.0.0:8080/monCoffre/";
+
+    // chemin dans le container pour trouver le certificat du serveur
+    private static final String KEYSTORE_LOC = "/usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/security/cacerts/keystore_server";
+    private static final String KEYSTORE_PASS= "passee";
+
+    // chemin dans le container pour trouver le trustore du serveur
+    private static final String TRUSTSTORE_LOC = "/usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/security/cacerts/truststore_server";
+    private static final String TRUSTSTORE_PASS = "passee";
 
     /**
-     * Starts Grizzly HTTP server exposing JAX-RS resources defined in this application.
-     * @return Grizzly HTTP server.
+     * Starts Grizzly HTTPS server exposing JAX-RS resources defined in this application.
+     * @return Grizzly HTTPS server.
      */
     public static HttpServer startServer() {
+        GenerationCertificats gen = new GenerationCertificats();
+        gen.executCommands();
+
+        SSLContextConfigurator sslCon = new SSLContextConfigurator();
+
+        sslCon.setKeyStoreFile(KEYSTORE_LOC);
+        sslCon.setKeyStorePass(KEYSTORE_PASS);
+
+        sslCon.setTrustStoreFile(TRUSTSTORE_LOC);
+        sslCon.setTrustStorePass(TRUSTSTORE_PASS);
+
+
         // create a resource config that scans for JAX-RS resources and providers
         final ResourceConfig rc = new ResourceConfig().packages("fr.univtln.groupe1.webCrypto").register(new CORSFilter());
 
-        // create and start a new instance of grizzly http server
-        // exposing the Jersey application at BASE_URI
-        return GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc);
+        // on rajoute apres le rc pour la connection https (true => secure)
+        return GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc, true,new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(false));
     }
 
     /**
@@ -37,20 +59,6 @@ public class Main {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-//
-//        String contenu;
-//
-//        FileManagment file = new FileManagment();
-//
-////        file.createFile("log/", "unFichier3");
-////        contenu = file.openFile("log/", "passwords.db.sc");
-//
-//        contenu = file.existencyAccount("log", "passwords");
-//        System.out.println("contenu= " + contenu);
-//
-////        contenu = file.existencyAccount("log2", "passc2");
-//
-//        System.out.println("contenu= " + contenu);
 
 
         final HttpServer server = startServer();

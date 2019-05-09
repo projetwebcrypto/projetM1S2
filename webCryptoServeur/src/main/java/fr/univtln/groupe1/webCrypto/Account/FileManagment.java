@@ -36,6 +36,7 @@ public class FileManagment{
 
         // Cree le fichier
         try {
+            System.out.println("Creation fichier vide");
             File completFileName = new File(path + login + "/" + fileName + ".db.sc");
             completFileName.createNewFile();
             this.initSchemaEmptyFile(login, fileName);
@@ -53,13 +54,11 @@ public class FileManagment{
     public boolean initSchemaEmptyFile(String login, String fileName) {
         conn = new Connect();
         conn.connexion(path, login + "/", fileName + ".db.sc");
-        PreparedStatement pstmt; //= connection.prepareStatement(sql);
+        PreparedStatement pstmt;
         try {
-            String req = "CREATE TABLE PASSWORDS" + "(SITE_NAME TEXT not null," + "CRYPTO TEXT) not null"
-                    + "PRIMARY KEY (SITE_NAME)"+ ")";
+            String req = "CREATE TABLE PASSWORDS" + "(SITE_NAME TEXT PRIMARY KEY," + "CRYPTO TEXT not null);";
             pstmt = conn.getConn().prepareStatement(req);
-//            pstmt.setString(1,"PASSWORDS");
-            ResultSet rs = stmt.executeQuery(req);
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -103,17 +102,25 @@ public class FileManagment{
         // le "fichier" existe et est un dossier
         if (repository.exists() && repository.isDirectory()) {
             if (file.exists()) {
-                System.out.println("Le fichier et le repertoire existe");
+                System.out.println("Ouverture du fichier " + fileName + " de l'ultilisateur " + login);
                 return openFile(login, fileName);
             }
             else {
-                createFile(login, fileName);
-                return "Fichier non trouvé\nCreation du fichier";
+                if (createFile(login, fileName)) {
+                    return "Fichier " + fileName + " non trouvé // Creation du fichier" + fileName;
+                }
+                else {
+                    return "Le fichier " + fileName + " n'a pas pu etre cree";
+                }
             }
         }
         else {
-            createFile(login, fileName);
-            return "Creation d'un nouvel utilisateur";
+            if (createFile(login, fileName)) {
+                return "Creation du nouvel utilisateur " + login + " et du fichier " + fileName;
+            }
+            else {
+                return "Impossible de creer l'ultilisateur " + login;
+            }
         }
 
     }
