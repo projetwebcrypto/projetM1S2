@@ -308,7 +308,7 @@ $(document).ready(function(){
             var myobj = JSON.parse(json);
             if (myobj.triplets.length > 0){
               for (var i=1; i<myobj.triplets.length; i++){
-                addTriplet(myobj.triplets[i].site, decodeURIComponent(myobj.triplets[i].crypto));
+                addTriplet(myobj.triplets[i].site, atob(myobj.triplets[i].crypto));
               };
             };
             readTriplet();
