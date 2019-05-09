@@ -141,10 +141,13 @@ $(document).ready(function(){
     var website = document.getElementById("Website").value;
     var login = document.getElementById("Login").value;
     var password = document.getElementById("Password").value;
-    message = login.length + login+password;
+    console.log(typeof login.length)
+    var array = [login.length];
+    var message = (login+password).split('').map(ascii)
+    // message = login.length + login+password;
     // var identifiants = (login.length + login+password).split('').map(ascii)
     // message = Uint8Array.from(identifiants);//
-    encryptAES128(website, message);
+    encryptAES128(website, Uint8Array.from(array.concat(message)));
     // addTriplet(website, login + password);
     // readTriplet();
     $("#add-buttons").hide();
@@ -189,6 +192,50 @@ $(document).ready(function(){
       };
     };
   };
+
+  /* Base64 string to array encoding */
+
+  function uint6ToB64 (nUint6) {
+
+    return nUint6 < 26 ?
+        nUint6 + 65
+      : nUint6 < 52 ?
+        nUint6 + 71
+      : nUint6 < 62 ?
+        nUint6 - 4
+      : nUint6 === 62 ?
+        43
+      : nUint6 === 63 ?
+        47
+      :
+        65;
+
+  }
+
+  function base64EncArr(aBytes){
+
+    var eqLen = (3 - (aBytes.length % 3)) % 3, sB64Enc = "";
+
+    for (var nMod3, nLen = aBytes.length, nUint24 = 0, nIdx = 0; nIdx < nLen; nIdx++) {
+      nMod3 = nIdx % 3;
+      /* Uncomment the following line in order to split the output in lines 76-character long: */
+      /*
+      if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) { sB64Enc += "\r\n"; }
+      */
+      nUint24 |= aBytes[nIdx] << (16 >>> nMod3 & 24);
+      if (nMod3 === 2 || aBytes.length - nIdx === 1) {
+        sB64Enc += String.fromCharCode(uint6ToB64(nUint24 >>> 18 & 63), uint6ToB64(nUint24 >>> 12 & 63), uint6ToB64(nUint24 >>> 6 & 63), uint6ToB64(nUint24 & 63));
+        nUint24 = 0;
+      }
+    }
+
+    return  eqLen === 0 ?
+        sB64Enc
+      :
+        sB64Enc.substring(0, sB64Enc.length - eqLen) + (eqLen === 1 ? "=" : "==");
+
+  }
+
 
   /* Décoder un tableau d'octets depuis une chaîne en base64 */
   function b64ToUint6 (nChr) {
@@ -330,9 +377,14 @@ $(document).ready(function(){
 
   // Fonction de chiffrement des identifiants
   function encryptAES128(website, word){
-    var mdp = "bonjour";
+    var mdp = "azerty";
     sel = new Uint8Array(16);
-    text = convertStringToByteArray(word);
+    console.log("word " + word);
+    // text = convertStringToByteArray(word);// word[0] == taille de login
+    text = word;
+    console.log("TEXT");
+    console.log(text);
+    // text[0] = text[0] - 48
     window.crypto.getRandomValues(sel);
     // Recuperation du mdp en tant que cle
     let promiseMat = crypto.subtle.importKey(
@@ -372,7 +424,8 @@ $(document).ready(function(){
             // Construction du cryptogramme complet (sel + ivChiffre + chiffre)
             cryptogrammeComplet = convertByteArrayToString(ivChiffre)
             cryptogrammeComplet += convertByteArrayToString(sel.buffer) + convertByteArrayToString(chiffre);
-            addTriplet(website, cryptogrammeComplet);
+            console.log(btoa(cryptogrammeComplet));
+            addTriplet(website, btoa(cryptogrammeComplet));
           })
         })
       })
@@ -385,6 +438,7 @@ $(document).ready(function(){
     objectStoreRequest.onsuccess = function() {
       cryptogrammeCompletB64 = objectStoreRequest.result.crypto;
       cryptogrammeComplet = base64DecToArr(cryptogrammeCompletB64);
+      if (cryptogrammeComplet.length != 0) {
         // On extrait les infos du cryptogramme complet
         // Taille du sel 16
         let ivChiffre = cryptogrammeComplet.slice(0, 32)
@@ -429,9 +483,7 @@ $(document).ready(function(){
                   chiffre);
                 promiseClair.then(function(clair){
                   messageClair = convertByteArrayToString(clair);
-                  passwordCourant = messageClair;
-                  tailleLogin = new Uint8Array(clair)[0];
-                  alert("Identifiants :" + messageClair.slice(1, tailleLogin + 1)+ "\n" + "mdp :" + messageClair.slice( tailleLogin + 1));
+                  passwordCourant = new Uint8Array(clair)[0] + messageClair.slice(1);
                 })
               })
             })
@@ -454,7 +506,7 @@ $(document).ready(function(){
     var website = $(this).text();
     decryptAES128(website);
     var identifiants = decoupage(passwordCourant)
-    alert("Identifiants :" + identifiants[0] + "mdp :" + identifiants[1]);
+    alert("Identifiants :" + identifiants[0] + " mdp : " + identifiants[1]);
     passwordCourant = '';
   })
 
