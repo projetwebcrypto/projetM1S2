@@ -4,6 +4,7 @@ package fr.univtln.groupe1.webCrypto.Account;
 import fr.univtln.groupe1.webCrypto.Connexion.Connect;
 import lombok.*;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -72,12 +73,14 @@ public class FileManagment{
         String contenu = "";
 
         try {
+            byte[] bytes;
             this.stmt = conn.getConn().createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM PASSWORDS");
             // on construit la chaine de caractere dont le serveur a besoin
             while (rs.next()) {
                 contenu += "{\"site\":\"" + rs.getString("SITE_NAME") + "\",";
-                contenu += "\"crypto\":\"" + URLEncoder.encode(rs.getString("CRYPTO"), "UTF-8") + "\"},";
+                bytes = rs.getBytes("CRYPTO");
+                contenu += "\"crypto\":\"" + DatatypeConverter.printBase64Binary(bytes) + "\"},";
 
             }
         } catch (Exception e) {
