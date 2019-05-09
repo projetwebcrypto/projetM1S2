@@ -8,7 +8,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 
-@Path("/moncoffre")
+@Path("/myresource")
 @Produces({"application/json"})
 public class serveurREST {
 
@@ -40,5 +40,11 @@ public class serveurREST {
         format: {"login": "X", "nomdb": "Y", "triplets": [...]}
          */
 
+    }
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String testServeur(){
+        return "Got it!";
     }
 }
