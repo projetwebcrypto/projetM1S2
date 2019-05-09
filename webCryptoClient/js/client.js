@@ -1,4 +1,4 @@
-// variables de verification de support d'IndexedDB
+// Variables de verification de support d'IndexedDB
 window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
 window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
@@ -57,10 +57,13 @@ function convertStringToByteArray(str){
 };
 
 
-// variables à démarrer
+// Variables a demarrer
 var db;
 var store;
 var cryptogrammeComplet = "";
+// Sale :
+var testlogin = "";
+var testpassword = "";
 
 function createDb(){
   console.log("Init openDb ...");
@@ -68,32 +71,42 @@ function createDb(){
   // Version 3 car seul chromium semble marcher à la fac, et uniquement sur cette version
   var request = window.indexedDB.open("MyTestDatabase", 3);
 
-  // fonction lancee si le demarrage reussit
+  // Fonction lancee si le demarrage reussit
   request.onsuccess = function (event){
     db = this.result;
     console.log("Creation: " + db);
     alert("Creation reussie");
   };
 
-  // fonction lancee si demarrage rate
+  // Fonction lancee si le demarrage rate
   request.onerror = function(event){
     alert("Erreur onerror:" + event.target.errorCode);
   };
 
-  // fonction lancee
+  // Fonction lancee a l'appel une fois lancee
   request.onupgradeneeded = function(event){
     store = event.currentTarget.result.createObjectStore("Triplet", {keyPath: "Website"});
     store.createIndex("Website", "Website", { unique: true, multiEntry: true});
   };
 };
 
-// fonction qui vérifie si les champs d' "ajouter un triplet" sont vides
+// Fonction qui vérifie si les champs d' "ajouter un triplet" sont vides
 function checkEmpty(){
   if((document.getElementById("Website").value !="") && (document.getElementById("Login").value!="") && (document.getElementById("Password").value!="")){
     document.getElementById('add_tuple').disabled = false;
   }
   else{
     document.getElementById('add_tuple').disabled = true;
+  }
+}
+
+// Fonction qui vérifie si les champs de "modifier un triplet" sont vides
+function checkEmptyMod(){
+  if((document.getElementById("mod-Login").value!="") && (document.getElementById("mod-Password").value!="")){
+    document.getElementById('mod_tuple').disabled = false;
+  }
+  else{
+    document.getElementById('mod_tuple').disabled = true;
   }
 }
 
@@ -104,6 +117,7 @@ $(document).ready(function(){
 
   // Dissimulation initiale des champs d'entrees d' "ajouter un triplet"
   $("#add-buttons").hide();
+  $("#mod-buttons").hide();
 
   // Test de raffraichissement en live de la bd
   function getObjectStore(store_name, mode){
@@ -125,10 +139,15 @@ $(document).ready(function(){
   };
 
   // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
-  function reset(){
+  function reset_add(){
     document.getElementById("Website").value = "";
     document.getElementById("Login").value = "";
     document.getElementById("Password").value = "";
+  };
+
+  function reset_mod(){
+    document.getElementById("mod-Login").value = "";
+    document.getElementById("mod-Password").value = "";
   };
 
   // Initialisation d'un bouton "reset" des champs d'entrees d' "ajouter un triplet"
@@ -151,9 +170,14 @@ $(document).ready(function(){
   });
 
   // Initialisation du bouton "Annuler" sous les champs d'entrees d' "ajouter un triplet"
-  $("#abort").click(function(){
-    reset();
+  $("#abort_add").click(function(){
     $("#add-buttons").hide();
+    reset_add();
+  });
+
+  $("#abort_mod").click(function(){
+    $("#mod-buttons").hide();
+    reset_mod();
   });
 
   // Initialisation des champs d'entrees d' "ajouter un triplet" (champ site, login et mot de passe)
@@ -161,6 +185,12 @@ $(document).ready(function(){
     $("#add-buttons").show();
     document.getElementById('add_tuple').disabled = true;
   });
+
+  function promptLogs(login, password) {
+    var newlog = prompt("Saisissez le nouvel identifiant:", login);
+    var newpass = prompt("Saisissez le nouveau mot de passe:", password);
+    return (newlog, newpass);
+  }
 
   // Fonction qui ajoute un triplet a la base de donnees
   function addTriplet(webs, crypt){
@@ -176,7 +206,7 @@ $(document).ready(function(){
     req.onsuccess = function (evt){
       readTriplet();
       console.log("Insertion in DB successful");
-      reset();
+      reset_add();
       // displayActionSuccess();
       // displayPubList(store);
     };
@@ -196,7 +226,7 @@ $(document).ready(function(){
     var objectStore = transaction.objectStore("Triplet");
     var objectStoreRequest = objectStore.clear();
     objectStoreRequest.onsuccess = function(event){
-      console.log("Suppression de la bd" + objectStore + "réussie !");
+      // console.log("Suppression de la bd" + objectStore + "réussie !");
     };
   };
 
@@ -216,8 +246,8 @@ $(document).ready(function(){
         tableau += '<tbody><tr><th scope="row">' + i + '</th><td>';
         tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">' + myobj[i].Website + '</td>';
         tableau += '<td id="crypto">' + myobj[i].crypto + '</td>';
-        tableau += '<td id="edit" name="' + myobj[i].Website + '"><img src="js/jquery-ui/images/modifier.png" onmouseover="this.style.cursor=\'pointer\'"></td>';
-        tableau += '<td id="deleteTrip" name="' + myobj[i].Website + '"><img src="js/jquery-ui/images/effacer.png" onmouseover="this.style.cursor=\'pointer\'"></td></tr>';
+        tableau += '<td><a href="#"><img src="js/jquery-ui/images/modifier.png" id="edit" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></a></td>';
+        tableau += '<td><img src="js/jquery-ui/images/effacer.png" id="deleteTrip" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></td></tr>';
       }
       // Fermeture des balises et du tableau
       tableau += '</tbody></table>';
@@ -226,8 +256,8 @@ $(document).ready(function(){
   };
 
   // Fonction qui ouvre une demande de confirmation de suppression de la base de donnees locale
-  function confirmationSuppression(){
-    var conf = confirm("Voulez-vous supprimer la base de donnée locale?");
+  function confirmationSuppression(message){
+    var conf = confirm(message);
     return conf;
   }
 
@@ -238,7 +268,7 @@ $(document).ready(function(){
     var conf = 'true';
     getdatas.onsuccess = function(){
       if (getdatas.result != 0){
-        conf = confirmationSuppression();
+        conf = confirmationSuppression("Voulez-vous supprimer la base de donnée locale?");
       };
       if (conf){
         deleteData();
@@ -259,12 +289,12 @@ $(document).ready(function(){
     var conf = 'true';
     getdatas.onsuccess = function(){
       if (getdatas.result != 0){
-        conf = confirmationSuppression();
+        conf = confirmationSuppression("Voulez-vous supprimer la base de donnée locale?");
       }
       if (conf){
         deleteData();
         data = {"login":'log',"bd":'passwords'};
-        var urlc = 'https://192.168.99.100:8080/monCoffre/moncoffre';
+        var urlc = 'http://192.168.99.100:8080/monCoffre/moncoffre';
         $.ajax({
           type:'POST',
           url:urlc + '/login',
@@ -291,7 +321,7 @@ $(document).ready(function(){
 
   // Fonction de chiffrement des identifiants
   function encryptAES128(website, word){
-    var mdp = "moncul";
+    var mdp = "bonjour";
     sel = new Uint8Array(16);
     text = convertStringToByteArray(word);
     window.crypto.getRandomValues(sel);
@@ -340,13 +370,14 @@ $(document).ready(function(){
     })
   };
 
-  function decryptAES128(website){
+  // Fonction de dechiffrement des identifiants
+  async function decryptAES128(website){
     var store =  getObjectStore('Triplet', 'readonly');
     var objectStoreRequest = store.get(website);
     objectStoreRequest.onsuccess = function() {
       cryptogrammeComplet = objectStoreRequest.result.crypto;
-      console.log(objectStoreRequest);
-      console.log("crypto : "  + cryptogrammeComplet);
+      // console.log(objectStoreRequest);
+      // console.log("crypto : "  + cryptogrammeComplet);
       if (cryptogrammeComplet.length != 0) {
         // On extrait les infos du cryptogramme complet
         // Taille du sel 16
@@ -357,7 +388,7 @@ $(document).ready(function(){
         let chiffre = convertStringToByteArray(cryptogrammeComplet.slice(48));
         // Generation du IV a 0 pour faire du ECB en CBC
         let ivZero = new Uint8Array(16);
-        var mdp = "moncul";
+        var mdp = "bonjour";
         if (mdp.length != 0) {
           // Recuperation du mdp en tant que cle
           let promiseMat = crypto.subtle.importKey(
@@ -391,7 +422,8 @@ $(document).ready(function(){
                 promiseClair.then(function(clair){
                   messageClair = convertByteArrayToString(clair);
                   tailleLogin = parseInt(messageClair[0])
-                  alert("Identifiants :" + messageClair.slice(1, tailleLogin + 1)+ "\n" + "mdp :" + messageClair.slice( tailleLogin + 1));
+                  testpassword = messageClair.slice( tailleLogin + 1);
+                  testlogin = messageClair.slice(1, tailleLogin + 1);
                 })
               })
             })
@@ -401,33 +433,76 @@ $(document).ready(function(){
     }
   };
 
-  // Initialisation d'interactions avec les champs site
-  $("body").on("click", "#website", function(){
-    var website = $(this).text();
-    decryptAES128(website);
-  })
+  // Fonction d'attente
+  var resolveAfter = function() {
+    return new Promise(resolve => {
+      setTimeout(function() {
+        resolve("rapide");
+      }, 50);
+    });
+  };
 
-
-  // Initialisation d'interactions avec les images "Modifier"
-  $("body").on("click", "#edit", function(){
-    var website = $(this).attr('name');
+  // Modification des identifiants d'un site
+  $("#mod_tuple").click(function(){
+    var website = document.getElementById("mod-Website").innerHTML;
+    var login = document.getElementById("mod-Login").value;
+    var password = document.getElementById("mod-Password").value;
+    var message = login.length + login+password;
+    // var identifiants = (login.length + login+password).split('').map(ascii)
+    // message = Uint8Array.from(identifiants);//
     var store =  getObjectStore('Triplet', 'readonly');
-    var objectStoreRequest = store.get(website);
-    objectStoreRequest.onsuccess = function(){
-    }
-  });
-
-  // Initialisation d'interactions avec les images "Effacer"
-  $("body").on("click", "#deleteTrip", function(){
-    var website = $(this).attr('name');
-    var store =  getObjectStore('Triplet', 'readonly');
+    console.log(website)
     var objectStoreRequest = store.get(website);
     objectStoreRequest.onsuccess = function(){
       var transaction = db.transaction(["Triplet"], "readwrite");
       var objectStore = transaction.objectStore("Triplet");
       var supprStoreRequest = objectStore.delete(website);
       supprStoreRequest.onsuccess = function(){
-        readTriplet();
+        encryptAES128(website, message);
+      }
+    }
+    // addTriplet(website, login + password);
+    // readTriplet();
+    $("#mod-buttons").hide();
+    testlogin = testpassword = "";
+  });
+
+  // Initialisation d'interactions avec les champs site
+  $("body").on("click", "#website", async function(){
+    var website = $(this).text();
+    var testvalid = decryptAES128(website);
+    var waiting = await resolveAfter();
+    alert("Identifiant :" + testlogin + "\n" + "mdp :" + testpassword);
+    testlogin = testpassword = "";
+  });
+
+  // Initialisation d'interactions avec les images "Modifier"
+  $("body").on("click", "#edit", async function(){
+    $("#mod-buttons").show();
+    document.getElementById('add_tuple').disabled = true;
+    var website = $(this).attr('name');
+    decryptAES128(website);
+    var waiting = await resolveAfter();
+    // document.getElementById("mod-Login").defaultValue = website;
+    document.getElementById("mod-Login").placeholder = testlogin;
+    document.getElementById("mod-Website").innerHTML = website;
+    reset_mod();
+  });
+
+  // Initialisation d'interactions avec les images "Effacer"
+  $("body").on("click", "#deleteTrip", function(){
+    var conf = confirmationSuppression("Voulez-vous supprimer ce tuple de la base de donnée locale?");
+    if (conf){
+      var website = $(this).attr('name');
+      var store =  getObjectStore('Triplet', 'readonly');
+      var objectStoreRequest = store.get(website);
+      objectStoreRequest.onsuccess = function(){
+        var transaction = db.transaction(["Triplet"], "readwrite");
+        var objectStore = transaction.objectStore("Triplet");
+        var supprStoreRequest = objectStore.delete(website);
+        supprStoreRequest.onsuccess = function(){
+          readTriplet();
+        }
       }
     }
   });
