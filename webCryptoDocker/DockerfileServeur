@@ -11,20 +11,17 @@ RUN mvn -s /tmp/settings.xml -B -e -C -T 1C org.apache.maven.plugins:maven-depen
 COPY src ./src
 RUN mvn -s /tmp/settings.xml -B -e -C -T 1C package
 
+
 # stage 2
 
-FROM ubuntu:18.04
+FROM jetty:9.4
 
-RUN apt-get update && apt-get -y install openjdk-8-jdk && rm -rf /var/lib/apt/lists/*
+COPY --from=build /myapp/target/*-withdependencies.war /var/lib/jetty/webapps/server.war
 
-ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
-ENV PATH $JAVA_HOME/bin:$PATH
+# RUN mkdir -p /etc/keystore
+# RUN mkdir -p /etc/truststore
+# ADD config/ /usr/local/jetty/start.d/
+# ADD xml/jetty-bytebufferpool.xml /usr/local/jetty/etc/jetty-bytebufferpool.xml
 
-RUN mkdir -p /usr/local/monCoffre/account
-RUN mkdir -p /usr/local/monCoffre/certificats
-RUN mkdir -p /usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/security/cacerts
-
-COPY --from=build /myapp/target/*-withdependencies.jar /App/monCoffre.jar
-CMD ["java", "-jar", "/App/monCoffre.jar"]
-
-EXPOSE 8080
+# RUN java -jar "$JETTY_HOME/start.jar" #--add-to-startd=https
+CMD ["java", "-jar", "/usr/local/jetty/start.jar"]
