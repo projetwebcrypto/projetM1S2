@@ -95,8 +95,8 @@ function checkEmpty(){
   }
   else{
     document.getElementById("add_tuple").disabled = true;
-  }
-}
+  };
+};
 
 // Fonction qui vérifie si les champs de "modifier un triplet" sont vides
 function checkEmptyMod(){
@@ -105,8 +105,24 @@ function checkEmptyMod(){
   }
   else{
     document.getElementById("mod_tuple").disabled = true;
+  };
+};
+
+// Fonction qui vérifie si les champs de "modifier le mot de passe maître" sont vides
+function checkMstr(){
+  if((document.getElementById("OldMstrPsw").value !="") && (document.getElementById("NewMstrPsw").value!="") && (document.getElementById("ConfMstrPsw").value!="") && (document.getElementById("NewMstrPsw").value == document.getElementById("ConfMstrPsw").value)){
+    document.getElementById("chng_psw").disabled = false;
+    // if((document.getElementById("NewMstrPsw").value == document.getElementById("ConfMstrPsw").value)){
+    //   $("#failpsw").hide();
+    // }
+    // else{
+    //   $("#failpsw").show();
+    // }
   }
-}
+  else{
+    document.getElementById("chng_psw").disabled = true;
+  };
+};
 
 // Initialisation de l'indexedDB
 createDb();
@@ -144,6 +160,13 @@ $(document).ready(function(){
   function reset_mod(){
     document.getElementById("mod-Login").value = "";
     document.getElementById("mod-Password").value = "";
+  };
+
+  // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
+  function reset_psw(){
+    document.getElementById("OldMstrPsw").value = "";
+    document.getElementById("NewMstrPsw").value = "";
+    document.getElementById("ConfMstrPsw").value = "";
   };
 
   // Fonction qui ajoute un triplet a la base de donnees
@@ -428,7 +451,6 @@ $(document).ready(function(){
                   chiffre);
                 promiseClair.then(function(clair){
                   messageClair = convertByteArrayToString(clair);
-                  passwordCourant = new Uint8Array(clair)[0] + messageClair.slice(1);
                   tailleLogin = new Uint8Array(clair)[0];
                   testpassword = messageClair.slice( tailleLogin + 1);
                   testlogin = messageClair.slice(1, tailleLogin + 1);
@@ -448,6 +470,7 @@ $(document).ready(function(){
   // Dissimulation initiale des champs d'entrees d' "ajouter un triplet"
   $("#add-buttons").hide();
   $("#mod-buttons").hide();
+  $("#psw-buttons").hide();
 
   // Initialisation du lien "Supprimer tout" qui supprime la base de données locale
   $("#Delete").click(function(){
@@ -507,6 +530,17 @@ $(document).ready(function(){
     }
   });
 
+  // Initialisation des champs d'entrees de "changer le mot de passe Maître" (champ mot de passe)
+  $("#PasswordChange").click(function(){
+    $("#psw-buttons").show();
+    document.getElementById("chng_psw").disabled = true;
+  });
+
+  // Initialisation du bouton "Valider" sous les champs d'entrees de "changer le mot de passe Maître"
+  $("#chng_psw").click(async function(){
+
+  });
+
   // // Initialisation d'un bouton "reset" des champs d'entrees d' "ajouter un triplet"
   // $("#reset").click(function(){
   //   reset();
@@ -534,9 +568,16 @@ $(document).ready(function(){
     reset_add();
   });
 
+  // Initialisation du bouton "Annuler" sous les champs d'entrees de "modifier un triplet"
   $("#abort_mod").click(function(){
     $("#mod-buttons").hide();
     reset_mod();
+  });
+
+  // Initialisation du bouton "Annuler" sous les champs d'entrees de "changer le mot de passe Maître"
+  $("#abort_psw").click(function(){
+    $("#psw-buttons").hide();
+    reset_psw();
   });
 
   // Initialisation des champs d'entrees d' "ajouter un triplet" (champ site, login et mot de passe)
@@ -573,7 +614,6 @@ $(document).ready(function(){
     decryptAES128(website, currentPassword);
     var waiting = await resolveAfter();
     alert("Identifiant :" + testlogin + "\n" + "mdp :" + testpassword);
-    passwordCourant = "";
     testlogin = "";
     testpassword = "";
   });

@@ -32,11 +32,11 @@
     </div>
     <div class="container">
       <div class="row">
-        <div class="col-sm-4" id = 'div_add'>
+        <div class="col-sm-4" id = "div_add">
           <h3>Ajouter site</h3>
-          <li><a href='#' id='ADD'>Ajouter site</a></li>
+          <li><a href="#" id="ADD">Ajouter site</a></li>
           <p>Permet d'ajouter une entrée.</p>
-          <div class="add-trip" id='add-buttons'>
+          <div class="add-trip" id="add-buttons">
             <div class="form-group">
               <label for="Website">Site</label>
               <input type="text" name="Website" class="form-control" id="Website" placeholder="Entrez le site"onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
@@ -58,32 +58,51 @@
         </div>
         <div class="col-sm-4">
           <h3>Récupérer les sites</h3>
-          <li><a href='#' id='DL'>Récupérer les sites</a></li>
+          <li><a href="#" id="DL">Récupérer les sites</a></li>
           <p>Permet de récupérer vos sites depuis le serveur.</p>
         </div>
         <div class="col-sm-4">
           <h3>Changer de mot de passe Maître</h3>
-          <li><a href='#'>Changer de mot de passe</a></li>
+          <li><a href="#" id="PasswordChange">Changer de mot de passe</a></li>
+          <div class="add-trip" id="psw-buttons">
+            <div class="form-group">
+              <label for="OldMstrPsw">Ancien mot de passe Maître</label>
+              <input type="password" name="oldmstrpsw" class="form-control" id="OldMstrPsw" placeholder="Entrez votre mot de passe maître actuel" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">
+            </div>
+            <div class="form-group">
+              <label for="NewMstrPsw">Nouveau mot de passe Maître</label>
+              <input type="password" name="newmstrpsw" class="form-control" id="NewMstrPsw" placeholder="Entrez votre nouveau mot de passe maître" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">
+            </div>
+            <div class="form-group">
+              <label for="ConfMstrPsw">Confirmer le nouveau mot de passe Maître</label>
+              <input type="password" name="confmstrpsw" class="form-control" id="ConfMstrPsw" placeholder="Confirmez votre nouveau mot de passe maître" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">
+            </div>
+            <p id="failpsw" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">Nouveaux mots de passe différents !</p>
+            <div class="btn-group mr-2" role="group" aria-label="First group">
+              <button type="button" class="btn btn-secondary" id="chng_psw">Ajouter</button>
+              <button type="button" class="btn btn-secondary" id="abort_psw">Annuler</button>
+            </div>
+          </div>
           <p>Permet de changer votre mot de passe Maître.</p>
         </div>
         <div class="col-sm-4">
           <h3>Supprimer tout</h3>
-          <li><a href='#' id='Delete'>Supprimer tout</a></li>
+          <li><a href="#" id="Delete">Supprimer tout</a></li>
           <p>Purification.</p>
         </div>
         <div class="col-sm-4">
           <h3>Sauvegarder Base</h3>
-          <li><a href='#'>Sauvegarder Base</a></li>
+          <li><a href="#">Sauvegarder Base</a></li>
           <p>Salvation.</p>
         </div>
         <div class="col-sm-4">
           <h3>A propos</h3>
-          <li><a href='#'>A propos</a></li>
+          <li><a href="#">A propos</a></li>
           <p>A propos de nous.</p>
         </div>
         <div class="col-sm-4">
           <h3>Afficher les sites</h3>
-          <li><a href='#' id='Affichage'>Afficher les sites</a></li>
+          <li><a href="#" id="Affichage">Afficher les sites</a></li>
           <p>Afficher les sites</p>
         </div>
       </div>
