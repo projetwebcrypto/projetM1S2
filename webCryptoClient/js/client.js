@@ -1,5 +1,4 @@
 // Variables de verification de support d'IndexedDB
-
 window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
 window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
@@ -11,7 +10,6 @@ if (!window.indexedDB){
 
 var crypto = window.crypto;
 
-
 if(crypto.subtle){
   // alert("Cryptography API Supported");
 }
@@ -19,9 +17,10 @@ else{
   alert("Cryptography API not Supported");
 };
 
+// Fonction qui convertit un array en string
 function convertByteArrayToString(buffer){
   let data_view = new DataView(buffer);
-  chaine ="";
+  chaine = "";
   len = data_view.byteLength;
   for(i = 0; i < len; i++){
     chaine += String.fromCharCode(data_view.getUint8(i));
@@ -29,44 +28,44 @@ function convertByteArrayToString(buffer){
   return chaine;
 };
 
+// Fonction qui convertit un array en hexadecimal
 function convertArrayBufferToHexa(buffer)
 {
     var data_view = new DataView(buffer);
-    var i, len, hex = '', c;
-
+    var i, len, hex = "", c;
     len = data_view.byteLength;
     for(i = 0; i < len; i++)
     {
         c = data_view.getUint8(i).toString(16);
         if(c.length < 2)
         {
-            c = '0' + c;
+            c = "0" + c;
         }
-
         hex += c;
     }
-
     return hex;
 }
 
+// Fonction qui retourne le code ascii d'une lettre
 function ascii(lettre){
   return lettre.charCodeAt(0);
 };
 
+// Fonction qui convertit un string en array
 function convertStringToByteArray(str){
-  return Uint8Array.from(str.split('').map(ascii));
+  return Uint8Array.from(str.split("").map(ascii));
 };
-
 
 // Variables a demarrer
 var db;
 var store;
 var cryptogrammeComplet = "";
-var passwordCourant = 'azerty'
+var currentPassword = "azerty";
 // Sale :
 var testlogin = "";
 var testpassword = "";
 
+// Fonction d'initialisation d'indexedDB
 function createDb(){
   console.log("Init openDb ...");
 
@@ -88,38 +87,35 @@ function createDb(){
   // Fonction lancee a l'appel une fois lancee
   request.onupgradeneeded = function(event){
     store = event.currentTarget.result.createObjectStore("Triplet", {keyPath: "Website"});
-    store.createIndex("Website", "Website", { unique: true, multiEntry: true});
+    store.createInde"Website", "Website", { unique: true, multiEntry: true});
   };
 };
 
 // Fonction qui vérifie si les champs d' "ajouter un triplet" sont vides
 function checkEmpty(){
   if((document.getElementById("Website").value !="") && (document.getElementById("Login").value!="") && (document.getElementById("Password").value!="")){
-    document.getElementById('add_tuple').disabled = false;
+    document.getElementById("add_tuple").disabled = false;
   }
   else{
-    document.getElementById('add_tuple').disabled = true;
+    document.getElementById("add_tuple").disabled = true;
   }
 }
 
 // Fonction qui vérifie si les champs de "modifier un triplet" sont vides
 function checkEmptyMod(){
   if((document.getElementById("mod-Login").value!="") && (document.getElementById("mod-Password").value!="")){
-    document.getElementById('mod_tuple').disabled = false;
+    document.getElementById("mod_tuple").disabled = false;
   }
   else{
-    document.getElementById('mod_tuple').disabled = true;
+    document.getElementById("mod_tuple").disabled = true;
   }
 }
 
 // Initialisation de l'indexedDB
 createDb();
 
+// S'assure que le .html est bien lance.
 $(document).ready(function(){
-
-  // Dissimulation initiale des champs d'entrees d' "ajouter un triplet"
-  $("#add-buttons").hide();
-  $("#mod-buttons").hide();
 
   // Test de raffraichissement en live de la bd
   function getObjectStore(store_name, mode){
@@ -132,7 +128,7 @@ $(document).ready(function(){
 
   // Fonction qui lit un triplet dans la base de donnees
   function readTriplet(){
-    var store =  getObjectStore('Triplet', 'readonly');
+    var store =  getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
     getdatas.onsuccess = function(){
       // console.log(getdatas.result);
@@ -147,55 +143,16 @@ $(document).ready(function(){
     document.getElementById("Password").value = "";
   };
 
+  // Fonction qui reinitialise les champs d'entrees de "modifier un triplet"
   function reset_mod(){
     document.getElementById("mod-Login").value = "";
     document.getElementById("mod-Password").value = "";
   };
 
-  // Initialisation d'un bouton "reset" des champs d'entrees d' "ajouter un triplet"
-  // $("#reset").click(function(){
-  //   reset();
-  // })
-
-  // Initialisation du bouton "Ajouter" sous les champs d'entrees d' "ajouter un triplet"
-  $("#add_tuple").click(function(){
-    var website = document.getElementById("Website").value;
-    var login = document.getElementById("Login").value;
-    var password = document.getElementById("Password").value;
-
-    var array = [login.length];
-    var message = (login+password).split('').map(ascii)
-    encryptAES128(website, Uint8Array.from(array.concat(message)), passwordCourant);
-    $("#add-buttons").hide();
-  });
-
-  // Initialisation du bouton "Annuler" sous les champs d'entrees d' "ajouter un triplet"
-  $("#abort_add").click(function(){
-    $("#add-buttons").hide();
-    reset_add();
-  });
-
-  $("#abort_mod").click(function(){
-    $("#mod-buttons").hide();
-    reset_mod();
-  });
-
-  // Initialisation des champs d'entrees d' "ajouter un triplet" (champ site, login et mot de passe)
-  $("#ADD").click(function(){
-    $("#add-buttons").show();
-    document.getElementById('add_tuple').disabled = true;
-  });
-
-  function promptLogs(login, password) {
-    var newlog = prompt("Saisissez le nouvel identifiant:", login);
-    var newpass = prompt("Saisissez le nouveau mot de passe:", password);
-    return (newlog, newpass);
-  }
-
   // Fonction qui ajoute un triplet a la base de donnees
   function addTriplet(webs, crypt){
     var tuple = {"Website":webs, "crypto":crypt};
-    var store = getObjectStore('Triplet', 'readwrite');
+    var store = getObjectStore("Triplet", "readwrite");
     var req;
     try {
       req = store.add(tuple);
@@ -256,7 +213,6 @@ $(document).ready(function(){
       :
         sB64Enc.substring(0, sB64Enc.length - eqLen) + (eqLen === 1 ? "=" : "==");
   }
-
 
   // Fonction qui decode un tableau d'octets depuis une chaine en Base64
   function b64ToUint6(nChr) {
@@ -333,67 +289,22 @@ $(document).ready(function(){
     return conf;
   }
 
-  // Initialisation du lien "Supprimer tout" qui supprime la base de données locale
-  $("#Delete").click(function(){
-    var store = getObjectStore('Triplet', 'readonly');
-    var getdatas = store.getAll();
-    var conf = 'true';
-    getdatas.onsuccess = function(){
-      if (getdatas.result != 0){
-        conf = confirmationSuppression("Voulez-vous supprimer la base de donnée locale?");
-      };
-      if (conf){
-        deleteData();
-        readTriplet();
-      };
-    };
-  });
+  // Fonction d'attente
+  var resolveAfter = function() {
+    return new Promise(resolve => {
+      setTimeout(function() {
+        resolve("rapide");
+      }, 50);
+    });
+  };
 
-  // Initialisation du lien "Afficher les sites" qui affiche une table contenant les sites et leurs cryptogrammes associes
-  $("#Affichage").click(function(){
-    readTriplet();
-  });
-
-  // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
-  $("#DL").click(function(){
-    var store = getObjectStore('Triplet', 'readonly');
-    var getdatas = store.getAll();
-    var conf = 'true';
-    getdatas.onsuccess = function(){
-      if (getdatas.result != 0){
-        conf = confirmationSuppression("Voulez-vous supprimer la base de donnée locale?");
-      }
-      if (conf){
-        deleteData();
-        data = {"login":'log',"bd":'passwords'};
-        var urlc = 'https://192.168.99.100:8080/monCoffre/moncoffre';
-        $.ajax({
-          type:'POST',
-          url:urlc + '/login',
-          data:JSON.stringify(data),
-          dataType:'text',
-          contentType:'application/json',
-          // accepts: "*/*",
-          success:function(json,status){
-            // variable de stockage ( liste de données post traitement)
-            // variable stockage d'un triplet
-            var myobj = JSON.parse(json);
-            if (myobj.triplets.length > 0){
-              for (var i=1; i<myobj.triplets.length; i++){
-                addTriplet(myobj.triplets[i].site, myobj.triplets[i].crypto);
-              };
-            };
-            readTriplet();
-          },
-          error:function(data,status){console.log("error POST"+data+" status :  "+status);}
-        });
-      }
-    }
-  });
+  /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Fonctions de chiffrement - dechiffrement
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
   // Fonction de chiffrement des identifiants
-  function encryptAES128(website, word, passwordCourant){
-    var mdp = passwordCourant;
+  function encryptAES128(website, word, currentPassword){
+    var mdp = currentPassword;
     sel = new Uint8Array(16);
     // text = convertStringToByteArray(word);// word[0] == taille de login
     text = word;
@@ -448,8 +359,8 @@ $(document).ready(function(){
   };
 
   // Fonction de dechiffrement des identifiants
-  async function decryptAES128(website, passwordCourant){
-    var store =  getObjectStore('Triplet', 'readonly');
+  async function decryptAES128(website, currentPassword){
+    var store =  getObjectStore("Triplet", "readonly");
     var objectStoreRequest = store.get(website);
     objectStoreRequest.onsuccess = function() {
       cryptogrammeCompletB64 = objectStoreRequest.result.crypto;
@@ -467,7 +378,7 @@ $(document).ready(function(){
         console.log(chiffre);
         // Generation du IV a 0 pour faire du ECB en CBC
         let ivZero = new Uint8Array(16);
-        var mdp = convertStringToByteArray(passwordCourant);
+        var mdp = convertStringToByteArray(currentPassword);
         if (mdp.length != 0) {
           // Recuperation du mdp en tant que cle
           let promiseMat = crypto.subtle.importKey(
@@ -500,6 +411,7 @@ $(document).ready(function(){
                   chiffre);
                 promiseClair.then(function(clair){
                   messageClair = convertByteArrayToString(clair);
+                  passwordCourant = new Uint8Array(clair)[0] + messageClair.slice(1);
                   tailleLogin = new Uint8Array(clair)[0];
                   testpassword = messageClair.slice( tailleLogin + 1);
                   testlogin = messageClair.slice(1, tailleLogin + 1);
@@ -512,25 +424,105 @@ $(document).ready(function(){
     }
   };
 
-  // Fonction d'attente
-  var resolveAfter = function() {
-    return new Promise(resolve => {
-      setTimeout(function() {
-        resolve("rapide");
-      }, 50);
-    });
-  };
+  /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Affichage et interactions avec le client.html
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
-  // Fonction de decoupage des identifiants
-  function decoupage(message){
-    // messageClair = convertByteArrayToString(message);
-    tailleLogin = parseInt(message[0]);
-    var array = [message.slice(1, tailleLogin + 1), message.slice( tailleLogin + 1)]
-    console.log("array :" + array);
-    return(array);
-  }
+  // Dissimulation initiale des champs d'entrees d' "ajouter un triplet"
+  $("#add-buttons").hide();
+  $("#mod-buttons").hide();
 
+  // Initialisation du lien "Supprimer tout" qui supprime la base de données locale
+  $("#Delete").click(function(){
+    var store = getObjectStore("Triplet", "readonly");
+    var getdatas = store.getAll();
+    var conf = "true";
+    getdatas.onsuccess = function(){
+      if (getdatas.result != 0){
+        conf = confirmationSuppression("Voulez-vous supprimer la base de donnée locale?");
+      };
+      if (conf){
+        deleteData();
+        readTriplet();
+      };
+    };
+  });
 
+  // Initialisation du lien "Afficher les sites" qui affiche une table contenant les sites et leurs cryptogrammes associes
+  $("#Affichage").click(function(){
+    readTriplet();
+  });
+
+  // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
+  $("#DL").click(function(){
+    var store = getObjectStore("Triplet", "readonly");
+    var getdatas = store.getAll();
+    var conf = "true";
+    getdatas.onsuccess = function(){
+      if (getdatas.result != 0){
+        conf = confirmationSuppression("Voulez-vous supprimer la base de donnée locale?");
+      }
+      if (conf){
+        deleteData();
+        data = {"login":"log","bd":"passwords"};
+        var urlc = "https://192.168.99.100:8080/monCoffre/moncoffre";
+        $.aja{
+          type:"POST",
+          url:urlc + "/login",
+          data:JSON.stringify(data),
+          dataType:"text",
+          contentType:"application/json",
+          // accepts: "*/*",
+          success:function(json,status){
+            // variable de stockage ( liste de données post traitement)
+            // variable stockage d'un triplet
+            var myobj = JSON.parse(json);
+            if (myobj.triplets.length > 0){
+              for (var i=1; i<myobj.triplets.length; i++){
+                addTriplet(myobj.triplets[i].site, myobj.triplets[i].crypto);
+              };
+            };
+            readTriplet();
+          },
+          error:function(data,status){console.log("error POST"+data+" status :  "+status);}
+        });
+      }
+    }
+  });
+
+  // // Initialisation d'un bouton "reset" des champs d'entrees d' "ajouter un triplet"
+  // $("#reset").click(function(){
+  //   reset();
+  // })
+
+  // Initialisation du bouton "Ajouter" sous les champs d'entrees d' "ajouter un triplet"
+  $("#add_tuple").click(function(){
+    var website = document.getElementById("Website").value;
+    var login = document.getElementById("Login").value;
+    var password = document.getElementById("Password").value;
+
+    var array = [login.length];
+    var message = (login+password).split("").map(ascii)
+    encryptAES128(website, Uint8Array.from(array.concat(message)), currentPassword);
+    $("#add-buttons").hide();
+  });
+
+  // Initialisation du bouton "Annuler" sous les champs d'entrees d' "ajouter un triplet"
+  $("#abort_add").click(function(){
+    $("#add-buttons").hide();
+    reset_add();
+  });
+
+  $("#abort_mod").click(function(){
+    $("#mod-buttons").hide();
+    reset_mod();
+  });
+
+  // Initialisation des champs d'entrees d' "ajouter un triplet" (champ site, login et mot de passe)
+  $("#ADD").click(function(){
+    $("#add-buttons").show();
+    document.getElementById("add_tuple").disabled = true;
+  });
 
   // Modification des identifiants d'un site
   $("#mod_tuple").click(function(){
@@ -538,10 +530,10 @@ $(document).ready(function(){
     var login = document.getElementById("mod-Login").value;
     var password = document.getElementById("mod-Password").value;
     var taille = [login.length];
-    var message = (login+password).split('').map(ascii);
-    // var identifiants = (login.length + login+password).split('').map(ascii)
+    var message = (login+password).split("").map(ascii);
+    // var identifiants = (login.length + login+password).split("").map(ascii)
     // message = Uint8Array.from(identifiants);//
-    var store =  getObjectStore('Triplet', 'readonly');
+    var store =  getObjectStore("Triplet", "readonly");
     // console.log(website)
     var objectStoreRequest = store.get(website);
     objectStoreRequest.onsuccess = function(){
@@ -549,7 +541,7 @@ $(document).ready(function(){
       var objectStore = transaction.objectStore("Triplet");
       var supprStoreRequest = objectStore.delete(website);
       supprStoreRequest.onsuccess = function(){
-        encryptAES128(website, Uint8Array.from(taille.concat(message)), passwordCourant);
+        encryptAES128(website, Uint8Array.from(taille.concat(message)), currentPassword);
       }
     }
     // addTriplet(website, login + password);
@@ -561,10 +553,10 @@ $(document).ready(function(){
   // Initialisation d'interactions avec les champs site
   $("body").on("click", "#website", async function(){
     var website = $(this).text();
-    decryptAES128(website, passwordCourant);
+    decryptAES128(website, currentPassword);
     var waiting = await resolveAfter();
     alert("Identifiant :" + testlogin + "\n" + "mdp :" + testpassword);
-    // passwordCourant = "";
+    passwordCourant = "";
     testlogin = "";
     testpassword = "";
   });
@@ -572,9 +564,9 @@ $(document).ready(function(){
   // Initialisation d'interactions avec les images "Modifier"
   $("body").on("click", "#edit", async function(){
     $("#mod-buttons").show();
-    document.getElementById('add_tuple').disabled = true;
-    var website = $(this).attr('name');
-    decryptAES128(website, passwordCourant);
+    document.getElementById("add_tuple").disabled = true;
+    var website = $(this).attr("name");
+    decryptAES128(website, currentPassword);
     var waiting = await resolveAfter();
     // document.getElementById("mod-Login").defaultValue = website;
     document.getElementById("mod-Login").placeholder = testlogin;
@@ -586,8 +578,8 @@ $(document).ready(function(){
   $("body").on("click", "#deleteTrip", function(){
     var conf = confirmationSuppression("Voulez-vous supprimer ce tuple de la base de donnée locale?");
     if (conf){
-      var website = $(this).attr('name');
-      var store =  getObjectStore('Triplet', 'readonly');
+      var website = $(this).attr("name");
+      var store =  getObjectStore("Triplet", "readonly");
       var objectStoreRequest = store.get(website);
       objectStoreRequest.onsuccess = function(){
         var transaction = db.transaction(["Triplet"], "readwrite");
