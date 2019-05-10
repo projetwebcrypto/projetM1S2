@@ -87,7 +87,7 @@ function createDb(){
   // Fonction lancee a l'appel une fois lancee
   request.onupgradeneeded = function(event){
     store = event.currentTarget.result.createObjectStore("Triplet", {keyPath: "Website"});
-    store.createInde"Website", "Website", { unique: true, multiEntry: true});
+    store.createIndex("Website", "Website", { unique: true, multiEntry: true});
   };
 };
 
@@ -179,40 +179,43 @@ $(document).ready(function(){
 
   // Fonction qui decode une chaine en Base64 depuis un tableau d'octets
   function uint6ToB64(nUint6) {
-    return nUint6 < 26 ?
-        nUint6 + 65
-      : nUint6 < 52 ?
-        nUint6 + 71
-      : nUint6 < 62 ?
-        nUint6 - 4
-      : nUint6 === 62 ?
+    return nUint6 < 26 ? // si mon caracteres est compris dans [0-25] c'est un caracteres
+        nUint6 + 65     // non imprimable, on fais donc +65 (ascii (A) = 65)
+      : nUint6 < 52 ?  // si le caracteres est une lettre minuscule +71 pour correspondre
+        nUint6 + 71   // au code ascii de la minuscule
+      : nUint6 < 62 ?   // si le caracteres est un chiffre -4 pour correspondre
+        nUint6 - 4        // au code ascii du chiffre
+      : nUint6 === 62 ? // si le caracteres est + le codage deviens r
         43
-      : nUint6 === 63 ?
+      : nUint6 === 63 ? // si le caracteres est / le codage deviens v
         47
       :
         65;
   }
 
-  // Fonction d'encodage array en Base64
-  function base64EncArr(aBytes){
-    var eqLen = (3 - (aBytes.length % 3)) % 3, sB64Enc = "";
-    for (var nMod3, nLen = aBytes.length, nUint24 = 0, nIdx = 0; nIdx < nLen; nIdx++) {
-      nMod3 = nIdx % 3;
-      /* Uncomment the following line in order to split the output in lines 76-character long: */
-      /*
-      if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) { sB64Enc += "\r\n"; }
-      */
-      nUint24 |= aBytes[nIdx] << (16 >>> nMod3 & 24);
-      if (nMod3 === 2 || aBytes.length - nIdx === 1) {
-        sB64Enc += String.fromCharCode(uint6ToB64(nUint24 >>> 18 & 63), uint6ToB64(nUint24 >>> 12 & 63), uint6ToB64(nUint24 >>> 6 & 63), uint6ToB64(nUint24 & 63));
-        nUint24 = 0;
-      }
-    }
-    return  eqLen === 0 ?
-        sB64Enc
-      :
-        sB64Enc.substring(0, sB64Enc.length - eqLen) + (eqLen === 1 ? "=" : "==");
-  }
+  // // Fonction d'encodage array en Base64
+  // function base64EncArr(aBytes){
+  //   var eqLen = (3 - (aBytes.length % 3)) % 3, sB64Enc = "";
+  //   console.log("base64EncArr");
+  //   console.log(eqLen);
+  //   console.log(aBytes);
+  //   for (var nMod3, nLen = aBytes.length, nUint24 = 0, nIdx = 0; nIdx < nLen; nIdx++) {
+  //     nMod3 = nIdx % 3;
+  //     /* Uncomment the following line in order to split the output in lines 76-character long: */
+  //     /*
+  //     if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) { sB64Enc += "\r\n"; }
+  //     */
+  //     nUint24 |= aBytes[nIdx] << (16 >>> nMod3 & 24);
+  //     if (nMod3 === 2 || aBytes.length - nIdx === 1) {
+  //       sB64Enc += String.fromCharCode(uint6ToB64(nUint24 >>> 18 & 63), uint6ToB64(nUint24 >>> 12 & 63), uint6ToB64(nUint24 >>> 6 & 63), uint6ToB64(nUint24 & 63));
+  //       nUint24 = 0;
+  //     }
+  //   }
+  //   return  eqLen === 0 ?
+  //       sB64Enc
+  //     :
+  //       sB64Enc.substring(0, sB64Enc.length - eqLen) + (eqLen === 1 ? "=" : "==");
+  // }
 
   // Fonction qui decode un tableau d'octets depuis une chaine en Base64
   function b64ToUint6(nChr) {
@@ -232,6 +235,7 @@ $(document).ready(function(){
 
   // Fonction de decode d'une chaine de caracteres en Base64 en un tableau d'octets
   function base64DecToArr (sBase64, nBlockSize) {
+    // enleve les caracteres de fin du base64, stock la taile
     var
       sB64Enc = sBase64.replace(/[^A-Za-z0-9\+\/]/g, ""), nInLen = sB64Enc.length,
       nOutLen = nBlockSize ? Math.ceil((nInLen * 3 + 1 >>> 2) / nBlockSize) * nBlockSize : nInLen * 3 + 1 >>> 2, aBytes = new Uint8Array(nOutLen);
@@ -466,7 +470,7 @@ $(document).ready(function(){
         deleteData();
         data = {"login":"log","bd":"passwords"};
         var urlc = "https://192.168.99.100:8080/monCoffre/moncoffre";
-        $.aja{
+        $.ajax({
           type:"POST",
           url:urlc + "/login",
           data:JSON.stringify(data),
