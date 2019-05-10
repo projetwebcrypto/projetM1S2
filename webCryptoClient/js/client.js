@@ -1,4 +1,5 @@
 // Variables de verification de support d'IndexedDB
+
 window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
 window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
@@ -61,7 +62,7 @@ function convertStringToByteArray(str){
 var db;
 var store;
 var cryptogrammeComplet = "";
-var passwordCourant = ''
+var passwordCourant = 'azerty'
 // Sale :
 var testlogin = "";
 var testpassword = "";
@@ -164,7 +165,7 @@ $(document).ready(function(){
 
     var array = [login.length];
     var message = (login+password).split('').map(ascii)
-    encryptAES128(website, Uint8Array.from(array.concat(message)));
+    encryptAES128(website, Uint8Array.from(array.concat(message)), passwordCourant);
     $("#add-buttons").hide();
   });
 
@@ -391,8 +392,8 @@ $(document).ready(function(){
   });
 
   // Fonction de chiffrement des identifiants
-  function encryptAES128(website, word){
-    var mdp = "azerty";
+  function encryptAES128(website, word, passwordCourant){
+    var mdp = passwordCourant;
     sel = new Uint8Array(16);
     // text = convertStringToByteArray(word);// word[0] == taille de login
     text = word;
@@ -447,7 +448,7 @@ $(document).ready(function(){
   };
 
   // Fonction de dechiffrement des identifiants
-  async function decryptAES128(website){
+  async function decryptAES128(website, passwordCourant){
     var store =  getObjectStore('Triplet', 'readonly');
     var objectStoreRequest = store.get(website);
     objectStoreRequest.onsuccess = function() {
@@ -466,7 +467,7 @@ $(document).ready(function(){
         console.log(chiffre);
         // Generation du IV a 0 pour faire du ECB en CBC
         let ivZero = new Uint8Array(16);
-        var mdp = convertStringToByteArray("azerty");
+        var mdp = convertStringToByteArray(passwordCourant);
         if (mdp.length != 0) {
           // Recuperation du mdp en tant que cle
           let promiseMat = crypto.subtle.importKey(
@@ -499,7 +500,6 @@ $(document).ready(function(){
                   chiffre);
                 promiseClair.then(function(clair){
                   messageClair = convertByteArrayToString(clair);
-                  passwordCourant = new Uint8Array(clair)[0] + messageClair.slice(1);
                   tailleLogin = new Uint8Array(clair)[0];
                   testpassword = messageClair.slice( tailleLogin + 1);
                   testlogin = messageClair.slice(1, tailleLogin + 1);
@@ -549,7 +549,7 @@ $(document).ready(function(){
       var objectStore = transaction.objectStore("Triplet");
       var supprStoreRequest = objectStore.delete(website);
       supprStoreRequest.onsuccess = function(){
-        encryptAES128(website, Uint8Array.from(taille.concat(message)));
+        encryptAES128(website, Uint8Array.from(taille.concat(message)), passwordCourant);
       }
     }
     // addTriplet(website, login + password);
@@ -559,21 +559,12 @@ $(document).ready(function(){
   });
 
   // Initialisation d'interactions avec les champs site
-  // $("body").on("click", "#website", function(){
-  //   var website = $(this).text();
-  //   decryptAES128(website);
-  //   var identifiants = decoupage(passwordCourant)
-  //   alert("Identifiants :" + identifiants[0] + " mdp : " + identifiants[1]);
-  //   passwordCourant = '';
-  // })
-
-  // Initialisation d'interactions avec les champs site
   $("body").on("click", "#website", async function(){
     var website = $(this).text();
-    decryptAES128(website);
+    decryptAES128(website, passwordCourant);
     var waiting = await resolveAfter();
     alert("Identifiant :" + testlogin + "\n" + "mdp :" + testpassword);
-    passwordCourant = "";
+    // passwordCourant = "";
     testlogin = "";
     testpassword = "";
   });
@@ -583,7 +574,7 @@ $(document).ready(function(){
     $("#mod-buttons").show();
     document.getElementById('add_tuple').disabled = true;
     var website = $(this).attr('name');
-    decryptAES128(website);
+    decryptAES128(website, passwordCourant);
     var waiting = await resolveAfter();
     // document.getElementById("mod-Login").defaultValue = website;
     document.getElementById("mod-Login").placeholder = testlogin;
