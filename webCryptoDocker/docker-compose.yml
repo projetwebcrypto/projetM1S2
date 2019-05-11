@@ -13,23 +13,29 @@ services:
     # - /home/docker/:/usr/local/monCoffre
     - /home/docker/account:/usr/local/monCoffre/account
 
+  # certificat:
+  #   build:
+  #     context: ../webCryptoCertificat
+  #     dockerfile: ../webCryptoDocker/DockerfileCertificat
+  #   container_name: Certificat
+  #   volumes:
+  #     - /home/docker/certificats:/usr/local/monCoffre/certificats
+  #     - certifok:/usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/security/cacerts
   certificat:
     build:
       context: ../webCryptoCertificat
       dockerfile: ../webCryptoDocker/DockerfileCertificat
     container_name: Certificat
     volumes:
-      - /home/docker/certificats:/usr/local/monCoffre/certificats
-      - /home/docker/fghj:/usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/security/cacerts
+      - certifok:/usr/local/certif/
 
   serveur:
     build:
       context: ../webCryptoServeur/
       dockerfile: ../webCryptoDocker/DockerfileServeur
     container_name: Serveur
-    user: "jetty:jetty"
-    ports:
-    - "8080:8080"
+    # ports:
+    # - "8080:8080"
     volumes_from:
     - sqlite:rw
     # volumes:
@@ -41,6 +47,24 @@ services:
     # - certificat
     links:
     - "sqlite:sqlite"
+
+  reverse_proxy:
+    image: nginx:1.15
+    container_name: RevProxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certifok:/etc/nginx/certif/
+      - /home/docker/config/:/etc/nginx/conf.d/
+    stdin_open: True
+    tty: True
+    depends_on:
+      - serveur
+      - certificat
+    links:
+      - "serveur:app"
+    
 
 volumes:
   certifok:
