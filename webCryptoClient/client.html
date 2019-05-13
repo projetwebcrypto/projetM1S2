@@ -49,9 +49,11 @@
               <label for="Password">Mot de passe</label>
               <input type="password" name="mdp" class="form-control" id="Password" placeholder="Entrez votre mot de passe"onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
             </div>
-            <button type="button" id="add_tuple">Ajouter</button>
-            <!-- <button type="reset" id="reset">Reset</button> -->
-            <button type="button" id="abort">Annuler</button>
+            <div class="btn-group mr-2" role="group" aria-label="First group">
+              <button type="button" class="btn btn-secondary" id="add_tuple">Ajouter</button>
+              <!-- <button type="reset" id="reset">Reset</button> -->
+              <button type="button" class="btn btn-secondary" id="abort_add">Annuler</button>
+            </div>
           </div>
         </div>
         <div class="col-sm-4">
@@ -84,6 +86,20 @@
           <li><a href='#' id='Affichage'>Afficher les sites</a></li>
           <p>Afficher les sites</p>
         </div>
+      </div>
+    </div>
+    <div class="btn-toolbar mb-3" role="toolbar" id="mod-buttons">
+      <div class="input-group">
+        <label for="Website" id="mod-Website"></label>
+        <div class="input-group-prepend"></div>
+        <label for="Login">Identifiant</label>
+        <input type="text" name="login" id="mod-Login" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
+        <label for="Password">Mot de passe</label>
+        <input type="password" name="mdp" id="mod-Password" placeholder="Entrez nouveau mdp" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
+      </div>
+      <div class="btn-group mr-2" role="group" aria-label="First group">
+        <button type="button" class="btn btn-secondary" id="mod_tuple">Valider</button>
+        <button type="button" class="btn btn-secondary" id="abort_mod">Annuler</button>
       </div>
     </div>
     <!-- Optional JavaScript -->
