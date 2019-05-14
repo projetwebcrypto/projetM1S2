@@ -133,6 +133,16 @@ $(document).ready(function(){
     };
   };
 
+  function placement(testlogin, testpassword){
+    document.getElementById("mod-Login").placeholder = testlogin;
+    document.getElementById("mod-Website").innerHTML = website;
+  }
+
+  function afficheClair(testlogin, testpassword){
+  alert("Identifiant :" + testlogin + "\n" + "mdp :" + testpassword);
+}
+
+
   // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
   function reset_add(){
     document.getElementById("Website").value = "";
@@ -149,6 +159,7 @@ $(document).ready(function(){
   // Fonction qui ajoute un triplet a la base de donnees
   function addTriplet(webs, crypt){
     var tuple = {"Website":webs, "crypto":crypt};
+    console.log(tuple);
     var store = getObjectStore("Triplet", "readwrite");
     var req;
     try {
@@ -176,7 +187,8 @@ $(document).ready(function(){
   };
 
   // Fonction qui ajoute un triplet a la base de donnees
-  function modTriplet(tuple){
+  function modTriplet(webs, crypt){
+    var tuple = {"Website":webs, "crypto":crypt};
     var store = getObjectStore("Triplet", "readwrite");
     var req;
     try {
@@ -188,7 +200,7 @@ $(document).ready(function(){
     req.onsuccess = function (evt){
       readTriplet();
       console.log("Insertion in DB successful");
-      reset_add();
+      reset_mod();
       return 0;
       // displayActionSuccess();
       // displayPubList(store);
@@ -290,12 +302,12 @@ $(document).ready(function(){
     else{
       // Initialisation des champs du tableau
       var tableau = '<table class="table"><thead><tr><th scope="col">#</th>';
-      tableau += '<th scope="col">Site</th><th scope="col">Crypto</th>';
-      tableau += '<th score="col">Modifier</th><th score="col">Supprimer</th></tr></thead>';
+      tableau += '<th scope="col">Site</th>';//<th scope="col">Crypto</th>';
+      // tableau += '<th score="col">Modifier</th><th score="col">Supprimer</th></tr></thead>';
       for (var i=0; i<myobj.length; i++){
         tableau += '<tbody><tr><th scope="row">' + i + '</th><td>';
         tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">' + myobj[i].Website + '</td>';
-        tableau += '<td id="crypto">' + myobj[i].crypto + '</td>';
+        //tableau += '<td id="crypto">' + myobj[i].crypto + '</td>';
         tableau += '<td><a href="#"><img src="js/jquery-ui/images/modifier.png" id="edit" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></a></td>';
         tableau += '<td><img src="js/jquery-ui/images/effacer.png" id="deleteTrip" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></td></tr>';
       }
@@ -311,21 +323,12 @@ $(document).ready(function(){
     return conf;
   }
 
-  // Fonction d'attente
-  var resolveAfter = function() {
-    return new Promise(resolve => {
-      setTimeout(function() {
-        resolve("rapide");
-      }, 50);
-    });
-  };
-
   /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   Fonctions de chiffrement - dechiffrement
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
   // Fonction de chiffrement des identifiants
-  async function encryptAES128(word, currentPassword){
+  async function encryptAES128(word, currentPassword, fonction, website){
     var mdp = currentPassword;
     sel = new Uint8Array(16);
     // text = convertStringToByteArray(word);// word[0] == taille de login
@@ -369,10 +372,13 @@ $(document).ready(function(){
             key,
             text);
           promiseChiffre.then(function(chiffre) {
-            // Construction du cryptogramme complet (sel + ivChiffre + chiffre)
+
             cryptogrammeComplet = convertByteArrayToString(ivChiffre);
             cryptogrammeComplet += convertByteArrayToString(sel.buffer) + convertByteArrayToString(chiffre);
-            // console.log(btoa(cryptogrammeComplet));
+            cryptogrammeComplet = convertStringToByteArray(cryptogrammeComplet);
+
+            fonction(website, cryptogrammeComplet);
+
           })
         })
       })
@@ -380,12 +386,12 @@ $(document).ready(function(){
   };
 
   // Fonction de dechiffrement des identifiants
-  async function decryptAES128(website, currentPassword){
+  async function decryptAES128(website, currentPassword, fonction){
     var store =  getObjectStore("Triplet", "readonly");
     var objectStoreRequest = store.get(website);
     objectStoreRequest.onsuccess = function() {
-      cryptogrammeCompletB64 = objectStoreRequest.result.crypto;
-      cryptogrammeComplet = base64DecToArr(cryptogrammeCompletB64);
+      cryptogrammeComplet = objectStoreRequest.result.crypto;
+      // cryptogrammeComplet = base64DecToArr(cryptogrammeCompletB64);
       if (cryptogrammeComplet.length != 0) {
         // On extrait les infos du cryptogramme complet
         // Taille du sel 16
@@ -436,6 +442,11 @@ $(document).ready(function(){
                   tailleLogin = new Uint8Array(clair)[0];
                   testpassword = messageClair.slice( tailleLogin + 1);
                   testlogin = messageClair.slice(1, tailleLogin + 1);
+
+                  fonction(testlogin, testpassword);
+                  passwordCourant = "";
+                  testlogin = "";
+                  testpassword = "";
                 })
               })
             })
@@ -501,7 +512,7 @@ $(document).ready(function(){
             var myobj = JSON.parse(json);
             if (myobj.triplets.length > 0){
               for (var i=1; i<myobj.triplets.length; i++){
-                addTriplet(myobj.triplets[i].site, myobj.triplets[i].crypto);
+                addTriplet(myobj.triplets[i].site, base64DecToArr(myobj.triplets[i].crypto));
               };
             };
             readTriplet();
@@ -512,10 +523,7 @@ $(document).ready(function(){
     }
   });
 
-  // // Initialisation d'un bouton "reset" des champs d'entrees d' "ajouter un triplet"
-  // $("#reset").click(function(){
-  //   reset();
-  // })
+
 
   // Initialisation du bouton "Ajouter" sous les champs d'entrees d' "ajouter un triplet"
   $("#add_tuple").click(async function(){
@@ -525,11 +533,8 @@ $(document).ready(function(){
 
     var array = [login.length];
     var message = (login+password).split("").map(ascii);
-    encryptAES128(Uint8Array.from(array.concat(message)), currentPassword);
-    var waiting = await resolveAfter();
-    var added = addTriplet(website, btoa(cryptogrammeComplet));
-    var waiting = await resolveAfter();
-    cryptogrammeComplet = "";
+    console.log(website);
+    encryptAES128(Uint8Array.from(array.concat(message)), currentPassword, addTriplet, website);
     $("#add-buttons").hide();
   });
 
@@ -560,27 +565,16 @@ $(document).ready(function(){
     // var identifiants = (login.length + login+password).split("").map(ascii)
     // message = Uint8Array.from(identifiants);//
 
-    encryptAES128(Uint8Array.from(taille.concat(message)), currentPassword);
-    var waiting = await resolveAfter();
-    var data = {"Website":website, "crypto":btoa(cryptogrammeComplet)};
-
-    modTriplet(data);
-    // addTriplet(website, login + password);
-    // readTriplet();
+    encryptAES128(Uint8Array.from(taille.concat(message)), currentPassword, modTriplet, website);
     $("#mod-buttons").hide();
-    cryptogrammeComplet = "";
     testlogin = testpassword = "";
   });
 
   // Initialisation d'interactions avec les champs site
   $("body").on("click", "#website", async function(){
     var website = $(this).text();
-    decryptAES128(website, currentPassword);
-    var waiting = await resolveAfter();
-    alert("Identifiant :" + testlogin + "\n" + "mdp :" + testpassword);
-    passwordCourant = "";
-    testlogin = "";
-    testpassword = "";
+    decryptAES128(website, currentPassword, afficheClair);
+
   });
 
   // Initialisation d'interactions avec les images "Modifier"
@@ -588,11 +582,7 @@ $(document).ready(function(){
     $("#mod-buttons").show();
     document.getElementById("add_tuple").disabled = true;
     var website = $(this).attr("name");
-    decryptAES128(website, currentPassword);
-    var waiting = await resolveAfter();
-    // document.getElementById("mod-Login").defaultValue = website;
-    document.getElementById("mod-Login").placeholder = testlogin;
-    document.getElementById("mod-Website").innerHTML = website;
+    decryptAES128(website, currentPassword, placement);
     reset_mod();
   });
 
