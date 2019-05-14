@@ -133,12 +133,12 @@ $(document).ready(function(){
     };
   };
 
-  function placement(testlogin, testpassword){
+  function placement(testlogin, testpassword, website){
     document.getElementById("mod-Login").placeholder = testlogin;
     document.getElementById("mod-Website").innerHTML = website;
   }
 
-  function afficheClair(testlogin, testpassword){
+  function afficheClair(testlogin, testpassword, website){
   alert("Identifiant :" + testlogin + "\n" + "mdp :" + testpassword);
 }
 
@@ -387,6 +387,8 @@ $(document).ready(function(){
 
   // Fonction de dechiffrement des identifiants
   async function decryptAES128(website, currentPassword, fonction){
+    console.log("decrypt");
+    console.log(website);
     var store =  getObjectStore("Triplet", "readonly");
     var objectStoreRequest = store.get(website);
     objectStoreRequest.onsuccess = function() {
@@ -443,7 +445,7 @@ $(document).ready(function(){
                   testpassword = messageClair.slice( tailleLogin + 1);
                   testlogin = messageClair.slice(1, tailleLogin + 1);
 
-                  fonction(testlogin, testpassword);
+                  fonction(testlogin, testpassword, website);
                   passwordCourant = "";
                   testlogin = "";
                   testpassword = "";
@@ -564,7 +566,7 @@ $(document).ready(function(){
     var message = (login+password).split("").map(ascii);
     // var identifiants = (login.length + login+password).split("").map(ascii)
     // message = Uint8Array.from(identifiants);//
-
+    console.log(website);
     encryptAES128(Uint8Array.from(taille.concat(message)), currentPassword, modTriplet, website);
     $("#mod-buttons").hide();
     testlogin = testpassword = "";
