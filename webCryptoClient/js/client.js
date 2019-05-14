@@ -482,7 +482,8 @@ $(document).ready(function(){
       if (conf){
         deleteData();
         data = {"login":"log","bd":"passwords"};
-        var urlc = "https://192.168.99.100:8080/monCoffre/moncoffre";
+        // var urlc = "https://192.168.99.100:8080/moncoffre";
+        var urlc = "https://192.168.99.100:443/moncoffre";
         $.ajax({
           type:"POST",
           url:urlc + "/login",
