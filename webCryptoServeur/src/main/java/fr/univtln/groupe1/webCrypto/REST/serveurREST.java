@@ -25,7 +25,7 @@ public class serveurREST {
         String login = request.getString("login");
         String nomdb = request.getString("bd");
         FileManagment fileManagment = new FileManagment();
-        String contenu = fileManagment.openFile(login, nomdb);
+        String contenu = fileManagment.existencyAccount(login, nomdb);
         String reponse = "{\"triplets\":[" + contenu + "]}";
         return reponse;
     }
