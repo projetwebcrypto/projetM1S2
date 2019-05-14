@@ -8,6 +8,15 @@ if (!window.indexedDB){
   window.alert("Votre navigateur ne supporte pas une version stable d'IndexedDB. Quelques fonctionnalités ne seront pas disponibles.")
 };
 
+// Variables a demarrer
+var db;
+var store;
+var cryptogrammeComplet = "";
+var currentPassword = "azerty";
+// Sale :
+var testlogin = "";
+var testpassword = "";
+
 var crypto = window.crypto;
 
 if(crypto.subtle){
@@ -29,22 +38,19 @@ function convertByteArrayToString(buffer){
 };
 
 // Fonction qui convertit un array en hexadecimal
-function convertArrayBufferToHexa(buffer)
-{
+function convertArrayBufferToHexa(buffer){
     var data_view = new DataView(buffer);
     var i, len, hex = "", c;
     len = data_view.byteLength;
-    for(i = 0; i < len; i++)
-    {
+    for(i = 0; i < len; i++){
         c = data_view.getUint8(i).toString(16);
-        if(c.length < 2)
-        {
+        if(c.length < 2){
             c = "0" + c;
         }
         hex += c;
     }
     return hex;
-}
+};
 
 // Fonction qui retourne le code ascii d'une lettre
 function ascii(lettre){
@@ -55,15 +61,6 @@ function ascii(lettre){
 function convertStringToByteArray(str){
   return Uint8Array.from(str.split("").map(ascii));
 };
-
-// Variables a demarrer
-var db;
-var store;
-var cryptogrammeComplet = "";
-var currentPassword = "azerty";
-// Sale :
-var testlogin = "";
-var testpassword = "";
 
 // Fonction d'initialisation d'indexedDB
 function createDb(){
@@ -164,6 +161,7 @@ $(document).ready(function(){
       readTriplet();
       console.log("Insertion in DB successful");
       reset_add();
+      return 0;
       // displayActionSuccess();
       // displayPubList(store);
     };
@@ -174,6 +172,26 @@ $(document).ready(function(){
         alert("Tuple(s) déjà présent(s)");
         // displayActionFailure(this.error);
       };
+    };
+  };
+
+  // Fonction qui ajoute un triplet a la base de donnees
+  function modTriplet(tuple){
+    var store = getObjectStore("Triplet", "readwrite");
+    var req;
+    try {
+      req = store.put(tuple);
+    } catch (e) {
+      console.log("Error In modTriplet : " + e);
+      throw e;
+    }
+    req.onsuccess = function (evt){
+      readTriplet();
+      console.log("Insertion in DB successful");
+      reset_add();
+      return 0;
+      // displayActionSuccess();
+      // displayPubList(store);
     };
   };
 
@@ -191,7 +209,7 @@ $(document).ready(function(){
         47
       :
         65;
-  }
+  };
 
   // // Fonction d'encodage array en Base64
   // function base64EncArr(aBytes){
@@ -231,7 +249,7 @@ $(document).ready(function(){
         63
       :
         0;
-  }
+  };
 
   // Fonction de decode d'une chaine de caracteres en Base64 en un tableau d'octets
   function base64DecToArr (sBase64, nBlockSize) {
@@ -247,10 +265,10 @@ $(document).ready(function(){
           aBytes[nOutIdx] = nUint24 >>> (16 >>> nMod3 & 24) & 255;
         }
         nUint24 = 0;
-      }
-    }
+      };
+    };
     return aBytes;
-  }
+  };
 
   // Fonction qui supprime la base de donnees locale
   function deleteData(){
@@ -307,7 +325,7 @@ $(document).ready(function(){
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
   // Fonction de chiffrement des identifiants
-  function encryptAES128(website, word, currentPassword){
+  async function encryptAES128(word, currentPassword){
     var mdp = currentPassword;
     sel = new Uint8Array(16);
     // text = convertStringToByteArray(word);// word[0] == taille de login
@@ -352,10 +370,9 @@ $(document).ready(function(){
             text);
           promiseChiffre.then(function(chiffre) {
             // Construction du cryptogramme complet (sel + ivChiffre + chiffre)
-            cryptogrammeComplet = convertByteArrayToString(ivChiffre)
+            cryptogrammeComplet = convertByteArrayToString(ivChiffre);
             cryptogrammeComplet += convertByteArrayToString(sel.buffer) + convertByteArrayToString(chiffre);
             // console.log(btoa(cryptogrammeComplet));
-            addTriplet(website, btoa(cryptogrammeComplet));
           })
         })
       })
@@ -372,14 +389,14 @@ $(document).ready(function(){
       if (cryptogrammeComplet.length != 0) {
         // On extrait les infos du cryptogramme complet
         // Taille du sel 16
-        let ivChiffre = cryptogrammeComplet.slice(0, 32)
-        console.log(ivChiffre);
+        let ivChiffre = cryptogrammeComplet.slice(0, 32);
+        // console.log(ivChiffre);
         // Taille du ivChiffre 32
-        let sel = cryptogrammeComplet.slice(32, 48)
-        console.log(sel);
+        let sel = cryptogrammeComplet.slice(32, 48);
+        // console.log(sel);
         // Taille du chiffre le reste
-        let chiffre = cryptogrammeComplet.slice(48)
-        console.log(chiffre);
+        let chiffre = cryptogrammeComplet.slice(48);
+        // console.log(chiffre);
         // Generation du IV a 0 pour faire du ECB en CBC
         let ivZero = new Uint8Array(16);
         var mdp = convertStringToByteArray(currentPassword);
@@ -469,7 +486,8 @@ $(document).ready(function(){
       if (conf){
         deleteData();
         data = {"login":"log","bd":"passwords"};
-        var urlc = "https://192.168.99.100:8080/monCoffre/moncoffre";
+        // var urlc = "https://192.168.99.100:8080/moncoffre";
+        var urlc = "https://192.168.99.100:443/moncoffre";
         $.ajax({
           type:"POST",
           url:urlc + "/login",
@@ -500,14 +518,18 @@ $(document).ready(function(){
   // })
 
   // Initialisation du bouton "Ajouter" sous les champs d'entrees d' "ajouter un triplet"
-  $("#add_tuple").click(function(){
+  $("#add_tuple").click(async function(){
     var website = document.getElementById("Website").value;
     var login = document.getElementById("Login").value;
     var password = document.getElementById("Password").value;
 
     var array = [login.length];
-    var message = (login+password).split("").map(ascii)
-    encryptAES128(website, Uint8Array.from(array.concat(message)), currentPassword);
+    var message = (login+password).split("").map(ascii);
+    encryptAES128(Uint8Array.from(array.concat(message)), currentPassword);
+    var waiting = await resolveAfter();
+    var added = addTriplet(website, btoa(cryptogrammeComplet));
+    var waiting = await resolveAfter();
+    cryptogrammeComplet = "";
     $("#add-buttons").hide();
   });
 
@@ -529,7 +551,7 @@ $(document).ready(function(){
   });
 
   // Modification des identifiants d'un site
-  $("#mod_tuple").click(function(){
+  $("#mod_tuple").click(async function(){
     var website = document.getElementById("mod-Website").innerHTML;
     var login = document.getElementById("mod-Login").value;
     var password = document.getElementById("mod-Password").value;
@@ -537,20 +559,16 @@ $(document).ready(function(){
     var message = (login+password).split("").map(ascii);
     // var identifiants = (login.length + login+password).split("").map(ascii)
     // message = Uint8Array.from(identifiants);//
-    var store =  getObjectStore("Triplet", "readonly");
-    // console.log(website)
-    var objectStoreRequest = store.get(website);
-    objectStoreRequest.onsuccess = function(){
-      var transaction = db.transaction(["Triplet"], "readwrite");
-      var objectStore = transaction.objectStore("Triplet");
-      var supprStoreRequest = objectStore.delete(website);
-      supprStoreRequest.onsuccess = function(){
-        encryptAES128(website, Uint8Array.from(taille.concat(message)), currentPassword);
-      }
-    }
+
+    encryptAES128(Uint8Array.from(taille.concat(message)), currentPassword);
+    var waiting = await resolveAfter();
+    var data = {"Website":website, "crypto":btoa(cryptogrammeComplet)};
+
+    modTriplet(data);
     // addTriplet(website, login + password);
     // readTriplet();
     $("#mod-buttons").hide();
+    cryptogrammeComplet = "";
     testlogin = testpassword = "";
   });
 

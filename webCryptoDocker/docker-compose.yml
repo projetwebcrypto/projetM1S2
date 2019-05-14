@@ -1,15 +1,6 @@
 version: '2'
 
 services:
-  # authentification:
-    # image: postgres:11.2
-    # container_name: postgreSQLCompte
-    # ports:
-    # - "5432:5432"
-    # volumes:
-    # - /home/docker/pg/:/
-
-
   sqlite:
     command: socat TCP-L:12345,fork,reuseaddr EXEC:'sqlite3',pty
     build:
@@ -19,22 +10,61 @@ services:
     ports:
     - 2:12345
     volumes:
-    - /home/docker/:/usr/local/monCoffre
+    # - /home/docker/:/usr/local/monCoffre
+    - /home/docker/account:/usr/local/monCoffre/account
+
+  # certificat:
+  #   build:
+  #     context: ../webCryptoCertificat
+  #     dockerfile: ../webCryptoDocker/DockerfileCertificat
+  #   container_name: Certificat
+  #   volumes:
+  #     - /home/docker/certificats:/usr/local/monCoffre/certificats
+  #     - certifok:/usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/security/cacerts
+  certificat:
+    build:
+      context: ../webCryptoCertificat
+      dockerfile: ../webCryptoDocker/DockerfileCertificat
+    container_name: Certificat
+    volumes:
+      - certifok:/usr/local/certif/
 
   serveur:
     build:
       context: ../webCryptoServeur/
       dockerfile: ../webCryptoDocker/DockerfileServeur
     container_name: Serveur
-    ports:
-    - "8080:8080"
+    # ports:
+    # - "8080:8080"
     volumes_from:
     - sqlite:rw
+    # volumes:
+    # - /home/docker/fghj:/usr/local/jetty/etc
     stdin_open: True
     tty: True
     depends_on:
     - sqlite
-    # - authentification
+    # - certificat
     links:
     - "sqlite:sqlite"
-    # - "authentification:auth"
+
+  reverse_proxy:
+    image: nginx:1.15
+    container_name: RevProxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certifok:/etc/nginx/certif/
+      - /home/docker/config/:/etc/nginx/conf.d/
+    stdin_open: True
+    tty: True
+    depends_on:
+      - serveur
+      - certificat
+    links:
+      - "serveur:app"
+
+
+volumes:
+  certifok:
