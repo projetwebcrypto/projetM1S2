@@ -77,7 +77,9 @@
               <label for="ConfMstrPsw">Confirmer le nouveau mot de passe Maître</label>
               <input type="password" name="confmstrpsw" class="form-control" id="ConfMstrPsw" placeholder="Confirmez votre nouveau mot de passe maître" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">
             </div>
-            <p id="failpsw" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">Nouveaux mots de passe différents !</p>
+            <div id="failpsw" onfocus="checkSame()" onblur="checkSame()" onkeyup="checkSame()">
+              <p>Nouveaux mots de passe différents !</p>
+            </div>
             <div class="btn-group mr-2" role="group" aria-label="First group">
               <button type="button" class="btn btn-secondary" id="chng_psw">Ajouter</button>
               <button type="button" class="btn btn-secondary" id="abort_psw">Annuler</button>
