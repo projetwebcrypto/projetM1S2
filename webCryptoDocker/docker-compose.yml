@@ -10,17 +10,9 @@ services:
     ports:
     - 2:12345
     volumes:
-    # - /home/docker/:/usr/local/monCoffre
     - /home/docker/account:/usr/local/monCoffre/account
 
-  # certificat:
-  #   build:
-  #     context: ../webCryptoCertificat
-  #     dockerfile: ../webCryptoDocker/DockerfileCertificat
-  #   container_name: Certificat
-  #   volumes:
-  #     - /home/docker/certificats:/usr/local/monCoffre/certificats
-  #     - certifok:/usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/security/cacerts
+
   certificat:
     build:
       context: ../webCryptoCertificat
@@ -38,8 +30,6 @@ services:
     # - "8080:8080"
     volumes_from:
     - sqlite:rw
-    # volumes:
-    # - /home/docker/fghj:/usr/local/jetty/etc
     stdin_open: True
     tty: True
     depends_on:
@@ -61,10 +51,41 @@ services:
     tty: True
     depends_on:
       - serveur
-      - certificat
+#      - certificat
     links:
       - "serveur:app"
 
 
+  authentification:
+    image: jboss/keycloak
+    container_name: Keycloak
+#    command:
+    depends_on:
+      - postgres_auth
+    #
+    # A enelever pour le https
+    #
+    ports:
+      - "8081:8080"
+    networks:
+      - keycloak-network
+
+
+
+  postgres_auth:
+    image: postgres:11.3
+    container_name: Postgres_auth
+    ports:
+      - "5432:5432"
+    volumes:
+      - volumeAuthentifie:/var/lib/postgresql/data
+    networks:
+      - keycloak-network
+
 volumes:
   certifok:
+  volumeAuthentifie:
+
+networks:
+  keycloak-network:
+    driver: bridge
