@@ -13,6 +13,8 @@ var db;
 var store;
 var cryptogrammeComplet = "";
 var currentPassword = "azerty";
+var urlc = "https://192.168.99.100:443/moncoffre";
+
 // Sale :
 var testlogin = "";
 var testpassword = "";
@@ -159,7 +161,6 @@ $(document).ready(function(){
   // Fonction qui ajoute un triplet a la base de donnees
   function addTriplet(webs, crypt){
     var tuple = {"Website":webs, "crypto":crypt};
-    console.log(tuple);
     var store = getObjectStore("Triplet", "readwrite");
     var req;
     try {
@@ -223,29 +224,27 @@ $(document).ready(function(){
         65;
   };
 
-  // // Fonction d'encodage array en Base64
-  // function base64EncArr(aBytes){
-  //   var eqLen = (3 - (aBytes.length % 3)) % 3, sB64Enc = "";
-  //   console.log("base64EncArr");
-  //   console.log(eqLen);
-  //   console.log(aBytes);
-  //   for (var nMod3, nLen = aBytes.length, nUint24 = 0, nIdx = 0; nIdx < nLen; nIdx++) {
-  //     nMod3 = nIdx % 3;
-  //     /* Uncomment the following line in order to split the output in lines 76-character long: */
-  //     /*
-  //     if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) { sB64Enc += "\r\n"; }
-  //     */
-  //     nUint24 |= aBytes[nIdx] << (16 >>> nMod3 & 24);
-  //     if (nMod3 === 2 || aBytes.length - nIdx === 1) {
-  //       sB64Enc += String.fromCharCode(uint6ToB64(nUint24 >>> 18 & 63), uint6ToB64(nUint24 >>> 12 & 63), uint6ToB64(nUint24 >>> 6 & 63), uint6ToB64(nUint24 & 63));
-  //       nUint24 = 0;
-  //     }
-  //   }
-  //   return  eqLen === 0 ?
-  //       sB64Enc
-  //     :
-  //       sB64Enc.substring(0, sB64Enc.length - eqLen) + (eqLen === 1 ? "=" : "==");
-  // }
+  // Fonction d'encodage array en Base64
+  function base64EncArr(aBytes){
+    var eqLen = (3 - (aBytes.length % 3)) % 3, sB64Enc = "";
+
+    for (var nMod3, nLen = aBytes.length, nUint24 = 0, nIdx = 0; nIdx < nLen; nIdx++) {
+      nMod3 = nIdx % 3;
+      /* Uncomment the following line in order to split the output in lines 76-character long: */
+      /*
+      if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) { sB64Enc += "\r\n"; }
+      */
+      nUint24 |= aBytes[nIdx] << (16 >>> nMod3 & 24);
+      if (nMod3 === 2 || aBytes.length - nIdx === 1) {
+        sB64Enc += String.fromCharCode(uint6ToB64(nUint24 >>> 18 & 63), uint6ToB64(nUint24 >>> 12 & 63), uint6ToB64(nUint24 >>> 6 & 63), uint6ToB64(nUint24 & 63));
+        nUint24 = 0;
+      }
+    }
+    return  eqLen === 0 ?
+        sB64Enc
+      :
+        sB64Enc.substring(0, sB64Enc.length - eqLen) + (eqLen === 1 ? "=" : "==");
+  }
 
   // Fonction qui decode un tableau d'octets depuis une chaine en Base64
   function b64ToUint6(nChr) {
@@ -292,6 +291,14 @@ $(document).ready(function(){
     };
   };
 
+  // Fonction de traitement de la base de donnees avant envoie serveur
+  function encodeB64(myobj){
+    for (var i=0; i<myobj.length; i++){
+      myobj[i].crypto = base64EncArr(myobj[i].crypto);
+    }
+    return(myobj);
+  };
+
   // Fonction de traitement de la base de donnees pour un affichage sur le client html
   function addTable(myobj){
     // Effacement d'eventuels affichage precedents
@@ -304,7 +311,7 @@ $(document).ready(function(){
       var tableau = '<table class="table"><thead><tr><th scope="col">#</th>';
       tableau += '<th scope="col">Site</th>';//<th scope="col">Crypto</th>';
       // tableau += '<th score="col">Modifier</th><th score="col">Supprimer</th></tr></thead>';
-      for (var i=0; i<myobj.length; i++){
+      for (var i=1; i<myobj.length; i++){
         tableau += '<tbody><tr><th scope="row">' + i + '</th><td>';
         tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">' + myobj[i].Website + '</td>';
         //tableau += '<td id="crypto">' + myobj[i].crypto + '</td>';
@@ -387,8 +394,6 @@ $(document).ready(function(){
 
   // Fonction de dechiffrement des identifiants
   async function decryptAES128(website, currentPassword, fonction){
-    console.log("decrypt");
-    console.log(website);
     var store =  getObjectStore("Triplet", "readonly");
     var objectStoreRequest = store.get(website);
     objectStoreRequest.onsuccess = function() {
@@ -398,13 +403,10 @@ $(document).ready(function(){
         // On extrait les infos du cryptogramme complet
         // Taille du sel 16
         let ivChiffre = cryptogrammeComplet.slice(0, 32);
-        // console.log(ivChiffre);
         // Taille du ivChiffre 32
         let sel = cryptogrammeComplet.slice(32, 48);
-        // console.log(sel);
         // Taille du chiffre le reste
         let chiffre = cryptogrammeComplet.slice(48);
-        // console.log(chiffre);
         // Generation du IV a 0 pour faire du ECB en CBC
         let ivZero = new Uint8Array(16);
         var mdp = convertStringToByteArray(currentPassword);
@@ -487,6 +489,36 @@ $(document).ready(function(){
     readTriplet();
   });
 
+  // Envoie de la base de donnée sur serveur
+  $("#upload").click(function(){
+    var store = getObjectStore("Triplet", "readonly");
+    var getdatas = store.getAll();
+    var conf = "true";
+    getdatas.onsuccess = function(){
+      if (getdatas.result != 0){
+        var tmp = encodeB64(getdatas.result);
+
+        data = {"login":"log","bd":"passwords","triplets": tmp};
+        // var urlc = "https://192.168.99.100:8080/moncoffre";
+        $.ajax({
+          type:"POST",
+          url:urlc + "/",
+          data:JSON.stringify(data),
+          dataType:"text",
+          contentType:"application/json",
+          // accepts: "*/*",
+          success:function(json,status){
+            alert("Envoie réussie");
+          },
+          error:function(data,status){
+            alert("Echec de l'envoie");
+            console.log("error POST"+data+" status :  "+status);
+          }
+        });
+      }
+    }
+  });
+
   // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
   $("#DL").click(function(){
     var store = getObjectStore("Triplet", "readonly");
@@ -499,8 +531,7 @@ $(document).ready(function(){
       if (conf){
         deleteData();
         data = {"login":"log","bd":"passwords"};
-        // var urlc = "https://192.168.99.100:8080/moncoffre";
-        var urlc = "https://192.168.99.100:443/moncoffre";
+
         $.ajax({
           type:"POST",
           url:urlc + "/login",
@@ -512,8 +543,10 @@ $(document).ready(function(){
             // variable de stockage ( liste de données post traitement)
             // variable stockage d'un triplet
             var myobj = JSON.parse(json);
+            console.log("requeste ajax")
+            console.log(myobj);
             if (myobj.triplets.length > 0){
-              for (var i=1; i<myobj.triplets.length; i++){
+              for (var i=0; i<myobj.triplets.length; i++){
                 addTriplet(myobj.triplets[i].site, base64DecToArr(myobj.triplets[i].crypto));
               };
             };
@@ -535,7 +568,6 @@ $(document).ready(function(){
 
     var array = [login.length];
     var message = (login+password).split("").map(ascii);
-    console.log(website);
     encryptAES128(Uint8Array.from(array.concat(message)), currentPassword, addTriplet, website);
     $("#add-buttons").hide();
   });
@@ -566,7 +598,6 @@ $(document).ready(function(){
     var message = (login+password).split("").map(ascii);
     // var identifiants = (login.length + login+password).split("").map(ascii)
     // message = Uint8Array.from(identifiants);//
-    console.log(website);
     encryptAES128(Uint8Array.from(taille.concat(message)), currentPassword, modTriplet, website);
     $("#mod-buttons").hide();
     testlogin = testpassword = "";
