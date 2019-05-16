@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+    <Get name="securityHandler">
+        <Set name="authenticator">
+            <New class="org.keycloak.adapters.jetty.KeycloakJettyAuthenticator">
+                <Set name="adapterConfig">
+                    <New class="org.keycloak.representations.adapters.config.AdapterConfig">
+                        <Set name="realm">MiddleEarth</Set>
+                        <Set name="resource">customer-portal</Set>
+                        <Set name="authServerUrl">http://serv:8080/auth</Set>
+                        <Set name="sslRequired">external</Set>
+                        <Set name="credentials">
+                            <Map>
+                                <Entry>
+                                    <Item>secret</Item>
+                                    <Item>password</Item>
+                                </Entry>
+                            </Map>
+                        </Set>
+                    </New>
+                </Set>
+            </New>
+        </Set>
+    </Get>
+</Configure>

@@ -18,10 +18,7 @@ FROM jetty:9.4
 
 COPY --from=build /myapp/target/*-withdependencies.war /var/lib/jetty/webapps/server.war
 
-# RUN mkdir -p /etc/keystore
-# RUN mkdir -p /etc/truststore
-# ADD config/ /usr/local/jetty/start.d/
-# ADD xml/jetty-bytebufferpool.xml /usr/local/jetty/etc/jetty-bytebufferpool.xml
+ADD mod/keycloak.mod /usr/local/jetty/modules/
+ADD mod/keycloak.ini /var/lib/jetty/start.d/
 
-# RUN java -jar "$JETTY_HOME/start.jar" #--add-to-startd=https
 CMD ["java", "-jar", "/usr/local/jetty/start.jar"]

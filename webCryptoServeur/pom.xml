@@ -30,6 +30,20 @@
 
     <dependencies>
 
+        <!--<dependency>-->
+            <!--<groupId>org.keycloak</groupId>-->
+            <!--<artifactId>keycloak-dependencies-server-all</artifactId>-->
+            <!--<version>6.0.1</version>-->
+            <!--<type>pom</type>-->
+        <!--</dependency>-->
+
+        <!--<dependency>-->
+            <!--<groupId>org.keycloak</groupId>-->
+            <!--<artifactId>keycloak-core</artifactId>-->
+            <!--<version>6.0.1</version>-->
+        <!--</dependency>-->
+
+
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlets</artifactId>
@@ -42,12 +56,6 @@
             <artifactId>jersey-container-servlet-core</artifactId>
             <!-- use the following artifactId if you don't need servlet 2.x compatibility -->
             <!-- artifactId>jersey-container-servlet</artifactId -->
-        </dependency>
-
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20180813</version>
         </dependency>
 
         <dependency>
