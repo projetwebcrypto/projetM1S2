@@ -90,14 +90,21 @@ services:
   keycloak_dependency:
     build:
       context: .
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
       dockerfile: DockerfileKeycloakDependency
     container_name: Keycloak_dependency
+#    env_file:
+#      - proxy.env
     volumes:
-      - keycloakDependency:/keycloak
+      - keycloakDependency:/keycloak/lib/keycloak/
 
 volumes:
   certifok:
   volumeAuthentifie:
+  keycloakDependency:
 
 networks:
   keycloak-network:
