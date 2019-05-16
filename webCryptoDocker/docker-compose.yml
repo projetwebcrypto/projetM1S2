@@ -28,6 +28,9 @@ services:
     container_name: Serveur
     # ports:
     # - "8080:8080"
+    volumes:
+      - /home/docker/keycloak/:/opt/
+      - keycloakDependency:/usr/local/jetty/lib/keycloak/
     volumes_from:
     - sqlite:rw
     stdin_open: True
@@ -81,6 +84,16 @@ services:
       - volumeAuthentifie:/var/lib/postgresql/data
     networks:
       - keycloak-network
+
+
+
+  keycloak_dependency:
+    build:
+      context: .
+      dockerfile: DockerfileKeycloakDependency
+    container_name: Keycloak_dependency
+    volumes:
+      - keycloakDependency:/keycloak
 
 volumes:
   certifok:
