@@ -29,7 +29,7 @@ services:
     # ports:
     # - "8080:8080"
     volumes:
-      - /home/docker/keycloak/:/opt/
+      # - /home/docker/keycloak/:/opt/
       - keycloakDependency:/usr/local/jetty/lib/keycloak/
     volumes_from:
     - sqlite:rw
@@ -40,6 +40,7 @@ services:
     # - certificat
     links:
     - "sqlite:sqlite"
+    - "authentification:serv"
 
   reverse_proxy:
     image: nginx:1.15
@@ -49,7 +50,7 @@ services:
       - "443:443"
     volumes:
       - certifok:/etc/nginx/certif/
-      - /home/docker/config/:/etc/nginx/conf.d/
+      # - /home/docker/config/:/etc/nginx/conf.d/
     stdin_open: True
     tty: True
     depends_on:
@@ -66,7 +67,7 @@ services:
     depends_on:
       - postgres_auth
     #
-    # A enelever pour le https
+    # A enlever pour le https
     #
     ports:
       - "8081:8080"

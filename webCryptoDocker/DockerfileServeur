@@ -18,6 +18,7 @@ FROM jetty:9.4
 
 COPY --from=build /myapp/target/*-withdependencies.war /var/lib/jetty/webapps/server.war
 
+ADD config/default.conf /etc/nginx/conf.d/
 ADD mod/keycloak.mod /usr/local/jetty/modules/
 ADD mod/keycloak.ini /var/lib/jetty/start.d/
 

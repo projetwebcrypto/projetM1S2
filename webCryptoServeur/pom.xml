@@ -31,18 +31,59 @@
     <dependencies>
 
         <!--<dependency>-->
-            <!--<groupId>org.keycloak</groupId>-->
-            <!--<artifactId>keycloak-dependencies-server-all</artifactId>-->
-            <!--<version>6.0.1</version>-->
-            <!--<type>pom</type>-->
+            <!--<groupId>org.apache.httpcomponents</groupId>-->
+            <!--<artifactId>httpclient</artifactId>-->
+            <!--<version>4.5.4</version>-->
         <!--</dependency>-->
+
+        <!--<dependency>-->
+            <!--<groupId>org.apache.httpcomponents</groupId>-->
+            <!--<artifactId>httpcore</artifactId>-->
+            <!--<version>4.4.5</version>-->
+        <!--</dependency>-->
+
+        <!--<dependency>-->
+            <!--<groupId>org.keycloak</groupId>-->
+            <!--<artifactId>keycloak-jetty-adapter-spi</artifactId>-->
+            <!--<version>6.0.1</version>-->
+        <!--</dependency>-->
+
+        <!--<dependency>-->
+            <!--<groupId>org.keycloak</groupId>-->
+            <!--<artifactId>keycloak-jetty94-adapter</artifactId>-->
+            <!--<version>6.0.1</version>-->
+        <!--</dependency>-->
+
+        <!--<dependency>-->
+            <!--<groupId>org.keycloak</groupId>-->
+            <!--<artifactId>keycloak-jetty-core</artifactId>-->
+            <!--<version>6.0.1</version>-->
+        <!--</dependency>-->
+
+        <!--<dependency>-->
+            <!--<groupId>org.keycloak</groupId>-->
+            <!--<artifactId>keycloak-common</artifactId>-->
+            <!--<version>6.0.1</version>-->
+        <!--</dependency>-->
+
+        <!--<dependency>-->
+            <!--<groupId>org.keycloak</groupId>-->
+            <!--<artifactId>keycloak-adapter-spi</artifactId>-->
+            <!--<version>6.0.1</version>-->
+        <!--</dependency>-->
+
+        <!--<dependency>-->
+            <!--<groupId>org.keycloak</groupId>-->
+            <!--<artifactId>keycloak-adapter-core</artifactId>-->
+            <!--<version>6.0.1</version>-->
+        <!--</dependency>-->
+
 
         <!--<dependency>-->
             <!--<groupId>org.keycloak</groupId>-->
             <!--<artifactId>keycloak-core</artifactId>-->
             <!--<version>6.0.1</version>-->
         <!--</dependency>-->
-
 
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
