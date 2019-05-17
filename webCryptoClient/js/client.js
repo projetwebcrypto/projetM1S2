@@ -13,6 +13,7 @@ var db;
 var store;
 var cryptogrammeComplet = "";
 var currentPassword = "azerty";
+// var val = false;
 // Sale :
 // var testlogin = "";
 // var testpassword = "";
@@ -84,7 +85,7 @@ function createDb(){
   // Fonction lancee a l'appel une fois lancee
   request.onupgradeneeded = function(event){
     store = event.currentTarget.result.createObjectStore("Triplet", {keyPath: "Website"});
-    store.createInde"Website", "Website", { unique: true, multiEntry: true});
+    store.createIndex("Website", "Website", { unique: true, multiEntry: true});
   };
 };
 
@@ -162,26 +163,16 @@ $(document).ready(function(){
     };
   };
 
-function decoupage(clair){
-  messageClair = convertByteArrayToString(clair);
-  tailleLogin = new Uint8Array(clair)[0];
-  testpassword = messageClair.slice( tailleLogin + 1);
-  testlogin = messageClair.slice(1, tailleLogin + 1);
-  return([testlogin, testpassword])
-}
   // Fonction qui mets en placeholder du champ "modifier login" le login actuel
-  function placement(clair, website){
-    var id = decoupage(clair);
-    console.log(website);
-    document.getElementById("mod-Login").placeholder = id[0];
+  function placement(testlogin, testpassword, website){
+    document.getElementById("mod-Login").placeholder = testlogin;
     document.getElementById("mod-Website").innerHTML = website;
   }
 
   // Fonction qui affiche le login et le mdp en clair du site demande.
-  function afficheClair(clair, website){
-    var id = decoupage(clair);
-    alert("Identifiant :" + id[0] + "\n" + "mdp :" + id[1]);
-}
+  function afficheClair(testlogin, testpassword, website){
+    alert("Identifiant :" + testlogin + "\n" + "mdp :" + testpassword);
+  }
 
   // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
   function reset_add(){
@@ -236,7 +227,6 @@ function decoupage(clair){
   function modTriplet(webs, crypt){
     var tuple = {"Website":webs, "crypto":crypt};
     var store = getObjectStore("Triplet", "readwrite");
-    console.log(tuple);
     var req;
     try {
       req = store.put(tuple);
@@ -375,9 +365,12 @@ function decoupage(clair){
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
   // Fonction de chiffrement des identifiants
-  function encryptAES128(word, passwords, fonction, website){
-    var mdp = passwords;
-    console.log(mdp);
+  function encryptAES128(testlogin, testpassword, website, newmstrpsw, myobj, fonction){
+    var message = (testlogin+testpassword).split("").map(ascii);
+    var taille = [testlogin.length];
+    var word = Uint8Array.from(taille.concat(message));
+
+    var mdp = currentPassword;
     sel = new Uint8Array(16);
     window.crypto.getRandomValues(sel);
     // Recuperation du mdp en tant que cle
@@ -418,6 +411,7 @@ function decoupage(clair){
             cryptogrammeComplet = convertByteArrayToString(ivChiffre);
             cryptogrammeComplet += convertByteArrayToString(sel.buffer) + convertByteArrayToString(chiffre);
             cryptogrammeComplet = convertStringToByteArray(cryptogrammeComplet);
+            console.log("login : " + testlogin + " et password : " + testpassword + " et website : " + website);
             fonction(website, cryptogrammeComplet);
           })
         })
@@ -426,7 +420,7 @@ function decoupage(clair){
   };
 
   // Fonction de dechiffrement des identifiants
-  function decryptAES128(website, currentPassword, fonction, newmstrpsw){
+  function decryptAES128(website, currentPassword, fonction, newmstrpsw, myobj, fctn){
     var store =  getObjectStore("Triplet", "readonly");
     var objectStoreRequest = store.get(website);
     objectStoreRequest.onsuccess = function() {
@@ -473,10 +467,12 @@ function decoupage(clair){
                   key,
                   chiffre);
                 promiseClair.then(function(clair){
-                  fonction(clair, website, newmstrpsw);
-                  passwordCourant = "";
-                  // testlogin = "";
-                  // testpassword = "";
+                //   messageClair = convertByteArrayToString(clair);
+                //   tailleLogin = new Uint8Array(clair)[0];
+                //   testpassword = messageClair.slice( tailleLogin + 1);
+                //   testlogin = messageClair.slice(1, tailleLogin + 1);
+                //   console.log("login : " + testlogin + " et password : " + testpassword);
+                  traitement(clair, currentPassword, website, newmstrpsw, myobj, fonction, fctn);
                 })
               })
             })
@@ -486,48 +482,60 @@ function decoupage(clair){
     }
   };
 
-function reEncryptAES(clair, website, newmstrpsw){
-  var id = decoupage(clair);// tableau string [login, pwd]
-  var array = [id[0].length];
-  var message = (id[0]+id[1]).split("").map(ascii);
-  console.log("id[0] : " + id[0]);
-  console.log("id[1] : " + id[1]);
-  console.log(website);
-  console.log(Uint8Array.from(array.concat(message)));
-  console.log(newmstrpsw);
-  encryptAES128(Uint8Array.from(array.concat(message)), newmstrpsw, modTriplet, website);
-};
+  function traitement(clair, currentPassword, website, newmstrpsw, myobj, fonction, fctn){
+    messageClair = convertByteArrayToString(clair);
+    tailleLogin = new Uint8Array(clair)[0];
+    testpassword = messageClair.slice( tailleLogin + 1);
+    testlogin = messageClair.slice(1, tailleLogin + 1);
+    fonction(testlogin, testpassword, website, newmstrpsw, myobj, fctn);
+  };
 
-  function checkTest(clair, website, newmstrpsw){
-    toverify = new Uint8Array(clair)
-    console.log("clair")
-    console.log(newmstrpsw)
-    var val = new Uint8Array([0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
-    if (val.length == toverify.length){
-      for (var i=0; i<val.length; i++){
-        if (val[i] != toverify[i]){
-          alert("Ancien Mot de passe erroné.");
-          return false;
-        };
-      };
-      var store = getObjectStore("Triplet", "readwrite");
-      var getdatas = store.getAll();
-      getdatas.onsuccess = function(){
-        let myobj = getdatas.result;
-        console.log(myobj)
-        for (var i=0; i<myobj.length; i++){
-          console.log('in checktest');
-          console.log(newmstrpsw);
-          decryptAES128( myobj[i].Website, currentPassword, reEncryptAES, newmstrpsw);
-        }
-        currentPassword = newmstrpsw;
-        $("#psw-buttons").hide();
-        reset_psw();
-        readTriplet();
-      }
+  // Fonction de changement de base de donnee locale avec le nouveau mot de passe maitre
+  function modMstrPsw(testlogin, toverify, website, newmstrpsw, myobj){
+    if (myobj[0].Website == "0________"){
+      decryptAES128(myobj[0].Website, currentPassword, checkTest, newmstrpsw, myobj);
     }
-    else{
-      alert("Ancien Mot de passe erroné.");
+  };
+
+  function checkTest(testlogin, testpassword, website, newmstrpsw, myobj, tailleLogin){
+    var verif = new Uint8Array([0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
+    byteLogin = new Uint8Array(convertStringToByteArray(testlogin));
+    console.log(verif + " et " + byteLogin);
+    var val = false;
+    if (verif.length == (byteLogin.length) + 1){
+      var tentative = promCheckModPsw(verif, byteLogin, newmstrpsw, myobj);
+      tentative.then(effectiveChangeMstrPsw(true, newmstrpsw, myobj));
+    }
+  };
+
+  function promCheckModPsw(verif, byteLogin, newmstrpsw, myobj){
+    return new Promise((resolve) => {
+      console.log(verif + " et " + byteLogin);
+      if (verif[0] == tailleLogin){
+        for (var i=1; i<verif.length; i++){
+          if (verif[i] != byteLogin[i-1]){
+            alert("Ancien Mot de passe erroné1.");
+            resolve(false);
+          };
+        };
+        resolve(true, newmstrpsw, myobj);
+      }
+      else{
+        alert("Ancien Mot de passe erroné2.");
+        resolve(false);
+      }
+    });
+  };
+
+  function effectiveChangeMstrPsw(booleanVal, newmstrpsw, myobj){
+    if (booleanVal){
+      for (var i=0; i<myobj.length; i++){
+        decryptAES128(myobj[i].Website, currentPassword, encryptAES128, newmstrpsw, myobj, modTriplet);
+      }
+      $("#psw-buttons").hide();
+      reset_psw();
+      readTriplet();
+      currentPassword = newmstrpsw;
     }
   };
 
@@ -576,7 +584,7 @@ function reEncryptAES(clair, website, newmstrpsw){
       if (conf){
         data = {"login":"log","bd":"passwords"};
         var urlc = "https://192.168.99.100:443/moncoffre";
-        $.aja{
+        $.ajax({
           type:"POST",
           url:urlc + "/login",
           data:JSON.stringify(data),
@@ -615,14 +623,11 @@ function reEncryptAES(clair, website, newmstrpsw){
     getdatas.onsuccess = function(){
       var myobj = getdatas.result;
       if (myobj.length > 0){
-        decryptAES128(myobj[0].Website, oldmstrpsw, checkTest, newmstrpsw);
-      };
-    }
-    getdatas.onerror = function(event){
-      alert("Erreur changpsw:" + event.target.errorCode);
-    };
-    getdatas.onabort = function(event){
-      alert("Abort changpsw:" + event.target.errorCode);
+        var transaction = db.transaction(["Triplet"], "readwrite");
+        transaction.oncomplete = function(event){
+          decryptAES128(myobj[0].Website, oldmstrpsw, modMstrPsw, newmstrpsw, myobj);
+        };
+      }
     };
   });
 
@@ -637,9 +642,9 @@ function reEncryptAES(clair, website, newmstrpsw){
     var login = document.getElementById("Login").value;
     var password = document.getElementById("Password").value;
 
-    var array = [login.length];
+    var taille = [login.length];
     var message = (login+password).split("").map(ascii);
-    encryptAES128(Uint8Array.from(array.concat(message)), currentPassword, addTriplet, website);
+    encryptAES128(login, password, website, undefined, undefined, addTriplet);
     $("#add-buttons").hide();
   });
 
@@ -674,16 +679,17 @@ function reEncryptAES(clair, website, newmstrpsw){
     var password = document.getElementById("mod-Password").value;
     var taille = [login.length];
     var message = (login+password).split("").map(ascii);
-    console.log(website)
-    encryptAES128(Uint8Array.from(taille.concat(message)), currentPassword, modTriplet, website);
+    testlogin, testpassword, website, newmstrpsw, myobj, tailleLogin, fonction
+    encryptAES128(login, password, website, undefined, undefined, modTriplet);
     $("#mod-buttons").hide();
-    // testlogin = testpassword = "";
+    testlogin = testpassword = "";
   });
 
   // Initialisation d'interactions avec les champs site
   $("body").on("click", "#website", function(){
     var website = $(this).text();
     decryptAES128(website, currentPassword, afficheClair);
+
   });
 
   // Initialisation d'interactions avec les images "Modifier"
@@ -691,7 +697,6 @@ function reEncryptAES(clair, website, newmstrpsw){
     $("#mod-buttons").show();
     document.getElementById("add_tuple").disabled = true;
     var website = $(this).attr("name");
-    console.log(website);
     decryptAES128(website, currentPassword, placement);
     reset_mod();
   });
