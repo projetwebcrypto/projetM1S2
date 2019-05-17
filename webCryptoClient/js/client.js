@@ -498,16 +498,17 @@ $(document).ready(function(){
       if (getdatas.result != 0){
         var tmp = encodeB64(getdatas.result);
 
-        data = {"login":"log","bd":"passwords","triplets": tmp};
+        data = {"login":"log2","bd":"2passwords","triplets": tmp};
         // var urlc = "https://192.168.99.100:8080/moncoffre";
         $.ajax({
           type:"POST",
-          url:urlc + "/",
+          url:urlc + "/test",
           data:JSON.stringify(data),
           dataType:"text",
           contentType:"application/json",
           // accepts: "*/*",
           success:function(json,status){
+            console.log(json);
             alert("Envoie réussie");
           },
           error:function(data,status){
@@ -543,8 +544,6 @@ $(document).ready(function(){
             // variable de stockage ( liste de données post traitement)
             // variable stockage d'un triplet
             var myobj = JSON.parse(json);
-            console.log("requeste ajax")
-            console.log(myobj);
             if (myobj.triplets.length > 0){
               for (var i=0; i<myobj.triplets.length; i++){
                 addTriplet(myobj.triplets[i].site, base64DecToArr(myobj.triplets[i].crypto));

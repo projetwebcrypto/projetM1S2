@@ -50,6 +50,21 @@ public class FileManagment{
 
     }
 
+    // Remplit la bd
+    public boolean fillFile(String login, String fileName, Object site, Object crypto) {
+        conn = new Connect();
+        conn.connexion(path, login + "/", fileName + ".db.sc");
+        PreparedStatement pstmt;
+        try {
+            String req = "INSERT INTO PASSWORDS VALUE " + "(site" + "crypto);";
+            pstmt = conn.getConn().prepareStatement(req);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
 
     // Creer le schema de la bd dans le fichier vide
     public boolean initSchemaEmptyFile(String login, String fileName) {
