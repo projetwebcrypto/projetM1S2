@@ -43,7 +43,9 @@ services:
     - "authentification:serv"
 
   reverse_proxy:
-    image: nginx:1.15
+    build:
+      context: ../webCryptoServeur/
+      dockerfile: ../webCryptoDocker/DockerfileNGINX
     container_name: RevProxy
     ports:
       - "80:80"
@@ -58,6 +60,7 @@ services:
 #      - certificat
     links:
       - "serveur:app"
+      - "authentification:authent"
 
 
   authentification:
