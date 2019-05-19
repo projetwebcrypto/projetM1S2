@@ -9,13 +9,15 @@
                         <Set name="realm">jettytest</Set>
                         <Set name="resource">customer-portal</Set>
                         <Set name="authServerUrl">http://serv:8080/auth</Set>
-                        <Set name="sslRequired">none</Set>
-                        <!--<Set name="bearer-only">true</Set>-->
+<!--                        <Set name="url">http://serv:8080/auth</Set>-->
+                        <Set name="sslRequired">external</Set>
+                        <Set name="bearer-only">true</Set>
+                        <Set name="enable-cors">true</Set>
                         <Set name="credentials">
                             <Map>
                                 <Entry>
-                                    <Item>secret</Item>
-                                    <Item>password</Item>
+                                    <Item>a completer</Item>
+                                    <Item></Item>
                                 </Entry>
                             </Map>
                         </Set>
