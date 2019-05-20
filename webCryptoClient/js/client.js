@@ -745,6 +745,30 @@ $(document).ready(function(){
     }
   });
 
+  // Initialisation du lien "Lister les sites" qui recupere les noms de base de donnees situee sur le serveur
+  $("#PAS").click(function(){
+        data = {"login":"log"};
+        var urlc = "https://192.168.99.100:443/moncoffre";
+        $.ajax({
+          type:"POST",
+          url:urlc + "/Lister",
+          data:JSON.stringify(data),
+          dataType:"text",
+          contentType:"application/json",
+          success:function(json,status){
+            // {bd : ["bd1, bd3 , .., bdn"]}
+            var myobj = JSON.parse(json);
+            if (myobj.bd.length > 0){
+              for (var i=0; i<myobj.bd.length; i++){
+                //fonction(myobj.bd[i]);
+              };
+            };
+            readTriplet();
+          },
+          error:function(data,status){console.log("error POST"+data+" status :  "+status);}
+        });
+    });
+
   // Initialisation des champs d'entrees de "changer le mot de passe Maître" (champ mot de passe)
   $("#PasswordChange").click(function(){
     $("#psw-buttons").show();
