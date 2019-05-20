@@ -162,6 +162,7 @@ $(document).ready(function(){
   // Fonction qui mets en placeholder du champ "modifier login" le login actuel
   function placement(testlogin, testpassword, website){
     document.getElementById("mod-Login").value = testlogin;
+    document.getElementById("mod-Login").placeholder = testlogin;
     document.getElementById("mod-Website").innerHTML = website;
     document.getElementById("new-Website").value = website;
   }
@@ -340,12 +341,10 @@ $(document).ready(function(){
     else{
       // Initialisation des champs du tableau
       var tableau = '<table class="table"><thead><tr><th scope="col">#</th>';
-      tableau += '<th scope="col">Site</th>';// <th scope="col">Crypto</th>';
-      // tableau += '<th score="col">Modifier</th><th score="col">Supprimer</th></tr></thead>';
+      tableau += '<th scope="col">Site</th>';
       for (var i=1; i<myobj.length; i++){
         tableau += '<tbody><tr><th scope="row">' + i + '</th><td>';
         tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">' + myobj[i].Website + '</td>';
-        // tableau += '<td id="crypto">' + myobj[i].crypto + '</td>';
         tableau += '<td><a href="#"><img src="js/jquery-ui/images/modifier.png" id="edit" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></a></td>';
         tableau += '<td><img src="js/jquery-ui/images/effacer.png" id="deleteTrip" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></td></tr>';
       }
@@ -729,7 +728,6 @@ $(document).ready(function(){
           data:JSON.stringify(data),
           dataType:"text",
           contentType:"application/json",
-          // accepts: "*/*",
           success:function(json,status){
             // variable de stockage ( liste de données post traitement)
             // variable stockage d'un triplet
