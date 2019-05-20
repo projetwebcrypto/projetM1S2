@@ -11,12 +11,12 @@
                         <Set name="authServerUrl">http://serv:8080/auth</Set>
 <!--                        <Set name="url">http://serv:8080/auth</Set>-->
                         <Set name="sslRequired">external</Set>
-                        <Set name="bearer-only">true</Set>
-                        <Set name="enable-cors">true</Set>
+                        <Set name="bearerOnly">true</Set>
+                        <!--<Set name="enableCors">true</Set>-->
                         <Set name="credentials">
                             <Map>
                                 <Entry>
-                                    <Item>a completer</Item>
+                                    <Item>cac4d010-11ed-4b4f-a87d-6727af2b5131</Item>
                                     <Item></Item>
                                 </Entry>
                             </Map>

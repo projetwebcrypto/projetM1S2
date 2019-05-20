@@ -7,9 +7,9 @@
           <script src="keycloak-js-adapter-dist-6.0.1/keycloak.js" type="text/javascript"></script>
       </head>
       <body bgcolor="#E3F6CE">
-      
+
       <p>Goto: <a href="/product-portal">products</a> | <a href="#" onclick="keycloak.logout()">logout</a> | <a href="#" onclick="keycloak.accountManagement()">manage acct</a></p>
-      
+
       User <b id="subject"></b> made this request.
       <p><b>User details (from <span id="profileType"></span>)</b></p>
       <p>Username: <span id="username"></span></p>
@@ -17,10 +17,10 @@
       <p>Full Name: <span id="name"></span></p>
       <p>First: <span id="givenName"></span></p>
       <p>Last: <span id="familyName"></span></p>
-      
+
       <h2>Customer Listing</h2>
       <div id="customers"></div>
-      
+
       <script>
           var keycloak = Keycloak({
   "realm": "jettytest",
@@ -31,17 +31,17 @@
   "resource": "customer-portal",
   "verify-token-audience": true,
   "credentials": {
-    "secret": "9d93946b-fd95-4e7e-a2bb-050ab34a0684"
+    "secret": "cac4d010-11ed-4b4f-a87d-6727af2b5131"
   },
   "use-resource-role-mappings": true,
   "confidential-port": 0,
   "policy-enforcer": {},
   "enable-cors": true
 });
-      
+
           var loadData = function () {
               document.getElementById('subject').innerHTML = keycloak.subject;
-      
+
               if (keycloak.idToken) {
                   document.getElementById('profileType').innerHTML = 'IDToken';
                   document.getElementById('username').innerHTML = keycloak.idTokenParsed.preferred_username;
@@ -61,9 +61,9 @@
                       document.getElementById('profileType').innerHTML = 'Failed to retrieve user details. Please enable claims or account role';
                   });
               }
-      
+
               var urlc = 'https://192.168.99.100/moncoffre/login';
-      
+
               var req = new XMLHttpRequest();
               req.open('POST', urlc, true);
               req.setRequestHeader('Accept', 'application/json');
@@ -73,7 +73,7 @@
             //   req.setRequestHeader("Access-Control-Allow-Credentials", "true");
             //   req.setRequestHeader("Access-Control-Allow-Headers", "Authorization,Accept,Origin,Content-Type,Keep-Alive");
             //   req.setRequestHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE");
-      
+
               req.onreadystatechange = function () {
                   if (req.readyState == 4) {
                       if (req.status == 200) {
@@ -110,11 +110,11 @@
         //   error:function(data,status){console.log("error POST"+data+" status :  "+status);}
         // });
           };
-      
+
           var loadFailure = function () {
               document.getElementById('customers').innerHTML = '<b>Failed to load data.  Check console log</b>';
           };
-      
+
           var reloadData = function () {
               keycloak.updateToken(10)
                       .success(loadData)
@@ -122,17 +122,16 @@
                           document.getElementById('customers').innerHTML = '<b>Failed to load data.  User is logged out.</b>';
                       });
           }
-      
+
           keycloak.init({ onLoad: 'login-required' })
               .success(reloadData)
               .error(function(errorData) {
                   document.getElementById('customers').innerHTML = '<b>Failed to load data. Error: ' + JSON.stringify(errorData) + '</b>';
               });
-      
+
       </script>
-      
+
       <br><br>
       <button onclick="reloadData()">Reload data</button>
       </body>
       </html>
-      

@@ -1,3 +1,6 @@
 FROM nginx:1.15
 
 ADD config/default.conf /etc/nginx/conf.d/
+ADD js /etc/nginx/html/js
+ADD keycloak-js-adapter-dist-6.0.1 /etc/nginx/html/keycloak-js-adapter-dist-6.0.1
+ADD testBearer.html /etc/nginx/html/

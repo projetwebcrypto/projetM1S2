@@ -44,7 +44,7 @@ services:
 
   reverse_proxy:
     build:
-      context: ../webCryptoServeur/
+      context: ../webCryptoNGINX/
       dockerfile: ../webCryptoDocker/DockerfileNGINX
     container_name: RevProxy
     ports:
