@@ -12,12 +12,8 @@ if (!window.indexedDB){
 var db;
 var store;
 var cryptogrammeComplet = "";
-var currentPassword = "azerty";
-// var val = false;
-// Sale :
-// var testlogin = "";
-// var testpassword = "";
-
+var currentPassword = "";
+var liste = []
 var crypto = window.crypto;
 
 if(crypto.subtle){
@@ -101,7 +97,7 @@ function checkEmpty(){
 
 // Fonction qui vérifie si les champs de "modifier un triplet" sont vides
 function checkEmptyMod(){
-  if((document.getElementById("mod-Login").value!="") && (document.getElementById("mod-Password").value!="")){
+  if((document.getElementById("mod-Login").value!="") && (document.getElementById("mod-Password").value!="") && (document.getElementById("new-Website").value !="")){
     document.getElementById("mod_tuple").disabled = false;
   }
   else{
@@ -165,8 +161,9 @@ $(document).ready(function(){
 
   // Fonction qui mets en placeholder du champ "modifier login" le login actuel
   function placement(testlogin, testpassword, website){
-    document.getElementById("mod-Login").placeholder = testlogin;
+    document.getElementById("mod-Login").value = testlogin;
     document.getElementById("mod-Website").innerHTML = website;
+    document.getElementById("new-Website").value = website;
   }
 
   // Fonction qui affiche le login et le mdp en clair du site demande.
@@ -225,24 +222,28 @@ $(document).ready(function(){
 
   // Fonction qui ajoute un triplet a la base de donnees
   function modTriplet(webs, crypt){
+    var website = document.getElementById("new-Website").value;
+    if (website != webs){
+      var store = getObjectStore("Triplet", "readwrite");
+      store.delete(webs);
+      webs = website
+    }
     var tuple = {"Website":webs, "crypto":crypt};
     var store = getObjectStore("Triplet", "readwrite");
     var req;
     try {
       req = store.put(tuple);
-    } catch (e) {
-      console.log("Error In modTriplet : " + e);
-      throw e;
-    }
+      } catch (e) {
+        console.log("Error In modTriplet : " + e);
+        throw e;
+      }
     req.onsuccess = function (evt){
       readTriplet();
       console.log("Insertion in DB successful");
       reset_mod();
       return 0;
-      // displayActionSuccess();
-      // displayPubList(store);
+      };
     };
-  };
 
   // // Fonction qui decode une chaine en Base64 depuis un tableau d'octets
   // function uint6ToB64(nUint6) {
@@ -360,6 +361,43 @@ $(document).ready(function(){
     return conf;
   }
 
+  // Fonction qui garde la transaction ouverte pour rentrer tous les
+  // tuples en bdd en une seule fois
+  function put_record(data_array,objectStore,row_index){
+    if(row_index<data_array.length){
+      var req=objectStore.put(data_array[row_index]);
+      req.onsuccess=function(e){
+        row_index+=1;
+        put_record(data_array,objectStore,row_index);
+      };
+      req.onerror = function(){
+        console.error("error", this.error);
+        row_index+=1;
+        put_record(data_array,objectStore,row_index);
+      };
+    }
+    if(row_index == data_array.length){
+      liste = [];
+    }
+  };
+
+
+  // Fonction qui prend en parametre un site et son chiffre et les stocke dans une
+  // variable globale pour les rentrer en BDD plus tard.
+  function addListe(website, cryptogrammeComplet){
+    tuple = {"Website":website, "crypto":cryptogrammeComplet}
+    liste = liste.concat([tuple]);
+    var store = getObjectStore("Triplet", "readonly");
+    var countRequest = store.count();
+    countRequest.onsuccess = function() {
+      if( liste.length == countRequest.result){
+        store = getObjectStore("Triplet", "readwrite");
+        cpt = 0;
+        put_record(liste, store, cpt);
+      }
+    };
+  };
+
   /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   Fonctions de chiffrement - dechiffrement
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
@@ -369,7 +407,6 @@ $(document).ready(function(){
     var message = (testlogin+testpassword).split("").map(ascii);
     var taille = [testlogin.length];
     var word = Uint8Array.from(taille.concat(message));
-
     var mdp = currentPassword;
     sel = new Uint8Array(16);
     window.crypto.getRandomValues(sel);
@@ -411,7 +448,6 @@ $(document).ready(function(){
             cryptogrammeComplet = convertByteArrayToString(ivChiffre);
             cryptogrammeComplet += convertByteArrayToString(sel.buffer) + convertByteArrayToString(chiffre);
             cryptogrammeComplet = convertStringToByteArray(cryptogrammeComplet);
-            console.log("login : " + testlogin + " et password : " + testpassword + " et website : " + website);
             fonction(website, cryptogrammeComplet);
           })
         })
@@ -419,8 +455,112 @@ $(document).ready(function(){
     })
   };
 
+
+  // Fonction de dechiffrement avec oldmstrpsw et chiffrement avec newmstrpsw
+  function updateAES128(website, oldmstrpsw, fonction, newmstrpsw){
+    // récupération du store
+    var store =  getObjectStore("Triplet", "readonly");
+    // récupération du site
+    var objectStoreRequest = store.get(website);
+    objectStoreRequest.onsuccess = function() {
+      cryptogrammeComplet = objectStoreRequest.result.crypto;
+      if (cryptogrammeComplet.length != 0) {
+        // On extrait les infos du cryptogramme complet
+        let ivChiffre = cryptogrammeComplet.slice(0, 32);
+        let sel = cryptogrammeComplet.slice(32, 48);
+        let chiffre = cryptogrammeComplet.slice(48);
+
+        // Generation du IV a 0 pour faire du ECB en CBC
+        let ivZero = new Uint8Array(16);
+        var mdp = convertStringToByteArray(oldmstrpsw);
+        if (mdp.length != 0) {
+          // Recuperation du mdp en tant que cle
+          let promiseMat = crypto.subtle.importKey(
+            "raw",
+            mdp,
+            {name: "PBKDF2"},
+            false,
+            ["deriveKey"]
+            );
+          promiseMat.then(function(mat){
+            // Derivation de la cle
+            let promiseKey = crypto.subtle.deriveKey(
+              {"name":"PBKDF2", salt: sel, "iterations":10000, "hash":"SHA-1"},
+              mat,
+              {"name":"AES-CBC", length:128},
+              false,
+              ["decrypt"]
+              );
+            promiseKey.then(function(key){
+              // Dechiffrement de l'IV chiffre
+              let promiseIv = crypto.subtle.decrypt(
+                {name: "AES-CBC", iv: ivZero},
+                key,
+                ivChiffre);
+              promiseIv.then(function(ivClair){
+                // Dechiffrement du chiffre
+                let promiseClair = crypto.subtle.decrypt(
+                  {name: "AES-CBC", iv: ivClair},
+                  key,
+                  chiffre);
+                promiseClair.then(function(clair){
+                  var mdp = newmstrpsw;
+                  sel = new Uint8Array(16);
+                  window.crypto.getRandomValues(sel);
+                  // Recuperation du mdp en tant que cle
+                  let promiseMat = crypto.subtle.importKey(
+                    "raw",
+                    convertStringToByteArray(mdp),
+                    {name: "PBKDF2"},
+                    false,
+                    ["deriveKey"]
+                    );
+                  promiseMat.then(function(mat){
+                    // Derivation de la cle
+                    let promiseKey = crypto.subtle.deriveKey(
+                      {"name":"PBKDF2", salt: sel, "iterations":10000, "hash":"SHA-1"},
+                      mat,
+                      {"name":"AES-CBC", length:128},
+                      false,
+                      ["encrypt"]
+                      );
+                    promiseKey.then(function(key){
+                      // Generation du IV aleatoire
+                      let myiv2 = new Uint8Array(16);
+                      crypto.getRandomValues(myiv2);
+                      // Generation du IV a 0 pour faire du ECB en CBC
+                      let ivZero = new Uint8Array(16);
+                      // Chiffrement de l'IV aleatoire
+                      let promiseIv = crypto.subtle.encrypt(
+                        {name: "AES-CBC", iv: ivZero},
+                        key,
+                        myiv2);
+                      promiseIv.then(function(ivChiffre) {
+                        // Chiffrement du texte avec l'IV aleatoire et la cle
+                        let promiseChiffre = crypto.subtle.encrypt(
+                          {name: "AES-CBC", iv: myiv2},
+                          key,
+                          clair);
+                        promiseChiffre.then(function(chiffre) {
+                          cryptogrammeComplet = convertByteArrayToString(ivChiffre);
+                          cryptogrammeComplet += convertByteArrayToString(sel.buffer) + convertByteArrayToString(chiffre);
+                          cryptogrammeComplet = convertStringToByteArray(cryptogrammeComplet);
+                          addListe(website, cryptogrammeComplet);
+                        })
+                      })
+                    })
+                  })
+                })
+              })
+            })
+          })
+        }
+      }
+    }
+  };
+
   // Fonction de dechiffrement des identifiants
-  function decryptAES128(website, currentPassword, fonction, newmstrpsw, myobj, fctn){
+  function decryptAES128(website, currentPassword, fonction, newmstrpsw, myobj){
     var store =  getObjectStore("Triplet", "readonly");
     var objectStoreRequest = store.get(website);
     objectStoreRequest.onsuccess = function() {
@@ -467,12 +607,7 @@ $(document).ready(function(){
                   key,
                   chiffre);
                 promiseClair.then(function(clair){
-                //   messageClair = convertByteArrayToString(clair);
-                //   tailleLogin = new Uint8Array(clair)[0];
-                //   testpassword = messageClair.slice( tailleLogin + 1);
-                //   testlogin = messageClair.slice(1, tailleLogin + 1);
-                //   console.log("login : " + testlogin + " et password : " + testpassword);
-                  traitement(clair, currentPassword, website, newmstrpsw, myobj, fonction, fctn);
+                  traitement(clair, currentPassword, website, newmstrpsw, myobj, fonction);
                 })
               })
             })
@@ -482,25 +617,28 @@ $(document).ready(function(){
     }
   };
 
-  function traitement(clair, currentPassword, website, newmstrpsw, myobj, fonction, fctn){
+  // Fonction qui fait les traitements necessaire sur l'objet "clair" (uint8array[taille+chiffré(login+mdp)])
+  // puis envois le résultat du traitement a "fctn"
+  // Accepte : afficheClair(), function placement(),
+  function traitement(clair, currentPassword, website, newmstrpsw, myobj, fonction){
     messageClair = convertByteArrayToString(clair);
     tailleLogin = new Uint8Array(clair)[0];
     testpassword = messageClair.slice( tailleLogin + 1);
     testlogin = messageClair.slice(1, tailleLogin + 1);
-    fonction(testlogin, testpassword, website, newmstrpsw, myobj, fctn);
+    fonction(testlogin, testpassword, website, newmstrpsw, myobj);
   };
 
-  // Fonction de changement de base de donnee locale avec le nouveau mot de passe maitre
+  // Fonction de verification du site de l'entree 0
   function modMstrPsw(testlogin, toverify, website, newmstrpsw, myobj){
     if (myobj[0].Website == "0________"){
       decryptAES128(myobj[0].Website, currentPassword, checkTest, newmstrpsw, myobj);
     }
   };
 
+  // Fonction de verification du contenu du decrypte de l'entree 0
   function checkTest(testlogin, testpassword, website, newmstrpsw, myobj, tailleLogin){
     var verif = new Uint8Array([0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
     byteLogin = new Uint8Array(convertStringToByteArray(testlogin));
-    console.log(verif + " et " + byteLogin);
     var val = false;
     if (verif.length == (byteLogin.length) + 1){
       var tentative = promCheckModPsw(verif, byteLogin, newmstrpsw, myobj);
@@ -508,9 +646,9 @@ $(document).ready(function(){
     }
   };
 
+  // Fonction de vérification de validite du mot de passe maitre
   function promCheckModPsw(verif, byteLogin, newmstrpsw, myobj){
     return new Promise((resolve) => {
-      console.log(verif + " et " + byteLogin);
       if (verif[0] == tailleLogin){
         for (var i=1; i<verif.length; i++){
           if (verif[i] != byteLogin[i-1]){
@@ -527,10 +665,11 @@ $(document).ready(function(){
     });
   };
 
+  // Fonction de changement du contenu de la base de donnee locale avec le nouveau mot de passe maitre
   function effectiveChangeMstrPsw(booleanVal, newmstrpsw, myobj){
     if (booleanVal){
       for (var i=0; i<myobj.length; i++){
-        decryptAES128(myobj[i].Website, currentPassword, encryptAES128, newmstrpsw, myobj, modTriplet);
+        updateAES128(myobj[i].Website, currentPassword, addListe, newmstrpsw)
       }
       $("#psw-buttons").hide();
       reset_psw();
@@ -641,7 +780,6 @@ $(document).ready(function(){
     var website = document.getElementById("Website").value;
     var login = document.getElementById("Login").value;
     var password = document.getElementById("Password").value;
-
     var taille = [login.length];
     var message = (login+password).split("").map(ascii);
     encryptAES128(login, password, website, undefined, undefined, addTriplet);
@@ -679,7 +817,6 @@ $(document).ready(function(){
     var password = document.getElementById("mod-Password").value;
     var taille = [login.length];
     var message = (login+password).split("").map(ascii);
-    testlogin, testpassword, website, newmstrpsw, myobj, tailleLogin, fonction
     encryptAES128(login, password, website, undefined, undefined, modTriplet);
     $("#mod-buttons").hide();
     testlogin = testpassword = "";
