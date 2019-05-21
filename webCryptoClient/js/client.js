@@ -161,9 +161,10 @@ $(document).ready(function(){
 
   // Fonction qui mets en placeholder du champ "modifier login" le login actuel
   function placement(testlogin, testpassword, website){
+    document.getElementById("mod-Password").value = testpassword;
     document.getElementById("mod-Login").value = testlogin;
     document.getElementById("mod-Login").placeholder = testlogin;
-    document.getElementById("mod-Website").innerHTML = website;
+    document.getElementById("mod-Website").innerHTML = "Website";
     document.getElementById("new-Website").value = website;
   }
 
@@ -204,6 +205,7 @@ $(document).ready(function(){
       throw e;
     }
     req.onsuccess = function (evt){
+      document.getElementById("button-onload").className = "dot red";
       readTriplet();
       console.log("Insertion in DB successful");
       reset_add();
@@ -239,6 +241,7 @@ $(document).ready(function(){
         throw e;
       }
     req.onsuccess = function (evt){
+      document.getElementById("button-onload").className = "dot red";
       readTriplet();
       console.log("Insertion in DB successful");
       reset_mod();
@@ -340,10 +343,10 @@ $(document).ready(function(){
     }
     else{
       // Initialisation des champs du tableau
-      var tableau = '<table class="table"><thead><tr><th scope="col">#</th>';
+      var tableau = '<table class="table"><thead><tr>';
       tableau += '<th scope="col">Site</th>';
       for (var i=1; i<myobj.length; i++){
-        tableau += '<tbody><tr><th scope="row">' + i + '</th><td>';
+        tableau += '<tr><td>';
         tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">' + myobj[i].Website + '</td>';
         tableau += '<td><a href="#"><img src="js/jquery-ui/images/modifier.png" id="edit" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></a></td>';
         tableau += '<td><img src="js/jquery-ui/images/effacer.png" id="deleteTrip" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></td></tr>';
@@ -390,6 +393,7 @@ $(document).ready(function(){
     var countRequest = store.count();
     countRequest.onsuccess = function() {
       if( liste.length == countRequest.result){
+        console.log(liste);
         store = getObjectStore("Triplet", "readwrite");
         cpt = 0;
         put_record(liste, store, cpt);
@@ -697,6 +701,7 @@ $(document).ready(function(){
       };
       if (conf){
         deleteData();
+        document.getElementById("button-onload").className = "dot grey";
         readTriplet();
       };
     };
@@ -707,6 +712,9 @@ $(document).ready(function(){
     readTriplet();
   });
 
+$("#Veron").click(function(){
+  window.location.href="https://github.com/p-veron/moncoffre/blob/master/README.md"
+});
   // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
   $("#DL").click(function(){
     var store = getObjectStore("Triplet", "readonly");
@@ -732,12 +740,19 @@ $(document).ready(function(){
             // variable de stockage ( liste de données post traitement)
             // variable stockage d'un triplet
             var myobj = JSON.parse(json);
+            let bdd_js = []
             if (myobj.triplets.length > 0){
+              console.log(myobj.triplets);
               for (var i=0; i<myobj.triplets.length; i++){
-                addTriplet(myobj.triplets[i].site, base64DecToArr(myobj.triplets[i].crypto));
+                // addTriplet(myobj.triplets[i].site, base64DecToArr(myobj.triplets[i].crypto));
+                liste = liste.concat({"Website":myobj.triplets[i].site, "crypto":base64DecToArr(myobj.triplets[i].crypto)});
               };
+              store = getObjectStore("Triplet", "readwrite");
+              cpt = 0;
+              put_record(liste, store, cpt);
             };
             readTriplet();
+            document.getElementById("button-onload").className = "dot";
           },
           error:function(data,status){console.log("error POST"+data+" status :  "+status);}
         });
@@ -848,6 +863,7 @@ $(document).ready(function(){
         var objectStore = transaction.objectStore("Triplet");
         var supprStoreRequest = objectStore.delete(website);
         supprStoreRequest.onsuccess = function(){
+          document.getElementById("button-onload").className = "dot red";
           readTriplet();
         }
       }

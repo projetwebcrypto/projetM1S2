@@ -18,6 +18,29 @@
   <title>Test Client!</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+.dot {
+  height: 15px;
+  width: 15px;
+  background-color: #0f0;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot.grey {
+  height: 15px;
+  width: 15px;
+  background-color: #999;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot.red{
+  height: 15px;
+  width: 15px;
+  background-color: #f00;
+  border-radius: 50%;
+  display: inline-block;
+}
+</style>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
@@ -28,7 +51,12 @@
   <body onload="checkEmpty()">
     <div class="jumbotron text-center">
       <h1>Client monCoffre</h1>
-      <p>Simple test</p>
+    </div>
+    <!-- <div class="alert alert-success text-center" role="alert" >
+      Pousser .onssucess
+    </div> -->
+    <div style="text-align:right">
+      <span class="dot grey" id="button-onload"></span>
     </div>
     <div class="container">
       <div class="row">
@@ -93,19 +121,20 @@
           <p>Purification.</p>
         </div>
         <div class="col-sm-4">
-          <h3>Sauvegarder Base</h3>
-          <li><a href="#">Sauvegarder Base</a></li>
-          <p>Salvation.</p>
-        </div>
-        <div class="col-sm-4">
-          <h3>A propos</h3>
-          <li><a href="#">A propos</a></li>
-          <p>A propos de nous.</p>
-        </div>
-        <div class="col-sm-4">
           <h3>Afficher les sites</h3>
           <li><a href="#" id="Affichage">Afficher les sites</a></li>
           <p>Afficher les sites</p>
+        </div>
+
+        <div class="col-sm-4">
+          <h3>A propos</h3>
+          <li><a href="#" id="Veron">A propos</a></li>
+          <p>A propos de nous.</p>
+        </div>
+        <div class="col-sm-4">
+          <h3>Sauvegarder Base</h3>
+          <li><a href="#">Sauvegarder Base</a></li>
+          <p>Salvation.</p>
         </div>
       </div>
     </div>
