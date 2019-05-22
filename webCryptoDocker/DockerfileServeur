@@ -14,7 +14,7 @@ RUN mvn -s /tmp/settings.xml -B -e -C -T 1C package
 
 # stage 2
 
-FROM jboss/wildfly:11.0.0.Final
+FROM jboss/wildfly:15.0.0.Final
 COPY keycloak-wildfly-adapter-dist-6.0.1.tar.gz /tmp/keycloak-wildfly-adapter-dist.tar.gz
 RUN /opt/jboss/wildfly/bin/add-user.sh admin admin --silent
 ENV WILDFLY_HOME=/opt/jboss
@@ -23,10 +23,41 @@ RUN cd $WILDFLY_HOME/wildfly &&\
     ./bin/jboss-cli.sh --file=bin/adapter-elytron-install-offline.cli &&\
     rm -rf $WILDFLY_HOME/wildfly/standalone/configuration/standalone_xml_history
 #    rm /tmp/keycloak-wildfly-adapter-dist.tar.gz
-CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
+# WORKDIR /opt/jboss
+# RUN sed -i -e 's/<extensions>/&\n        <extension module="org.keycloak.keycloak-adapter-subsystem"\/>/' /opt/jboss/wildfly/standalone/configuration/standalone.xml && \
+#     sed -i -e 's/<profile>/&\n        <subsystem xmlns="urn:jboss:domain:keycloak:1.1"\/>/' /opt/jboss/wildfly/standalone/configuration/standalone.xml && \
+#     sed -i -e 's/<security-domains>/&\n                <security-domain name="keycloak">\n                    <authentication>\n                        <login-module code="org.keycloak.adapters.jboss.KeycloakLoginModule" flag="required"\/>\n                    <\/authentication>\n                <\/security-domain>/' /opt/jboss/wildfly/standalone/configuration/standalone.xml # && \
+    # sed -i -e 's/<extensions>/&\n        <extension module="org.keycloak.keycloak-saml-adapter-subsystem"\/>/' /opt/jboss/wildfly/standalone/configuration/standalone.xml && \
+    # sed -i -e 's/<profile>/&\n        <subsystem xmlns="urn:jboss:domain:keycloak-saml:1.1"\/>/' $JBOSS_HOME/standalone/configuration/standalone.xml
 
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
+# FROM jboss/wildfly:15.0.0.Final
+#
+# ENV KEYCLOAK_VERSION 6.0.1
+#
+# WORKDIR /opt/jboss/wildfly
+#
+# USER root
+#
+# RUN yum update -y
+#
+# USER 1000
+#
+# COPY keycloak-wildfly-adapter-dist-6.0.1.tar.gz .
+#
+# RUN tar zxf keycloak-wildfly-adapter-dist-6.0.1.tar.gz
+#
+# WORKDIR /opt/jboss
+#
+# # Standalone.xml modifications.
+# RUN sed -i -e 's/<extensions>/&\n        <extension module="org.keycloak.keycloak-adapter-subsystem"\/>/' $JBOSS_HOME/standalone/configuration/standalone.xml && \
+#     sed -i -e 's/<profile>/&\n        <subsystem xmlns="urn:jboss:domain:keycloak:1.1"\/>/' $JBOSS_HOME/standalone/configuration/standalone.xml && \
+#     sed -i -e 's/<security-domains>/&\n                <security-domain name="keycloak">\n                    <authentication>\n                        <login-module code="org.keycloak.adapters.jboss.KeycloakLoginModule" flag="required"\/>\n                    <\/authentication>\n                <\/security-domain>/' $JBOSS_HOME/standalone/configuration/standalone.xml && \
+#     sed -i -e 's/<extensions>/&\n        <extension module="org.keycloak.keycloak-saml-adapter-subsystem"\/>/' $JBOSS_HOME/standalone/configuration/standalone.xml && \
+#     sed -i -e 's/<profile>/&\n        <subsystem xmlns="urn:jboss:domain:keycloak-saml:1.1"\/>/' $JBOSS_HOME/standalone/configuration/standalone.xml
+#
+#
 COPY --from=build /myapp/target/*-withdependencies.war /opt/jboss/wildfly/standalone/deployments/server.war
 
 # ADD mod/keycloak.mod /usr/local/jetty/modules/
 # ADD mod/keycloak.ini /var/lib/jetty/start.d/
-
