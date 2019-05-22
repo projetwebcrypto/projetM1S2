@@ -21,28 +21,50 @@ services:
     volumes:
       - certifok:/usr/local/certif/
 
+
+
+
   serveur:
     build:
-      context: ../webCryptoServeur/
+      context: ../webCryptoServeur
       dockerfile: ../webCryptoDocker/DockerfileServeur
     container_name: Serveur
-    # ports:
-    # - "8080:8080"
-    volumes:
-      # - /home/docker/keycloak/:/opt/
-      - keycloakDependency:/usr/local/jetty/lib/keycloak/
+    ports:
+    - "8880:8080"
     volumes_from:
     - sqlite:rw
     stdin_open: True
     tty: True
     depends_on:
     - sqlite
-    # - certificat
+    - keycloak_dependency
     links:
     - "sqlite:sqlite"
-    - "authentification:serv"
-    networks:
-      - revproxy-network
+#    volumes:
+#    - keycloakDependency:/keycloak
+
+#  serveur:
+#    build:
+#      context: ../webCryptoServeur/
+#      dockerfile: ../webCryptoDocker/DockerfileServeur
+#    container_name: Serveur
+#    # ports:
+#    # - "8080:8080"
+#    volumes:
+#      # - /home/docker/keycloak/:/opt/
+#      - keycloakDependency:/usr/local/jetty/lib/keycloak/
+#    volumes_from:
+#    - sqlite:rw
+#    stdin_open: True
+#    tty: True
+#    depends_on:
+#    - sqlite
+#    # - certificat
+#    links:
+#    - "sqlite:sqlite"
+#    - "authentification:serv"
+#    networks:
+#      - revproxy-network
 
   reverse_proxy:
     build:
@@ -119,13 +141,13 @@ services:
 #    env_file:
 #      - proxy.env
     volumes:
-      - keycloakDependency:/keycloak/lib/keycloak/
+#      - keycloakDependency:/keycloak/
       - keycloakCert:/usr/local/certif/
 
 volumes:
   certifok:
   volumeAuthentifie:
-  keycloakDependency:
+#  keycloakDependency:
   keycloakCert:
 
 networks:
