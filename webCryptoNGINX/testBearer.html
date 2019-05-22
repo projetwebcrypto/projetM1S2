@@ -23,15 +23,15 @@
 
       <script>
           var keycloak = Keycloak({
-  "realm": "jettytest",
-  "auth-server-url": "http://192.168.99.100/keycloak/auth",
-  "url": "http://192.168.99.100/keycloak/auth",
+  "realm": "wildflytest",
+  "auth-server-url": "https://192.168.99.100/keycloak/auth",
+  "url": "https://192.168.99.100/keycloak/auth",
   "clientId": 'customer-portal',
   "ssl-required": "external",
   "resource": "customer-portal",
   "verify-token-audience": true,
   "credentials": {
-    "secret": "04f2a019-5864-4821-a15e-5f6b029b9022"
+    "secret": "9906adc8-874b-4f13-8f4e-7d8fe0b2a795"
   },
   "use-resource-role-mappings": true,
   "confidential-port": 0,
@@ -62,10 +62,10 @@
                   });
               }
 
-              var urlc = 'https://192.168.99.100/moncoffre/login';
+              var urlc = 'https://192.168.99.100/myresource/login';
 
               var req = new XMLHttpRequest();
-              req.open('POST', urlc, true);
+              req.open('GET', urlc, true);
               req.setRequestHeader('Accept', 'application/json');
               req.setRequestHeader("Content-Type", "application/json");
               req.setRequestHeader('Authorization', 'Bearer ' + keycloak.token);
@@ -87,7 +87,7 @@
                       }
                   }
               }
-              data = {"login":"log","bd":"passwords"};
+              // data = {"login":"log","bd":"passwords"};
               req.send(JSON.stringify(data));
         //     $.ajax({
         //   type:"POST",
