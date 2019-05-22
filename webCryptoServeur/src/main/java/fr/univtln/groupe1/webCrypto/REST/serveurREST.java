@@ -16,15 +16,16 @@ public class serveurREST {
      * associé au login
      * @return String
      */
-    @POST
+    @GET
     @Path("/login")
     @Consumes(MediaType.APPLICATION_JSON)
     public String getBDDTriplets(String listJson) {
-        JSONObject request = new JSONObject(listJson);
-        String login = request.getString("login");
-        String nomdb = request.getString("bd");
+        System.out.println("okokokok");
+//        JSONObject request = new JSONObject(listJson);
+//        String login = request.getString("login");
+//        String nomdb = request.getString("bd");
         FileManagment fileManagment = new FileManagment();
-        String contenu = fileManagment.existencyAccount(login, nomdb);
+        String contenu = fileManagment.existencyAccount("log", "passwords");
         String reponse = "{\"triplets\":[" + contenu + "]}";
         return reponse;
     }

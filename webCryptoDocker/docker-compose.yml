@@ -42,6 +42,8 @@ services:
     - "sqlite:sqlite"
 #    volumes:
 #    - keycloakDependency:/keycloak
+    networks:
+    - revproxy-network
 
 #  serveur:
 #    build:
