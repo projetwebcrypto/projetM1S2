@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jboss-web xmlns="http://www.jboss.com/xml/ns/javaee"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:schemaLocation="
-  http://www.jboss.com/xml/ns/javaee
-  http://www.jboss.org/j2ee/schema/jboss-web_5_1.xsd">
-    <context-root>/</context-root>
-</jboss-web>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+    <servlet-mapping>
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+</web-app>
+
+
+<!--<jboss-web xmlns="http://www.jboss.com/xml/ns/javaee"-->
+           <!--xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
+           <!--xsi:schemaLocation="-->
+  <!--http://www.jboss.com/xml/ns/javaee-->
+  <!--http://www.jboss.org/j2ee/schema/jboss-web_5_1.xsd">-->
+  <!--&lt;!&ndash;<context-root>/</context-root>&ndash;&gt;-->
+<!--</jboss-web>-->
+<!--<test/>-->
 
 <!--<?xml version="1.0" encoding="UTF-8"?>-->
 <!--&lt;!&ndash; This web.xml file is not required when using Servlet 3.0 container,-->
