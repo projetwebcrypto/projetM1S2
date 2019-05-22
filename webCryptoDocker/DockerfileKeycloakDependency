@@ -4,3 +4,9 @@ RUN apt-get update && apt-get install -y wget && apt-get install -y unzip
 
 RUN wget https://downloads.jboss.org/keycloak/6.0.1/adapters/keycloak-oidc/keycloak-jetty94-adapter-dist-6.0.1.zip && \
     unzip keycloak-jetty94-adapter-dist-6.0.1.zip -d keycloak/
+
+RUN apt-get update && apt-get -y install openssl && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /usr/local/certif/
+
+RUN echo "\n\n\ntest\n\n\n\n" > creation.txt && openssl req -x509 -nodes -days 1 -newkey rsa:2048 -keyout ./tls.key -out ./tls.crt < creation.txt

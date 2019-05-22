@@ -2,7 +2,7 @@
       <head>
             <meta charset="utf-8">
           <title>Customer View Page</title>
-          <script src="js/jquery.min.js"></script>
+          <script src="js/jquery.min.js" type="text/javascript"></script>
           <script type="text/javascript" src="js/jquery-ui/jquery-ui.min.js"></script>
           <script src="keycloak-js-adapter-dist-6.0.1/keycloak.js" type="text/javascript"></script>
       </head>
@@ -24,14 +24,14 @@
       <script>
           var keycloak = Keycloak({
   "realm": "jettytest",
-  "auth-server-url": "http://192.168.99.100:8081/auth",
-  "url": "http://192.168.99.100:8081/auth",
+  "auth-server-url": "http://192.168.99.100/keycloak/auth",
+  "url": "http://192.168.99.100/keycloak/auth",
   "clientId": 'customer-portal',
   "ssl-required": "external",
   "resource": "customer-portal",
   "verify-token-audience": true,
   "credentials": {
-    "secret": "cac4d010-11ed-4b4f-a87d-6727af2b5131"
+    "secret": "04f2a019-5864-4821-a15e-5f6b029b9022"
   },
   "use-resource-role-mappings": true,
   "confidential-port": 0,

@@ -41,6 +41,8 @@ services:
     links:
     - "sqlite:sqlite"
     - "authentification:serv"
+    networks:
+      - revproxy-network
 
   reverse_proxy:
     build:
@@ -58,24 +60,38 @@ services:
     depends_on:
       - serveur
 #      - certificat
-    links:
-      - "serveur:app"
-      - "authentification:authent"
+    # links:
+    #   - "serveur:app"
+    #   - "authentification:authent"
+    networks:
+      - revproxy-network
 
 
   authentification:
-    image: jboss/keycloak
+    build:
+      context: ../webCryptoNGINX/
+      dockerfile: ../webCryptoDocker/DockerfileKeycloak
     container_name: Keycloak
-#    command:
+    # command: keycloak/bin/add-user-keycloak.sh -u admin -p admin
     depends_on:
       - postgres_auth
+      - keycloak_dependency
     #
     # A enlever pour le https
     #
+    environment:
+      # - KEYCLOAK_HTTPS_PORT=8085
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - PROXY_ADDRESS_FORWARDING=true
     ports:
       - "8081:8080"
+      - "8443:8443"
+    volumes:
+      - keycloakCert:/etc/x509/https
     networks:
       - keycloak-network
+      - revproxy-network
 
 
 
@@ -104,12 +120,16 @@ services:
 #      - proxy.env
     volumes:
       - keycloakDependency:/keycloak/lib/keycloak/
+      - keycloakCert:/usr/local/certif/
 
 volumes:
   certifok:
   volumeAuthentifie:
   keycloakDependency:
+  keycloakCert:
 
 networks:
   keycloak-network:
+    driver: bridge
+  revproxy-network:
     driver: bridge
