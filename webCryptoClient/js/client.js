@@ -711,7 +711,9 @@ $(document).ready(function(){
       if (conf){
         deleteData();
         document.getElementById("button-onload").className = "dot grey";
-        readTriplet();
+        // readTriplet();
+        $("table").remove();
+
       };
     };
   });
