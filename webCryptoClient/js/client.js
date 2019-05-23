@@ -139,7 +139,7 @@ $(document).ready(function(){
     currentPassword = newpassw;
   };
 
-  stateMstrPsw();
+   stateMstrPsw();
 
   // Test de raffraichissement en live de la bd
   function getObjectStore(store_name, mode){
@@ -712,10 +712,15 @@ addBase(JSON.parse('{"b":["passwords"]}'));
   Affichage et interactions avec le client.html
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
-  // Dissimulation initiale des champs d'entrees d' "ajouter un triplet"
+  $(window).blur(function () {
+    // currentPassword='';
+  });
+
+   // Dissimulation initiale des champs d'entrees d' "ajouter un triplet"
   $("#add-buttons").hide();
   $("#mod-buttons").hide();
   $("#psw-buttons").hide();
+  $('#add-MstrPsw').hide();
   $("#show-menu").hide();
   $("#show-menu").click(function(){
 
@@ -802,7 +807,6 @@ addBase(JSON.parse('{"b":["passwords"]}'));
             var myobj = JSON.parse(json);
             let bdd_js = []
             if (myobj.triplets.length > 0){
-              console.log(myobj.triplets);
               for (var i=0; i<myobj.triplets.length; i++){
                 // addTriplet(myobj.triplets[i].site, base64DecToArr(myobj.triplets[i].crypto));
                 liste = liste.concat({"Website":myobj.triplets[i].site, "crypto":base64DecToArr(myobj.triplets[i].crypto)});
@@ -843,10 +847,24 @@ addBase(JSON.parse('{"b":["passwords"]}'));
     };
   });
 
-  // // Initialisation d'un bouton "reset" des champs d'entrees d' "ajouter un triplet"
-  // $("#reset").click(function(){
-  //   reset();
-  // })
+  // Initialisation des champs d'entrees de "saisir le mot de passe Maître" (champ mot de passe)
+  $('#saisie-mdp-maitre').click(function(){
+    $('#add-MstrPsw').show();
+  });
+
+// Initialisation du bouton "Ajouter" sous les champs d'entrees de "saisir le mot de passe Maître"
+  $('#saisie_Mtrspsw').click(function(){
+    var pwd = document.getElementById("MtsrPwd").value;
+    currentPassword = pwd;
+    $('#add-MstrPsw').hide();
+    document.getElementById("MtsrPwd").value = '';
+  });
+
+  // Initialisation du bouton "Annuler" sous les champs d'entrees de "saisir le mot de passe Maître"
+  $("#abort_Mtrspsw").click(function(){
+    $('#add-MstrPsw').hide();
+    document.getElementById("MtsrPwd").value = '';
+  });
 
   // Initialisation du bouton "Ajouter" sous les champs d'entrees d' "ajouter un triplet"
   $("#add_tuple").click(function(){
