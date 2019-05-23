@@ -169,25 +169,47 @@
           <div class="panel-footer">Permet d'envoyer les données locales sur un serveur distant</div>
         </div>
       </div>
-    </div>
-  </div>
-  <div class="btn-toolbar mb-3" role="toolbar" id="mod-buttons">
-    <div class="input-group">
-      <label for="Website" id="mod-Website"></label>
-      <input type="text" name="website" id="new-Website" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
-      <div class="input-group-prepend"></div>
-      <label for="Login">Identifiant</label>
-      <input type="text" name="login" id="mod-Login" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
-      <label for="Password">Mot de passe</label>
-      <input type="password" name="mdp" id="mod-Password" placeholder="Entrez nouveau mdp" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
-    </div>
-    <div class="btn-group mr-2" role="group" aria-label="First group">
-      <button type="button" class="btn btn-secondary" id="mod_tuple">Valider</button>
-      <button type="button" class="btn btn-secondary" id="abort_mod">Annuler</button>
+      <div class="col-sm-4">
+        <div class="panel panel-primary">
+          <div class="panel-heading" style="cursor:pointer" id="saisie-mdp-maitre"><span class="glyphicon glyphicon-pencil">  SAISIR LE MOT DE PASSE MAÎTRE </div>
+          <div class="panel-footer">Permet la saisie du mot de passe de déchiffrement</div>
+          <div class="form-group" id=add-MstrPsw>
+            <label for="NewMstrPsw"> mot de passe Maître</label>
+            <input type="password" class="form-control" id="MtsrPwd" placeholder="Entrez votre mot de passe maître" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()" minlength="1" maxlength="32">
+            <div class="btn-group mr-2" role="group" aria-label="First group">
+              <button type="button" class="btn btn-secondary" id="saisie_Mtrspsw">Ajouter</button>
+              <button type="button" class="btn btn-secondary" id="abort_Mtrspsw">Annuler</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-
+<div class="container" id="mod-buttons">
+  <div class="row">
+    <div class="col-sm-4">
+      <div class="panel panel-primary">
+        <div class="panel-heading"><span class="glyphicon glyphicon-pencil">  Modification des champs </div>
+        <div style="text-align:center" class="btn-toolbar mb-3" role="toolbar">
+          <div class="input-group">
+            <label for="Website" id="mod-Website"></label>
+            <input type="text" name="website" id="new-Website" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
+            <div class="input-group-prepend"></div>
+            <label for="Login">Identifiant</label>
+            <input type="text" name="login" id="mod-Login" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
+            <label for="Password">Mot de passe</label>
+            <input type="password" name="mdp" id="mod-Password" placeholder="Entrez nouveau mdp" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
+          </div>
+          <div class="btn-group mr-2" role="group" aria-label="First group">
+            <button type="button" class="btn btn-secondary" id="mod_tuple">Valider</button>
+            <button type="button" class="btn btn-secondary" id="abort_mod">Annuler</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <br>
 <br>
 

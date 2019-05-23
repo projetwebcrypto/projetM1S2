@@ -138,7 +138,7 @@ $(document).ready(function(){
     currentPassword = newpassw;
   };
 
-  stateMstrPsw();
+   stateMstrPsw();
 
   // Test de raffraichissement en live de la bd
   function getObjectStore(store_name, mode){
@@ -347,12 +347,14 @@ $(document).ready(function(){
       // Initialisation des champs du tableau
       var tableau = '<div class="container"><table class="table"><thead><tr>';
       tableau += '<th scope="col">Site</th>';
-      for (var i=1; i<myobj.length; i++){
-        tableau += '<tr><td>';
-        tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">  ' + myobj[i].Website + '</td>';
-        tableau += '<td><a href="https://www.'+ myobj[i].Website + '.com" target="_blank"><span class="glyphicon glyphicon-globe">';
-        tableau += '<td><a href="#"><img src="js/jquery-ui/images/modifier.png" id="edit" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></a></td>';
-        tableau += '<td><img src="js/jquery-ui/images/effacer.png" id="deleteTrip" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></td></tr>';
+      for (var i=0; i<myobj.length; i++){
+        if(myobj[i].Website != "0________"){
+          tableau += '<tr><td>';
+          tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">  ' + myobj[i].Website + '</td>';
+          tableau += '<td><a href="https://www.' + myobj[i].Website + '.com" target="_blank"><span class="glyphicon glyphicon-globe"></a></td>';
+          tableau += '<td><a href="#"><img src="js/jquery-ui/images/modifier.png" id="edit" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></a></td>';
+          tableau += '<td><img src="js/jquery-ui/images/effacer.png" id="deleteTrip" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></td></tr>';
+        }
       }
       // Fermeture des balises et du tableau
       tableau += '</tbody></table></div>';
@@ -689,10 +691,15 @@ $(document).ready(function(){
   Affichage et interactions avec le client.html
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
-  // Dissimulation initiale des champs d'entrees d' "ajouter un triplet"
+  $(window).blur(function () {
+    // currentPassword='';
+  });
+
+   // Dissimulation initiale des champs d'entrees d' "ajouter un triplet"
   $("#add-buttons").hide();
   $("#mod-buttons").hide();
   $("#psw-buttons").hide();
+  $('#add-MstrPsw').hide();
   $("#show-menu").hide();
 
   $("#show-menu").click(function(){
@@ -725,9 +732,6 @@ $(document).ready(function(){
 
   });
 
-$("#Veron").click(function(){
-  window.location.href="https://github.com/p-veron/moncoffre/blob/master/README.md"
-});
   // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
   $("#DL").click(function(){
     var store = getObjectStore("Triplet", "readonly");
@@ -755,7 +759,6 @@ $("#Veron").click(function(){
             var myobj = JSON.parse(json);
             let bdd_js = []
             if (myobj.triplets.length > 0){
-              console.log(myobj.triplets);
               for (var i=0; i<myobj.triplets.length; i++){
                 // addTriplet(myobj.triplets[i].site, base64DecToArr(myobj.triplets[i].crypto));
                 liste = liste.concat({"Website":myobj.triplets[i].site, "crypto":base64DecToArr(myobj.triplets[i].crypto)});
@@ -797,10 +800,24 @@ $("#Veron").click(function(){
     };
   });
 
-  // // Initialisation d'un bouton "reset" des champs d'entrees d' "ajouter un triplet"
-  // $("#reset").click(function(){
-  //   reset();
-  // })
+  // Initialisation des champs d'entrees de "saisir le mot de passe Maître" (champ mot de passe)
+  $('#saisie-mdp-maitre').click(function(){
+    $('#add-MstrPsw').show();
+  });
+
+// Initialisation du bouton "Ajouter" sous les champs d'entrees de "saisir le mot de passe Maître"
+  $('#saisie_Mtrspsw').click(function(){
+    var pwd = document.getElementById("MtsrPwd").value;
+    currentPassword = pwd;
+    $('#add-MstrPsw').hide();
+    document.getElementById("MtsrPwd").value = '';
+  });
+
+  // Initialisation du bouton "Annuler" sous les champs d'entrees de "saisir le mot de passe Maître"
+  $("#abort_Mtrspsw").click(function(){
+    $('#add-MstrPsw').hide();
+    document.getElementById("MtsrPwd").value = '';
+  });
 
   // Initialisation du bouton "Ajouter" sous les champs d'entrees d' "ajouter un triplet"
   $("#add_tuple").click(function(){
