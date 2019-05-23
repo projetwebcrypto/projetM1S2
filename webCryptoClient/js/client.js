@@ -350,7 +350,7 @@ $(document).ready(function(){
       for (var i=1; i<myobj.length; i++){
         tableau += '<tr><td>';
         tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">  ' + myobj[i].Website + '</td>';
-        tableau += '<td><a href="https://www.'+ myobj[i].Website + '.com" target="_blank"><span class="glyphicon glyphicon-globe">';
+        tableau += '<td><a href="https://www.' + myobj[i].Website + '.com"><span class="glyphicon glyphicon-globe"></a></td>';
         tableau += '<td><a href="#"><img src="js/jquery-ui/images/modifier.png" id="edit" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></a></td>';
         tableau += '<td><img src="js/jquery-ui/images/effacer.png" id="deleteTrip" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></td></tr>';
       }
