@@ -155,6 +155,8 @@ $(document).ready(function(){
     var getdatas = store.getAll();
     getdatas.onsuccess = function(){
       // console.log(getdatas.result);
+      $("#show-menu").show();
+      $('.collapse').collapse();
       addTable(getdatas.result);
     };
   };
@@ -343,16 +345,16 @@ $(document).ready(function(){
     }
     else{
       // Initialisation des champs du tableau
-      var tableau = '<table class="table"><thead><tr>';
+      var tableau = '<div class="container"><table class="table"><thead><tr>';
       tableau += '<th scope="col">Site</th>';
       for (var i=1; i<myobj.length; i++){
         tableau += '<tr><td>';
-        tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">' + myobj[i].Website + '</td>';
+        tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'"><span class="glyphicon glyphicon-globe">  ' + myobj[i].Website + '</td>';
         tableau += '<td><a href="#"><img src="js/jquery-ui/images/modifier.png" id="edit" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></a></td>';
         tableau += '<td><img src="js/jquery-ui/images/effacer.png" id="deleteTrip" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></td></tr>';
       }
       // Fermeture des balises et du tableau
-      tableau += '</tbody></table>';
+      tableau += '</tbody></table></div>';
       $("body").append(tableau);
     };
   };
@@ -644,6 +646,7 @@ $(document).ready(function(){
     byteLogin = new Uint8Array(convertStringToByteArray(testlogin));
     var val = false;
     if (verif.length == (byteLogin.length) + 1){
+      console.log("if checkTest");
       var tentative = promCheckModPsw(verif, byteLogin, newmstrpsw, myobj);
       tentative.then(effectiveChangeMstrPsw(true, newmstrpsw, myobj));
     }
@@ -689,6 +692,12 @@ $(document).ready(function(){
   $("#add-buttons").hide();
   $("#mod-buttons").hide();
   $("#psw-buttons").hide();
+  $("#show-menu").hide();
+
+  $("#show-menu").click(function(){
+    // $("#show-menu").hide();
+    $(this).toggleClass('glyphicon-minus');
+  });
 
   // Initialisation du lien "Supprimer tout" qui supprime la base de données locale
   $("#Delete").click(function(){
@@ -710,6 +719,7 @@ $(document).ready(function(){
   // Initialisation du lien "Afficher les sites" qui affiche une table contenant les sites et leurs cryptogrammes associes
   $("#Affichage").click(function(){
     readTriplet();
+
   });
 
 $("#Veron").click(function(){
@@ -770,6 +780,7 @@ $("#Veron").click(function(){
   $("#chng_psw").click(function(){
     var oldmstrpsw = document.getElementById("OldMstrPsw").value;
     var newmstrpsw = document.getElementById("NewMstrPsw").value;
+    console.log(oldmstrpsw + "  " + newmstrpsw);
     var store = getObjectStore("Triplet", "readwrite");
     var getdatas = store.getAll();
     getdatas.onsuccess = function(){
@@ -825,9 +836,10 @@ $("#Veron").click(function(){
 
   // Modification des identifiants d'un site
   $("#mod_tuple").click(function(){
-    var website = document.getElementById("mod-Website").innerHTML;
+    var website = document.getElementById("mod-Website").value;
     var login = document.getElementById("mod-Login").value;
     var password = document.getElementById("mod-Password").value;
+
     var taille = [login.length];
     var message = (login+password).split("").map(ascii);
     encryptAES128(login, password, website, undefined, undefined, modTriplet);
@@ -837,7 +849,7 @@ $("#Veron").click(function(){
 
   // Initialisation d'interactions avec les champs site
   $("body").on("click", "#website", function(){
-    var website = $(this).text();
+    var website = $(this).text().slice(2);
     decryptAES128(website, currentPassword, afficheClair);
 
   });
@@ -847,6 +859,7 @@ $("#Veron").click(function(){
     $("#mod-buttons").show();
     document.getElementById("add_tuple").disabled = true;
     var website = $(this).attr("name");
+    document.getElementById("mod-Website").value = website;
     decryptAES128(website, currentPassword, placement);
     reset_mod();
   });
