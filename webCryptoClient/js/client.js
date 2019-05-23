@@ -14,6 +14,7 @@ var store;
 var cryptogrammeComplet = "";
 var currentPassword = "";
 var liste = []
+var bDD = '';//passwords
 var crypto = window.crypto;
 
 if(crypto.subtle){
@@ -336,6 +337,26 @@ $(document).ready(function(){
     };
   };
 
+addBase(JSON.parse('{"b":["passwords"]}'));
+  // Fonction de traitement de la base de donnees pour un affichage sur le client html
+  function addBase(myobj){
+    // Effacement d'eventuels affichage precedents
+  $("table").remove();
+    // Initialisation des champs du tableau
+    var tableau = '<div class="container"><table class="table"><thead><tr>';
+    tableau += '<th scope="col">Base de données :</th>';
+
+    for (var i=0; i<myobj.b.length; i++){
+      tableau += '<tr><td>';
+      tableau += '<li class="list-group-item">  ' + myobj.b[i] + '</td>';
+      tableau += '<td><span class="glyphicon glyphicon-download-alt" id="base" name="' + myobj.b[i] + '" style="cursor:pointer"></td></tr>';
+    }
+    // Fermeture des balises et du tableau
+    tableau += '</tbody></table></div>';
+    $("body").append(tableau);
+
+  };
+
   // Fonction de traitement de la base de donnees pour un affichage sur le client html
   function addTable(myobj){
     // Effacement d'eventuels affichage precedents
@@ -347,12 +368,14 @@ $(document).ready(function(){
       // Initialisation des champs du tableau
       var tableau = '<div class="container"><table class="table"><thead><tr>';
       tableau += '<th scope="col">Site</th>';
-      for (var i=1; i<myobj.length; i++){
-        tableau += '<tr><td>';
-        tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">  ' + myobj[i].Website + '</td>';
-        tableau += '<td><a href="https://www.' + myobj[i].Website + '.com"><span class="glyphicon glyphicon-globe"></a></td>';
-        tableau += '<td><a href="#"><img src="js/jquery-ui/images/modifier.png" id="edit" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></a></td>';
-        tableau += '<td><img src="js/jquery-ui/images/effacer.png" id="deleteTrip" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></td></tr>';
+      for (var i=0; i<myobj.length; i++){
+        if(myobj[i].Website != "0________"){
+          tableau += '<tr><td>';
+          tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">  ' + myobj[i].Website + '</td>';
+          tableau += '<td><a href="https://www.' + myobj[i].Website + '.com" target="_blank"><span class="glyphicon glyphicon-globe"></a></td>';
+          tableau += '<td><a href="#"><img src="js/jquery-ui/images/modifier.png" id="edit" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></a></td>';
+          tableau += '<td><img src="js/jquery-ui/images/effacer.png" id="deleteTrip" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></td></tr>';
+        }
       }
       // Fermeture des balises et du tableau
       tableau += '</tbody></table></div>';
@@ -694,8 +717,8 @@ $(document).ready(function(){
   $("#mod-buttons").hide();
   $("#psw-buttons").hide();
   $("#show-menu").hide();
-
   $("#show-menu").click(function(){
+
     // $("#show-menu").hide();
     $(this).toggleClass('glyphicon-minus');
   });
@@ -725,11 +748,35 @@ $(document).ready(function(){
 
   });
 
-$("#Veron").click(function(){
-  window.location.href="https://github.com/p-veron/moncoffre/blob/master/README.md"
-});
+// Initialisation du lien "Recuperer les bases de données" qui recupere la liste des bases de donnees présente sur le serveur
+  $("#DL-allBase").click(function(){
+      data = {"login":"log"};
+      var urlc = "https://192.168.99.100:443/moncoffre";
+      $.ajax({
+        type:"POST",
+        url:urlc + "/mesBDD",
+        data:JSON.stringify(data),
+        dataType:"text",
+        contentType:"application/json",
+        success:function(json,status){
+          // variable de stockage ( liste de données post traitement)
+          // variable stockage d'un triplet
+          var myobj = JSON.parse(json);
+          if (myobj.length > 0){
+            addBase(myobj);
+
+          };
+        },
+        error:function(data,status){console.log("error POST"+data+" status :  "+status);}
+      });
+    });
+
   // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
   $("#DL").click(function(){
+    downloadBdd(bDD)
+  });
+
+  function downloadBdd(bDD){
     var store = getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
     var conf = "true";
@@ -741,7 +788,7 @@ $("#Veron").click(function(){
         deleteData();
       }
       if (conf){
-        data = {"login":"log","bd":"passwords"};
+        data = {"login":"log","bd":bDD};
         var urlc = "https://192.168.99.100:443/moncoffre";
         $.ajax({
           type:"POST",
@@ -771,8 +818,7 @@ $("#Veron").click(function(){
         });
       }
     }
-  });
-
+  };
   // Initialisation des champs d'entrees de "changer le mot de passe Maître" (champ mot de passe)
   $("#PasswordChange").click(function(){
     $("#psw-buttons").show();
@@ -807,8 +853,14 @@ $("#Veron").click(function(){
     var website = document.getElementById("Website").value;
     var login = document.getElementById("Login").value;
     var password = document.getElementById("Password").value;
-    var taille = [login.length];
-    var message = (login+password).split("").map(ascii);
+
+    var store = getObjectStore("Triplet", "readonly");
+    var countRequest = store.count();
+    countRequest.onsuccess = function() {
+      if ( countRequest.result == 0){
+        encryptAES128("ÿÿÿÿÿÿÿ", "", "0________", undefined, undefined, addTriplet);
+      }
+    }
     encryptAES128(login, password, website, undefined, undefined, addTriplet);
     $("#add-buttons").hide();
   });
@@ -843,8 +895,6 @@ $("#Veron").click(function(){
     var login = document.getElementById("mod-Login").value;
     var password = document.getElementById("mod-Password").value;
 
-    var taille = [login.length];
-    var message = (login+password).split("").map(ascii);
     encryptAES128(login, password, website, undefined, undefined, modTriplet);
     $("#mod-buttons").hide();
     testlogin = testpassword = "";
@@ -855,6 +905,13 @@ $("#Veron").click(function(){
     var website = $(this).text().slice(2);
     decryptAES128(website, currentPassword, afficheClair);
 
+  });
+
+  $("body").on("click", "#base", function(){
+    document.getElementById("add_tuple").disabled = true;
+    var bDD = $(this).attr("name");
+    console.log(bDD)
+    downloadBdd(bDD)
   });
 
   // Initialisation d'interactions avec les images "Modifier"
