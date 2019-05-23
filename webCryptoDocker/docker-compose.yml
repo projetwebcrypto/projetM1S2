@@ -31,6 +31,8 @@ services:
     container_name: Serveur
     ports:
     - "8880:8080"
+    - "8444:8443"
+    - "9999:9990"
     volumes_from:
     - sqlite:rw
     stdin_open: True
