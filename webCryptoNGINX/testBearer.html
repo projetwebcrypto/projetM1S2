@@ -5,6 +5,7 @@
           <script src="js/jquery.min.js" type="text/javascript"></script>
           <script type="text/javascript" src="js/jquery-ui/jquery-ui.min.js"></script>
           <script src="keycloak-js-adapter-dist-6.0.1/keycloak.js" type="text/javascript"></script>
+          <!-- <script src="keycloak-js-adapter-dist-6.0.1/keycloak-authz.js"></script> -->
       </head>
       <body bgcolor="#E3F6CE">
 
@@ -29,15 +30,16 @@
   "clientId": 'customer-portal',
   "ssl-required": "external",
   "resource": "customer-portal",
-  "verify-token-audience": true,
+  // "verify-token-audience": true,
   "credentials": {
     "secret": "69e41e4c-882f-400f-8b0b-6c6d8592a192"
   },
-  "use-resource-role-mappings": true,
-  "confidential-port": 0,
-  "policy-enforcer": {},
+  // "use-resource-role-mappings": true,
+  // "confidential-port": 0,
+  // "policy-enforcer": {},
   "enable-cors": true
 });
+// var authorization = new KeycloakAuthorization(keycloak);
 
           var loadData = function () {
               document.getElementById('subject').innerHTML = keycloak.subject;
@@ -63,12 +65,14 @@
               }
 
               var urlc = 'https://192.168.99.100/myresource/login';
+              // var rpt = authorization.rpt;
 
               var req = new XMLHttpRequest();
               req.open('GET', urlc, true);
               req.setRequestHeader('Accept', 'application/json');
               req.setRequestHeader("Content-Type", "application/json");
               req.setRequestHeader('Authorization', 'Bearer ' + keycloak.token);
+              // req.setRequestHeader('Authorization', 'Bearer ' + rpt);
             //   req.setRequestHeader("Access-Control-Allow-Origin", "*");
             //   req.setRequestHeader("Access-Control-Allow-Credentials", "true");
             //   req.setRequestHeader("Access-Control-Allow-Headers", "Authorization,Accept,Origin,Content-Type,Keep-Alive");

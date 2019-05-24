@@ -27,7 +27,7 @@ services:
   serveur:
     build:
       context: ../webCryptoServeur
-      dockerfile: ../webCryptoDocker/DockerfileServeur
+      dockerfile: ../webCryptoDocker/DockerfileServeur2
     container_name: Serveur
     ports:
     - "8880:8080"

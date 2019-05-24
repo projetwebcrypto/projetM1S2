@@ -518,12 +518,13 @@
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:weld:4.0"/>
         <subsystem xmlns="urn:jboss:domain:keycloak:1.1">
-            <secure-deployment name="application.war">
+            <secure-deployment name="server.war">
                 <realm>wildlfytest</realm>
                 <auth-server-url>http://authentification:8080/keycloak/auth</auth-server-url>
+                <!--<use-resource-role-mappings>true</use-resource-role-mappings>-->
                 <ssl-required>external</ssl-required>
                 <resource>customer-portal</resource>
-                <credential name="69e41e4c-882f-400f-8b0b-6c6d8592a192"></credential>
+                <credential name="secret">69e41e4c-882f-400f-8b0b-6c6d8592a192</credential>
             </secure-deployment>
         </subsystem>
     </profile>
