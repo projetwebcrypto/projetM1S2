@@ -70,7 +70,7 @@ function createDb(){
   request.onsuccess = function (event){
     db = this.result;
     console.log("Creation: " + db);
-    // alert("Creation reussie");                  // Alerte de bonne creation de la BD
+    alert("Creation reussie");                  // Alerte de bonne creation de la BD
   };
 
   // Fonction lancee si le demarrage rate
@@ -218,7 +218,7 @@ $(document).ready(function(){
     }
     req.onsuccess = function (evt){
       readTriplet();
-      console.log("Insertion in DB successful");
+      // console.log("Insertion in DB successful");
       reset_add();
       return 0;
       // displayActionSuccess();
@@ -237,9 +237,9 @@ $(document).ready(function(){
   // Fonction qui ajoute un triplet a la base de donnees
   function modTriplet(webs, crypt){
     var website = document.getElementById("new-Website").value;
+    console.log("website : " + website + " et webs : " + webs);
     if (website != webs){
       var store = getObjectStore("Triplet", "readwrite");
-      console.log("passage dans modTriplet" + webs);
       store.delete(webs);
       webs = website
     }
@@ -254,7 +254,7 @@ $(document).ready(function(){
       }
     req.onsuccess = function (evt){
       readTriplet();
-      console.log("Insertion in DB successful");
+      // console.log("Insertion in DB successful");
       reset_mod();
       return 0;
       };
@@ -733,7 +733,6 @@ $(document).ready(function(){
 
   // Initialisation du lien "Afficher les sites" qui affiche une table contenant les sites et leurs cryptogrammes associes
   $("#Affichage").click(function(){
-    $("#add-buttons").hide();
     $("#mod-buttons").hide();
     $("#psw-buttons").hide();
     $("#failpsw").hide();
@@ -871,14 +870,13 @@ $(document).ready(function(){
   $("#mod_tuple").click(function(){
     $("#add-buttons").hide();
     $("#psw-buttons").hide();
-    var website = document.getElementById("mod-Website").innerHTML;
+    var website = document.getElementById("new-Website").value;
     var login = document.getElementById("mod-Login").value;
     var password = document.getElementById("mod-Password").value;
     var taille = [login.length];
     var message = (login+password).split("").map(ascii);
     encryptAES128(login, password, website, undefined, undefined, modTriplet);
     $("#mod-buttons").hide();
-    testlogin = testpassword = "";
   });
 
   // // Reinitialisation du contenu du expended
