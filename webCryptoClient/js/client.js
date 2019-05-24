@@ -14,7 +14,7 @@ var store;
 var cryptogrammeComplet = "";
 var currentPassword = "";
 var liste = []
-var bDD = '';//passwords
+var nom_de_la_Bdd = '';//passwords
 var crypto = window.crypto;
 
 if(crypto.subtle){
@@ -432,11 +432,21 @@ addBase(JSON.parse('{"b":["passwords"]}'));
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
   // Fonction de chiffrement des identifiants
-  function encryptAES128(testlogin, testpassword, website, newmstrpsw, myobj, fonction){
+  function encryptAES128(testlogin, testpassword, website, newmstrpsw, myobj, fonction, isCheckpwd){
     var message = (testlogin+testpassword).split("").map(ascii);
-    var taille = [testlogin.length];
-    var word = Uint8Array.from(taille.concat(message));
     var mdp = currentPassword;
+    if (isCheckpwd){
+      var word = Uint8Array.from(message);
+    }
+    else {
+      var taille = [testlogin.length];
+      var word = Uint8Array.from(taille.concat(message));
+      console.log("variables");
+      console.log(mdp);
+      console.log(word);
+    }
+
+
     sel = new Uint8Array(16);
     window.crypto.getRandomValues(sel);
     // Recuperation du mdp en tant que cle
@@ -588,6 +598,7 @@ addBase(JSON.parse('{"b":["passwords"]}'));
     }
   };
 
+decryptAES128("0________","azerty",placement);
   // Fonction de dechiffrement des identifiants
   function decryptAES128(website, currentPassword, fonction, newmstrpsw, myobj){
     var store =  getObjectStore("Triplet", "readonly");
@@ -648,12 +659,13 @@ addBase(JSON.parse('{"b":["passwords"]}'));
 
   // Fonction qui fait les traitements necessaire sur l'objet "clair" (uint8array[taille+chiffré(login+mdp)])
   // puis envois le résultat du traitement a "fctn"
-  // Accepte : afficheClair(), function placement(),
+  // Accepte : afficheClair(), function placement(),checktest()
   function traitement(clair, currentPassword, website, newmstrpsw, myobj, fonction){
     messageClair = convertByteArrayToString(clair);
     tailleLogin = new Uint8Array(clair)[0];
     testpassword = messageClair.slice( tailleLogin + 1);
     testlogin = messageClair.slice(1, tailleLogin + 1);
+    console.log("tailleLogin :"+tailleLogin)
     fonction(testlogin, testpassword, website, newmstrpsw, myobj);
   };
 
@@ -669,8 +681,9 @@ addBase(JSON.parse('{"b":["passwords"]}'));
     var verif = new Uint8Array([0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
     byteLogin = new Uint8Array(convertStringToByteArray(testlogin));
     var val = false;
+    console.log(verif);
+    console.log(byteLogin);
     if (verif.length == (byteLogin.length) + 1){
-      console.log("if checkTest");
       var tentative = promCheckModPsw(verif, byteLogin, newmstrpsw, myobj);
       tentative.then(effectiveChangeMstrPsw(true, newmstrpsw, myobj));
     }
@@ -678,7 +691,13 @@ addBase(JSON.parse('{"b":["passwords"]}'));
 
   // Fonction de vérification de validite du mot de passe maitre
   function promCheckModPsw(verif, byteLogin, newmstrpsw, myobj){
+    console.log("promCheckModPsw");
+    console.log("pwd : " + newmstrpsw);
+    console.log("verif : "+ verif);
+
     return new Promise((resolve) => {
+      console.log(verif[0]);
+      console.log(tailleLogin);
       if (verif[0] == tailleLogin){
         for (var i=1; i<verif.length; i++){
           if (verif[i] != byteLogin[i-1]){
@@ -699,6 +718,7 @@ addBase(JSON.parse('{"b":["passwords"]}'));
   function effectiveChangeMstrPsw(booleanVal, newmstrpsw, myobj){
     if (booleanVal){
       for (var i=0; i<myobj.length; i++){
+        console.log("avant update"+myobj[i])
         updateAES128(myobj[i].Website, currentPassword, addListe, newmstrpsw)
       }
       $("#psw-buttons").hide();
@@ -778,10 +798,10 @@ addBase(JSON.parse('{"b":["passwords"]}'));
 
   // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
   $("#DL").click(function(){
-    downloadBdd(bDD)
+    downloadBdd(nom_de_la_Bdd)
   });
 
-  function downloadBdd(bDD){
+  function downloadBdd(nom_de_la_Bdd){
     var store = getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
     var conf = "true";
@@ -793,7 +813,7 @@ addBase(JSON.parse('{"b":["passwords"]}'));
         deleteData();
       }
       if (conf){
-        data = {"login":"log","bd":bDD};
+        data = {"login":"log","bd":nom_de_la_Bdd};
         var urlc = "https://192.168.99.100:443/moncoffre";
         $.ajax({
           type:"POST",
@@ -805,7 +825,6 @@ addBase(JSON.parse('{"b":["passwords"]}'));
             // variable de stockage ( liste de données post traitement)
             // variable stockage d'un triplet
             var myobj = JSON.parse(json);
-            let bdd_js = []
             if (myobj.triplets.length > 0){
               for (var i=0; i<myobj.triplets.length; i++){
                 // addTriplet(myobj.triplets[i].site, base64DecToArr(myobj.triplets[i].crypto));
@@ -823,6 +842,7 @@ addBase(JSON.parse('{"b":["passwords"]}'));
       }
     }
   };
+
   // Initialisation des champs d'entrees de "changer le mot de passe Maître" (champ mot de passe)
   $("#PasswordChange").click(function(){
     $("#psw-buttons").show();
@@ -876,10 +896,11 @@ addBase(JSON.parse('{"b":["passwords"]}'));
     var countRequest = store.count();
     countRequest.onsuccess = function() {
       if ( countRequest.result == 0){
-        encryptAES128("ÿÿÿÿÿÿÿ", "", "0________", undefined, undefined, addTriplet);
+        let checkpwd = new Uint8Array([ 0xff,0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
+        encryptAES128(convertByteArrayToString(checkpwd.buffer), "", "0________", undefined, undefined, addTriplet,true);
       }
+      encryptAES128(login, password, website, undefined, undefined, addTriplet,false);
     }
-    encryptAES128(login, password, website, undefined, undefined, addTriplet);
     $("#add-buttons").hide();
   });
 
@@ -927,9 +948,9 @@ addBase(JSON.parse('{"b":["passwords"]}'));
 
   $("body").on("click", "#base", function(){
     document.getElementById("add_tuple").disabled = true;
-    var bDD = $(this).attr("name");
-    console.log(bDD)
-    downloadBdd(bDD)
+    var nom_de_la_Bdd = $(this).attr("name");
+    console.log(nom_de_la_Bdd)
+    downloadBdd(nom_de_la_Bdd)
   });
 
   // Initialisation d'interactions avec les images "Modifier"
