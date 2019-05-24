@@ -14,8 +14,9 @@ var store;
 var cryptogrammeComplet = "";
 var currentPassword = "";
 var liste = []
-var nom_de_la_Bdd = '';//passwords
+var urlc = "https://192.168.99.100:443/moncoffre";
 var crypto = window.crypto;
+var nom_de_la_Bdd = '';//passwords
 
 if(crypto.subtle){
   // alert("Cryptography API Supported");
@@ -107,24 +108,23 @@ function checkEmptyMod(){
 };
 
 // Fonction qui vérifie si les champs de "modifier le mot de passe maître" sont vides
+// et qui vérifie si les deux derniers champs de "modifier le mot de passe maître" sont identiques
 function checkMstr(){
+
   if((document.getElementById("OldMstrPsw").value !="") && (document.getElementById("NewMstrPsw").value!="") && (document.getElementById("ConfMstrPsw").value!="") && (document.getElementById("NewMstrPsw").value == document.getElementById("ConfMstrPsw").value)){
     document.getElementById("chng_psw").disabled = false;
+    $("#failpsw").hide();
+  }
+  else if ((document.getElementById("NewMstrPsw").value == document.getElementById("ConfMstrPsw").value)){
+      $("#failpsw").hide();
+      document.getElementById("chng_psw").disabled = true;
   }
   else{
     document.getElementById("chng_psw").disabled = true;
-  };
-};
-
-// Fonction qui vérifie si les deux derniers champs de "modifier le mot de passe maître" sont identiques
-function checkSame(){
-  if((document.getElementById("NewMstrPsw").value === document.getElementById("ConfMstrPsw").value)){
-    $("#failpsw").hide();
-  }
-  else{
     $("#failpsw").show();
   };
 };
+
 
 // Initialisation de l'indexedDB
 createDb();
@@ -143,10 +143,7 @@ $(document).ready(function(){
 
   // Test de raffraichissement en live de la bd
   function getObjectStore(store_name, mode){
-    // console.log("Avant la transaction: " + store_name + " " + mode);
-    // console.log(db);
     var tx = db.transaction(store_name, mode);
-    // console.log("Après la transaction");
     return tx.objectStore(store_name);
   };
 
@@ -252,45 +249,43 @@ $(document).ready(function(){
       };
     };
 
-  // // Fonction qui decode une chaine en Base64 depuis un tableau d'octets
-  // function uint6ToB64(nUint6) {
-  //   return nUint6 < 26 ? // si mon caracteres est compris dans [0-25] c'est un caracteres
-  //       nUint6 + 65     // non imprimable, on fais donc +65 (ascii (A) = 65)
-  //     : nUint6 < 52 ?  // si le caracteres est une lettre minuscule +71 pour correspondre
-  //       nUint6 + 71   // au code ascii de la minuscule
-  //     : nUint6 < 62 ?   // si le caracteres est un chiffre -4 pour correspondre
-  //       nUint6 - 4        // au code ascii du chiffre
-  //     : nUint6 === 62 ? // si le caracteres est + le codage deviens r
-  //       43
-  //     : nUint6 === 63 ? // si le caracteres est / le codage deviens v
-  //       47
-  //     :
-  //       65;
-  // };
+  // Fonction qui decode une chaine en Base64 depuis un tableau d'octets
+  function uint6ToB64(nUint6) {
+    return nUint6 < 26 ? // si mon caracteres est compris dans [0-25] c'est un caracteres
+        nUint6 + 65     // non imprimable, on fais donc +65 (ascii (A) = 65)
+      : nUint6 < 52 ?  // si le caracteres est une lettre minuscule +71 pour correspondre
+        nUint6 + 71   // au code ascii de la minuscule
+      : nUint6 < 62 ?   // si le caracteres est un chiffre -4 pour correspondre
+        nUint6 - 4        // au code ascii du chiffre
+      : nUint6 === 62 ? // si le caracteres est + le codage deviens r
+        43
+      : nUint6 === 63 ? // si le caracteres est / le codage deviens v
+        47
+      :
+        65;
+  };
 
-  // // Fonction d'encodage array en Base64
-  // function base64EncArr(aBytes){
-  //   var eqLen = (3 - (aBytes.length % 3)) % 3, sB64Enc = "";
-  //   console.log("base64EncArr");
-  //   console.log(eqLen);
-  //   console.log(aBytes);
-  //   for (var nMod3, nLen = aBytes.length, nUint24 = 0, nIdx = 0; nIdx < nLen; nIdx++) {
-  //     nMod3 = nIdx % 3;
-  //     /* Uncomment the following line in order to split the output in lines 76-character long: */
-  //     /*
-  //     if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) { sB64Enc += "\r\n"; }
-  //     */
-  //     nUint24 |= aBytes[nIdx] << (16 >>> nMod3 & 24);
-  //     if (nMod3 === 2 || aBytes.length - nIdx === 1) {
-  //       sB64Enc += String.fromCharCode(uint6ToB64(nUint24 >>> 18 & 63), uint6ToB64(nUint24 >>> 12 & 63), uint6ToB64(nUint24 >>> 6 & 63), uint6ToB64(nUint24 & 63));
-  //       nUint24 = 0;
-  //     }
-  //   }
-  //   return  eqLen === 0 ?
-  //       sB64Enc
-  //     :
-  //       sB64Enc.substring(0, sB64Enc.length - eqLen) + (eqLen === 1 ? "=" : "==");
-  // }
+  // Fonction d'encodage array en Base64
+  function base64EncArr(aBytes){
+    var eqLen = (3 - (aBytes.length % 3)) % 3, sB64Enc = "";
+
+    for (var nMod3, nLen = aBytes.length, nUint24 = 0, nIdx = 0; nIdx < nLen; nIdx++) {
+      nMod3 = nIdx % 3;
+      /* Uncomment the following line in order to split the output in lines 76-character long: */
+      /*
+      if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) { sB64Enc += "\r\n"; }
+      */
+      nUint24 |= aBytes[nIdx] << (16 >>> nMod3 & 24);
+      if (nMod3 === 2 || aBytes.length - nIdx === 1) {
+        sB64Enc += String.fromCharCode(uint6ToB64(nUint24 >>> 18 & 63), uint6ToB64(nUint24 >>> 12 & 63), uint6ToB64(nUint24 >>> 6 & 63), uint6ToB64(nUint24 & 63));
+        nUint24 = 0;
+      }
+    }
+    return  eqLen === 0 ?
+        sB64Enc
+      :
+        sB64Enc.substring(0, sB64Enc.length - eqLen) + (eqLen === 1 ? "=" : "==");
+  }
 
   // Fonction qui decode un tableau d'octets depuis une chaine en Base64
   function b64ToUint6(nChr) {
@@ -337,6 +332,14 @@ $(document).ready(function(){
     };
   };
 
+  // Fonction de traitement de la base de donnees avant envoie serveur
+  function encodeB64(myobj){
+    for (var i=0; i<myobj.length; i++){
+      myobj[i].crypto = base64EncArr(myobj[i].crypto);
+    }
+    return(myobj);
+  };
+
   // Fonction de traitement de la base de donnees pour un affichage sur le client html
   function addBase(myobj){
     $("#show-menu").show();
@@ -373,8 +376,7 @@ $(document).ready(function(){
         if(myobj[i].Website != "0________"){
           tableau += '<tr><td>';
           tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">  ' + myobj[i].Website + '</td>';
-          tableau += '<td><a href="https://www.' + myobj[i].Website + '.com" target="_blank"><span class="glyphicon glyphicon-globe"></a></td>';
-          tableau += '<td><a href="#"><img src="js/jquery-ui/images/modifier.png" id="edit" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></a></td>';
+          tableau += '<td><a href="#mod-buttons"><img src="js/jquery-ui/images/modifier.png" id="edit" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></a></td>';
           tableau += '<td><img src="js/jquery-ui/images/effacer.png" id="deleteTrip" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></td></tr>';
         }
       }
@@ -769,35 +771,65 @@ decryptAES128("0________","azerty",placement);
 
   });
 
-// Initialisation du lien "Recuperer les bases de données" qui recupere la liste des bases de donnees présente sur le serveur
-  $("#DL-allBase").click(function(){
-      data = {"login":"log"};
-      var urlc = "https://192.168.99.100:443/moncoffre";
-      $.ajax({
-        type:"POST",
-        url:urlc + "/mesBDD",
-        data:JSON.stringify(data),
-        dataType:"text",
-        contentType:"application/json",
-        success:function(json,status){
-          // variable de stockage ( liste de données post traitement)
-          // variable stockage d'un triplet
-          var myobj = JSON.parse(json);
-          if (myobj.length > 0){
-            addBase(myobj);
+  // Envoie de la base de donnée sur serveur
+  $("#upload").click(function(){
+    var store = getObjectStore("Triplet", "readonly");
+    var getdatas = store.getAll();
+    var conf = "true";
+    getdatas.onsuccess = function(){
+      if (getdatas.result != 0){
+        var tmp = encodeB64(getdatas.result);
 
-          };
-        },
-        error:function(data,status){
-          $("#OnabbortAjax").modal();
-          console.log("error POST"+data+" status :  "+status);
-        }
+        data = {"login":"log2","bd":"passwords","triplets": tmp};
+        // var urlc = "https://192.168.99.100:8080/moncoffre";
+        $.ajax({
+          type:"POST",
+          url:urlc + "/test",
+          data:JSON.stringify(data),
+          dataType:"text",
+          contentType:"application/json",
+          // accepts: "*/*",
+          success:function(json,status){
+            console.log(json);
+            alert("Envoie réussi");
+          },
+          error:function(data,status){
+            alert("Echec de l'envoie");
+            console.log("error POST"+data+" status :  "+status);
+          }
+        });
+      }
+    }
+  });
+
+  // Initialisation du lien "Recuperer les bases de données" qui recupere la liste des bases de donnees présente sur le serveur
+    $("#DL-allBase").click(function(){
+        data = {"login":"log"};
+        var urlc = "https://192.168.99.100:443/moncoffre";
+        $.ajax({
+          type:"POST",
+          url:urlc + "/mesBDD",
+          data:JSON.stringify(data),
+          dataType:"text",
+          contentType:"application/json",
+          success:function(json,status){
+            // variable de stockage ( liste de données post traitement)
+            // variable stockage d'un triplet
+            var myobj = JSON.parse(json);
+            if (myobj.length > 0){
+              addBase(myobj);
+
+            };
+          },
+          error:function(data,status){
+            $("#OnabbortAjax").modal();
+            console.log("error POST"+data+" status :  "+status);
+          }
+        });
       });
-    });
-
   // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
   $("#DL").click(function(){
-    downloadBdd(nom_de_la_Bdd)
+    downloadBdd("nom_de_la_Bdd")
   });
 
   function downloadBdd(nom_de_la_Bdd){
@@ -806,14 +838,16 @@ decryptAES128("0________","azerty",placement);
     var conf = "true";
     getdatas.onsuccess = function(){
       if (getdatas.result != 0){
-        conf = confirmationSuppression("Voulez-vous supprimer la base de donnée locale?");
+        conf = confirmationSuppression("Voulez-vous supprimer la base de données locale?");
       }
       if (conf && getdatas.result != 0){
         deleteData();
+
       }
       if (conf){
-        data = {"login":"log","bd":nom_de_la_Bdd};
-        var urlc = "https://192.168.99.100:443/moncoffre";
+        // data = {"login":"log","bd":"passwords"};
+        data = {"login":"log2","bd":"passwords"};
+
         $.ajax({
           type:"POST",
           url:urlc + "/login",
@@ -971,6 +1005,7 @@ decryptAES128("0________","azerty",placement);
     var conf = confirmationSuppression("Voulez-vous supprimer ce tuple de la base de donnée locale?");
     if (conf){
       var website = $(this).attr("name");
+      console.log("web= ", website);
       var store =  getObjectStore("Triplet", "readonly");
       var objectStoreRequest = store.get(website);
       objectStoreRequest.onsuccess = function(){

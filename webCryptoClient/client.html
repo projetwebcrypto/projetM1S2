@@ -253,7 +253,7 @@
       </div>
       <div class="col-sm-4">
         <div class="panel panel-primary">
-          <div class="panel-heading" style="cursor:pointer"><span class="glyphicon glyphicon-upload"><FONT face="Bitstream Vera Sans">  SAUVEGARDER LA BASE DE DONNÉES </FONT></div>
+          <div class="panel-heading" style="cursor:pointer" id="upload"><span class="glyphicon glyphicon-upload"><FONT face="Bitstream Vera Sans">  SAUVEGARDER LA BASE DE DONNÉES </FONT></div>
           <div class="panel-footer">Permet d'envoyer les données locales sur un serveur distant</div>
         </div>
       </div>
@@ -271,6 +271,12 @@
           </div>
         </div>
       </div>
+      <div class="col-sm-4">
+        <div class="panel panel-primary">
+        <div id="DL-allBase" style="cursor:pointer" class="panel-heading"><span class="glyphicon glyphicon-list"><FONT face="Bitstream Vera Sans">  LISTER LES BASES DE DONNÉES</FONT></span></div>
+        <div class="panel-footer">Permet récupérer la liste des base de données présente sur le serveur </div>
+      </div>
+    </div>
     </div>
   </div>
 </div>
@@ -285,9 +291,9 @@
             <input type="text" name="website" id="new-Website" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
             <div class="input-group-prepend"></div>
             <label for="Login">Identifiant</label>
-            <input type="text" name="login" id="mod-Login" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
+            <input type="text" name="login" id="mod-Login" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()" minlength="1" maxlength="32"/>
             <label for="Password">Mot de passe</label>
-            <input type="password" name="mdp" id="mod-Password" placeholder="Entrez nouveau mdp" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
+            <input type="password" name="mdp" id="mod-Password" placeholder="Entrez nouveau mdp" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()" minlength="1" maxlength="32"/>
           </div>
           <div class="btn-group mr-2" role="group" aria-label="First group">
             <button type="button" class="btn btn-secondary" id="mod_tuple">Valider</button>

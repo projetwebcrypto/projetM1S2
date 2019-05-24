@@ -1,11 +1,14 @@
 package fr.univtln.groupe1.webCrypto.REST;
 
 import fr.univtln.groupe1.webCrypto.Account.FileManagment;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import java.util.Iterator;
 
 
 @Path("/myresource")
@@ -25,21 +28,29 @@ public class serveurREST {
         String login = request.getString("login");
         String nomdb = request.getString("bd");
         FileManagment fileManagment = new FileManagment();
-        String contenu = fileManagment.existencyAccount(login, nomdb);
+        String contenu = fileManagment.pullBd(login, nomdb);
         String reponse = "{\"triplets\":[" + contenu + "]}";
         return reponse;
     }
 
     /**
      * Méthode qui insert les triplets reçus dans la BDD nomdb
-     * associé au login
+     * associe au login
+     * format: {"login": "X", "nomdb": "Y", "triplets": [...]}
      */
     @POST
-    public void postBDDTriplets(/*Something*/) {
-        /*
-        format: {"login": "X", "nomdb": "Y", "triplets": [...]}
-         */
+    @Path("/test")
+//    @Consumes(MediaType.APPLICATION_JSON)
+    public String postBDDTriplets(String listJson) {
+        JSONObject obj = new JSONObject(listJson);
+        String login = obj.getString("login");
+        String nomBd = obj.getString("bd");
+        JSONArray triplets = obj.getJSONArray("triplets");
 
+        FileManagment fileManagment = new FileManagment();
+
+        fileManagment.pushBd(login, nomBd, triplets);
+        return("recue");
     }
 
     @GET
