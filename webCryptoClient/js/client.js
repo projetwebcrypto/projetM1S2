@@ -808,7 +808,7 @@ decryptAES128("0________","azerty",placement);
         var urlc = "https://192.168.99.100:443/moncoffre";
         $.ajax({
           type:"POST",
-          url:urlc + "/mesBDD",
+          url:urlc + "/listeBd",
           data:JSON.stringify(data),
           dataType:"text",
           contentType:"application/json",

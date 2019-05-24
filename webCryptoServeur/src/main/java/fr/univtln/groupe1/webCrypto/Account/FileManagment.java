@@ -6,9 +6,10 @@ import lombok.*;
 import org.json.JSONArray;
 
 import javax.xml.bind.DatatypeConverter;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.sql.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @ToString
 public class FileManagment{
@@ -170,5 +171,31 @@ public class FileManagment{
             }
         }
         return true;
+    }
+
+    // Liste les bases de donnees d'un utilisateur
+    public String listeBd(String login) {
+        String contenu ="";
+        File repository = new File(path + login + "/");
+        try {
+            File[] listFile;
+            listFile = repository.listFiles();
+            for (int i = 0; i < listFile.length; i++) {
+                System.out.println();
+                System.out.println(listFile[i].toString());
+                System.out.println(listFile[i].toString().substring(listFile[i].toString().lastIndexOf("/")));
+                // on enleve le / avant le nom du fichier
+                // les 6 derniers carateres etant .db.sc ne nous interessent pas
+                if (contenu != null && contenu.length() > 0) {
+                    contenu = contenu.substring(1, contenu.length() - 6);
+                    System.out.println(contenu);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        return contenu;
     }
 }

@@ -53,6 +53,20 @@ public class serveurREST {
         return("recue");
     }
 
+    @POST
+    @Path("/listeBd")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String listerBdd(String listJson) {
+        System.out.println("ok");
+        JSONObject obj = new JSONObject(listJson);
+        String login = obj.getString("login");
+        FileManagment fileManagment = new FileManagment();
+
+        fileManagment.listeBd(login);
+
+        return "";
+    }
+
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String testServeur(){
