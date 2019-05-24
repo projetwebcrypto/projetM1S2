@@ -107,24 +107,23 @@ function checkEmptyMod(){
 };
 
 // Fonction qui vérifie si les champs de "modifier le mot de passe maître" sont vides
+// et qui vérifie si les deux derniers champs de "modifier le mot de passe maître" sont identiques
 function checkMstr(){
+
   if((document.getElementById("OldMstrPsw").value !="") && (document.getElementById("NewMstrPsw").value!="") && (document.getElementById("ConfMstrPsw").value!="") && (document.getElementById("NewMstrPsw").value == document.getElementById("ConfMstrPsw").value)){
     document.getElementById("chng_psw").disabled = false;
+    $("#failpsw").hide();
+  }
+  else if ((document.getElementById("NewMstrPsw").value == document.getElementById("ConfMstrPsw").value)){
+      $("#failpsw").hide();
+      document.getElementById("chng_psw").disabled = true;
   }
   else{
     document.getElementById("chng_psw").disabled = true;
-  };
-};
-
-// Fonction qui vérifie si les deux derniers champs de "modifier le mot de passe maître" sont identiques
-function checkSame(){
-  if((document.getElementById("NewMstrPsw").value === document.getElementById("ConfMstrPsw").value)){
-    $("#failpsw").hide();
-  }
-  else{
     $("#failpsw").show();
   };
 };
+
 
 // Initialisation de l'indexedDB
 createDb();
@@ -143,10 +142,7 @@ $(document).ready(function(){
 
   // Test de raffraichissement en live de la bd
   function getObjectStore(store_name, mode){
-    // console.log("Avant la transaction: " + store_name + " " + mode);
-    // console.log(db);
     var tx = db.transaction(store_name, mode);
-    // console.log("Après la transaction");
     return tx.objectStore(store_name);
   };
 
@@ -933,7 +929,6 @@ $(document).ready(function(){
         var supprStoreRequest = objectStore.delete(website);
         supprStoreRequest.onsuccess = function(){
           document.getElementById("button-onload").className = "dot red";
-          readTriplet();
         }
       }
     }
