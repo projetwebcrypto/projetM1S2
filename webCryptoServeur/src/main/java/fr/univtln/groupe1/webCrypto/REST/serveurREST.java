@@ -28,41 +28,28 @@ public class serveurREST {
         String login = request.getString("login");
         String nomdb = request.getString("bd");
         FileManagment fileManagment = new FileManagment();
-        String contenu = fileManagment.existencyAccount(login, nomdb);
+        String contenu = fileManagment.pullBd(login, nomdb);
         String reponse = "{\"triplets\":[" + contenu + "]}";
         return reponse;
     }
 
     /**
      * Méthode qui insert les triplets reçus dans la BDD nomdb
-     * associé au login
+     * associe au login
+     * format: {"login": "X", "nomdb": "Y", "triplets": [...]}
      */
     @POST
     @Path("/test")
 //    @Consumes(MediaType.APPLICATION_JSON)
     public String postBDDTriplets(String listJson) {
-        /*
-        format: {"login": "X", "nomdb": "Y", "triplets": [...]}
-         */
-
         JSONObject obj = new JSONObject(listJson);
         String login = obj.getString("login");
-        String bd = obj.getString("bd");
-        JSONArray triplet = obj.getJSONArray("triplets");
+        String nomBd = obj.getString("bd");
+        JSONArray triplets = obj.getJSONArray("triplets");
 
         FileManagment fileManagment = new FileManagment();
-        fileManagment.createFile(login,bd);
-        fileManagment.initSchemaEmptyFile(login,bd);
 
-        for (int i = 0; i < triplet.length(); i++) {
-            JSONObject tuple = triplet.getJSONObject(i);
-            fileManagment.fillFile(login, bd, tuple.get("Website"), tuple.get("crypto"));
-        }
-//        for (Iterator iterator = obj.keys(); iterator.hasNext();) {
-//            Object cle = iterator.next();
-//            Object val = obj.get(String.valueOf(cle));
-//            System.out.println("cle=" + cle + ", valeur=" + val);
-//        }
+        fileManagment.pushBd(login, nomBd, triplets);
         return("recue");
     }
 

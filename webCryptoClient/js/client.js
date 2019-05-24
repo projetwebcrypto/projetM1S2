@@ -498,7 +498,7 @@ $(document).ready(function(){
       if (getdatas.result != 0){
         var tmp = encodeB64(getdatas.result);
 
-        data = {"login":"log2","bd":"2passwords","triplets": tmp};
+        data = {"login":"log2","bd":"passwords","triplets": tmp};
         // var urlc = "https://192.168.99.100:8080/moncoffre";
         $.ajax({
           type:"POST",
@@ -509,7 +509,7 @@ $(document).ready(function(){
           // accepts: "*/*",
           success:function(json,status){
             console.log(json);
-            alert("Envoie réussie");
+            alert("Envoie réussi");
           },
           error:function(data,status){
             alert("Echec de l'envoie");
@@ -527,11 +527,12 @@ $(document).ready(function(){
     var conf = "true";
     getdatas.onsuccess = function(){
       if (getdatas.result != 0){
-        conf = confirmationSuppression("Voulez-vous supprimer la base de donnée locale?");
+        conf = confirmationSuppression("Voulez-vous supprimer la base de données locale?");
       }
       if (conf){
         deleteData();
-        data = {"login":"log","bd":"passwords"};
+        // data = {"login":"log","bd":"passwords"};
+        data = {"login":"log2","bd":"passwords"};
 
         $.ajax({
           type:"POST",
