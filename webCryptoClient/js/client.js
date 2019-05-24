@@ -921,6 +921,7 @@ $(document).ready(function(){
     var conf = confirmationSuppression("Voulez-vous supprimer ce tuple de la base de donnée locale?");
     if (conf){
       var website = $(this).attr("name");
+      console.log("web= ", website);
       var store =  getObjectStore("Triplet", "readonly");
       var objectStoreRequest = store.get(website);
       objectStoreRequest.onsuccess = function(){
@@ -929,6 +930,7 @@ $(document).ready(function(){
         var supprStoreRequest = objectStore.delete(website);
         supprStoreRequest.onsuccess = function(){
           document.getElementById("button-onload").className = "dot red";
+          readTriplet();
         }
       }
     }
