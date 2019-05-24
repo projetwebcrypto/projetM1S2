@@ -1,19 +1,21 @@
 package fr.univtln.groupe1.webCrypto.REST;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import fr.univtln.groupe1.webCrypto.Account.FileManagment;
-//import org.jboss.resteasy.spi.HttpRequest;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import org.json.JSONObject;
-import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.representations.AccessToken;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+
 import org.jboss.logging.Logger;
 
 import java.io.FileInputStream;
@@ -21,6 +23,7 @@ import java.io.InputStream;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
+
 
 
 @Path("/myresource")
@@ -81,21 +84,29 @@ public class serveurREST {
         log.info(x);
 
         FileManagment fileManagment = new FileManagment();
-        String contenu = fileManagment.existencyAccount("log", "passwords");
+        String contenu = fileManagment.pullBd("log", "passwords");
         String reponse = "{\"triplets\":[" + contenu + "]}";
         return x;
     }
 
     /**
      * Méthode qui insert les triplets reçus dans la BDD nomdb
-     * associé au login
+     * associe au login
+     * format: {"login": "X", "nomdb": "Y", "triplets": [...]}
      */
     @POST
-    public void postBDDTriplets(/*Something*/) {
-        /*
-        format: {"login": "X", "nomdb": "Y", "triplets": [...]}
-         */
+    @Path("/test")
+//    @Consumes(MediaType.APPLICATION_JSON)
+    public String postBDDTriplets(String listJson) {
+        JSONObject obj = new JSONObject(listJson);
+        String login = obj.getString("login");
+        String nomBd = obj.getString("bd");
+        JSONArray triplets = obj.getJSONArray("triplets");
 
+        FileManagment fileManagment = new FileManagment();
+
+        fileManagment.pushBd(login, nomBd, triplets);
+        return("recue");
     }
 
     @GET
