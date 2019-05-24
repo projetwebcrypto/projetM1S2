@@ -337,23 +337,24 @@ $(document).ready(function(){
     };
   };
 
-addBase(JSON.parse('{"b":["passwords"]}'));
   // Fonction de traitement de la base de donnees pour un affichage sur le client html
   function addBase(myobj){
+    $("#show-menu").show();
+    $('.collapse').collapse();
     // Effacement d'eventuels affichage precedents
-  $("table").remove();
-    // Initialisation des champs du tableau
-    var tableau = '<div class="container"><table class="table"><thead><tr>';
-    tableau += '<th scope="col">Base de données :</th>';
+    $("table").remove();
+      // Initialisation des champs du tableau
+      var tableau = '<div class="container"><table class="table"><thead><tr>';
+      tableau += '<th scope="col">Base de données :</th>';
 
-    for (var i=0; i<myobj.b.length; i++){
-      tableau += '<tr><td>';
-      tableau += '<li class="list-group-item">  ' + myobj.b[i] + '</td>';
-      tableau += '<td><span class="glyphicon glyphicon-download-alt" id="base" name="' + myobj.b[i] + '" style="cursor:pointer"></td></tr>';
-    }
-    // Fermeture des balises et du tableau
-    tableau += '</tbody></table></div>';
-    $("body").append(tableau);
+      for (var i=0; i<myobj.b.length; i++){
+        tableau += '<tr><td>';
+        tableau += '<li class="list-group-item">  ' + myobj.b[i] + '</td>';
+        tableau += '<td><span class="glyphicon glyphicon-download-alt" id="base" name="' + myobj.b[i] + '" style="cursor:pointer"></td></tr>';
+      }
+      // Fermeture des balises et du tableau
+      tableau += '</tbody></table></div>';
+      $("body").append(tableau);
 
   };
 
@@ -362,7 +363,7 @@ addBase(JSON.parse('{"b":["passwords"]}'));
     // Effacement d'eventuels affichage precedents
     $("table").remove();
     if(myobj == 0){
-      alert("Aucun tuple contenu dans la base de données !")
+      $("#OnabbortreadTriplet").modal();
     }
     else{
       // Initialisation des champs du tableau
@@ -732,19 +733,14 @@ decryptAES128("0________","azerty",placement);
   Affichage et interactions avec le client.html
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
-  $(window).blur(function () {
-    // currentPassword='';
-  });
-
    // Dissimulation initiale des champs d'entrees d' "ajouter un triplet"
   $("#add-buttons").hide();
   $("#mod-buttons").hide();
   $("#psw-buttons").hide();
   $('#add-MstrPsw').hide();
-  $("#show-menu").hide();
+  // $("#show-menu").hide();
+  addBase(JSON.parse('{"b":["passwords"]}'));
   $("#show-menu").click(function(){
-
-    // $("#show-menu").hide();
     $(this).toggleClass('glyphicon-minus');
   });
 
@@ -792,7 +788,10 @@ decryptAES128("0________","azerty",placement);
 
           };
         },
-        error:function(data,status){console.log("error POST"+data+" status :  "+status);}
+        error:function(data,status){
+          $("#OnabbortAjax").modal();
+          console.log("error POST"+data+" status :  "+status);
+        }
       });
     });
 
@@ -885,6 +884,10 @@ decryptAES128("0________","azerty",placement);
     $('#add-MstrPsw').hide();
     document.getElementById("MtsrPwd").value = '';
   });
+// Affiche le modal d'identification
+  $("#Account").click(function(){
+      $("#myModal").modal();
+    });
 
   // Initialisation du bouton "Ajouter" sous les champs d'entrees d' "ajouter un triplet"
   $("#add_tuple").click(function(){
