@@ -16,6 +16,18 @@ var currentPassword = "";
 var liste = []
 var urlc = "https://192.168.99.100:443/moncoffre";
 var crypto = window.crypto;
+var keycloak = Keycloak({
+"realm": "ragnarok",
+"auth-server-url": "https://192.168.99.100/keycloak/auth",
+"url": "https://192.168.99.100/keycloak/auth",
+"clientId": 'customer-portal',
+"ssl-required": "external",
+"resource": "customer-portal",
+"credentials": {
+"secret": "Achanger"
+},
+"enable-cors": true
+});
 
 if(crypto.subtle){
   // alert("Cryptography API Supported");
@@ -124,12 +136,17 @@ function checkMstr(){
   };
 };
 
-
 // Initialisation de l'indexedDB
 createDb();
 
 // S'assure que le .html est bien lance.
 $(document).ready(function(){
+
+  keycloak.init({ onLoad: 'login-required' })
+          .success(reloadData)
+          .error(function(errorData) {
+            console.log("Oups, I did it again.");
+          });
 
   // Fonction qui definit le mot de passe maitre initial. Si base de donnée locale existante,
   // verifie la valeur du mot de passe donne.
@@ -391,7 +408,6 @@ $(document).ready(function(){
     }
   };
 
-
   // Fonction qui prend en parametre un site et son chiffre et les stocke dans une
   // variable globale pour les rentrer en BDD plus tard.
   function addListe(website, cryptogrammeComplet){
@@ -407,6 +423,18 @@ $(document).ready(function(){
         put_record(liste, store, cpt);
       }
     };
+  };
+
+  var loadFailure = function () {
+    document.getElementById('customers').innerHTML = '<b>Failed to load data.  Check console log</b>';
+  };
+
+  var reloadData = function () {
+    keycloak.updateToken(10)
+            .success(loadData)
+            .error(function() {
+              document.getElementById('customers').innerHTML = '<b>Failed to load data.  User is logged out.</b>';
+            });
   };
 
   /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -748,6 +776,7 @@ $(document).ready(function(){
         // var urlc = "https://192.168.99.100:8080/moncoffre";
         $.ajax({
           type:"POST",
+          headers:{"Authorization": "Bearer " + keycloak.token},
           url:urlc + "/test",
           data:JSON.stringify(data),
           dataType:"text",
@@ -785,6 +814,7 @@ $(document).ready(function(){
 
         $.ajax({
           type:"POST",
+          headers:{"Authorization": "Bearer " + keycloak.token},
           url:urlc + "/login",
           data:JSON.stringify(data),
           dataType:"text",
