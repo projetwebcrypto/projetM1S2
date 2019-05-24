@@ -1,53 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- <head>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
-  <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <script type="text/JavaScript" src="js/client.js"></script>
-  <script type="text/javascript" src="js/jquery-ui/jquery-ui.min.js"></script>
-
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-  </head> -->
-  <head>
-  <title>Test Client!</title>
+<head>
+  <title> MonCoffre </title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="js/jquery-ui/jquery-ui.min.js"></script>
   <!-- <script type="text/javascript" src="js/firefox.js"></script> -->
   <script type="text/javascript" src="js/client.js"></script>
-  </head>
-  <body onload="checkEmpty()">
-    <div class="jumbotron text-center">
-      <h1>Client monCoffre</h1>
-      <p>Simple test</p>
+  <style>
+  .dot {
+    height: 15px;
+    width: 15px;
+    background-color: #0f0;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .dot.grey {
+    height: 15px;
+    width: 15px;
+    background-color: #999;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .dot.red{
+    height: 15px;
+    width: 15px;
+    background-color: #f00;
+    border-radius: 50%;
+    display: inline-block;
+  }
+    /* Remove the navbar's default rounded borders and increase the bottom margin */
+    .navbar {
+      margin-bottom: 50px;
+      border-radius: 0;
+    }
+
+    /* Remove the jumbotron's default bottom margin */
+     .jumbotron {
+      margin-bottom: 0;
+    }
+
+    /* Add a gray background color and some padding to the footer */
+    footer {
+      background-color: #f2f2f2;
+      padding: 25px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="jumbotron">
+  <div class="container text-center">
+    <h1>Client monCoffre</h1>
+    <p>Application permettant le stockage sécurisé de vos identifiants</p>
+  </div>
+</div>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Logo</a>
     </div>
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-4" id = 'div_add'>
-          <h3>Ajouter site</h3>
-          <li><a href='#' id='ADD'>Ajouter site</a></li>
-          <p>Permet d'ajouter une entrée.</p>
-          <div class="add-trip" id='add-buttons'>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="file:///home/etudiants/cclain594/T%C3%A9l%C3%A9chargements/Re%20html/site2.html">Home</a></li>
+        <li><a href="https://github.com/projetwebcrypto/projetM1S2/blob/master/README.md">A propos</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#"><span class="glyphicon glyphicon-user"></span> Your Account</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<div style="text-align:right">
+  <span class="dot grey" id="button-onload"></span>
+</div>
+<span class="glyphicon glyphicon-plus" style="cursor:pointer;text-align:left" id="show-menu" data-toggle="collapse" data-target="#demo"></span>
+<div id="demo" class="collapse in">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-4">
+        <div class="panel panel-primary">
+          <div id="ADD" class="panel-heading" style="cursor:pointer" ><span class="glyphicon glyphicon-plus">  AJOUTER UN SITE </div>
+          <div class="panel-footer">Permet d'ajouter un nouveau site dans votre base de données ( et ses logins mot de passe associé)</div>
+          <div class="add-trip" id="add-buttons">
             <div class="form-group">
               <label for="Website">Site</label>
-              <input type="text" name="Website" class="form-control" id="Website" placeholder="Entrez le site"onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
+              <input type="text" name="Website" class="form-control" id="Website" placeholder="Entrez le site" onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()" minlength="1" maxlength="64">
             </div>
             <div class="form-group">
               <label for="Login">Identifiant</label>
-              <input type="text" name="login" class="form-control" id="Login" placeholder="Entrez votre login"onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
+              <input type="text" name="login" class="form-control" id="Login" placeholder="Entrez votre login"onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()" minlength="1" maxlength="32">
             </div>
             <div class="form-group">
               <label for="Password">Mot de passe</label>
-              <input type="password" name="mdp" class="form-control" id="Password" placeholder="Entrez votre mot de passe"onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
+              <input type="password" name="mdp" class="form-control" id="Password" placeholder="Entrez votre mot de passe"onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()" minlength="1" maxlength="32">
             </div>
             <div class="btn-group mr-2" role="group" aria-label="First group">
               <button type="button" class="btn btn-secondary" id="add_tuple">Ajouter</button>
@@ -56,55 +112,106 @@
             </div>
           </div>
         </div>
-        <div class="col-sm-4">
-          <h3>Récupérer les sites</h3>
-          <li><a href='#' id='DL'>Récupérer les sites</a></li>
-          <p>Permet de récupérer vos sites depuis le serveur.</p>
+      </div>
+      <div class="col-sm-4">
+        <div class="panel panel-primary">
+          <div id="DL" style="cursor:pointer" class="panel-heading"><span class="glyphicon glyphicon-download">  RÉCUPÉRER LES SITES</span></div>
+          <div class="panel-footer">Permet récupérer les sites dans votre base de données distante ( sur le serveur de stockage) </div>
         </div>
-        <div class="col-sm-4">
-          <h3>Changer de mot de passe Maître</h3>
-          <li><a href='#'>Changer de mot de passe</a></li>
-          <p>Permet de changer votre mot de passe Maître.</p>
-        </div>
-        <div class="col-sm-4">
-          <h3>Supprimer tout</h3>
-          <li><a href='#' id='Delete'>Supprimer tout</a></li>
-          <p>Purification.</p>
-        </div>
-        <div class="col-sm-4">
-          <h3>Sauvegarder Base</h3>
-          <li><a href='#' id='upload'>Sauvegarder Base</a></li>
-          <p>Salvation.</p>
-        </div>
-        <div class="col-sm-4">
-          <h3>A propos</h3>
-          <li><a href='#'>A propos</a></li>
-          <p>A propos de nous.</p>
-        </div>
-        <div class="col-sm-4">
-          <h3>Afficher les sites</h3>
-          <li><a href='#' id='Affichage'>Afficher les sites</a></li>
-          <p>Afficher les sites</p>
+      </div>
+      <div class="col-sm-4">
+        <div class="panel panel-primary">
+          <div id="PasswordChange" class="panel-heading" style="cursor:pointer"><span class="glyphicon glyphicon-pencil">  CHANGER DE MOT DE PASSE MAÎTRE</div>
+          <div class="panel-footer">Permet de changer le mot de passe de la base de données</div>
+          <div class="add-trip" id="psw-buttons">
+            <div class="form-group">
+              <label for="OldMstrPsw">Ancien mot de passe Maître</label>
+              <input type="password" name="oldmstrpsw" class="form-control" id="OldMstrPsw" placeholder="Entrez votre mot de passe maître actuel" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()" minlength="1" maxlength="32">
+            </div>
+            <div class="form-group">
+              <label for="NewMstrPsw">Nouveau mot de passe Maître</label>
+              <input type="password" name="newmstrpsw" class="form-control" id="NewMstrPsw" placeholder="Entrez votre nouveau mot de passe maître" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()" minlength="1" maxlength="32">
+            </div>
+            <div class="form-group">
+              <label for="ConfMstrPsw">Confirmer le nouveau mot de passe Maître</label>
+              <input type="password" name="confmstrpsw" class="form-control" id="ConfMstrPsw" placeholder="Confirmez votre nouveau mot de passe maître" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()" minlength="1" maxlength="32">
+            </div>
+            <div id="failpsw" onfocus="checkSame()" onblur="checkSame()" onkeyup="checkSame()">
+              <p>Nouveaux mots de passe différents !</p>
+            </div>
+            <div class="btn-group mr-2" role="group" aria-label="First group">
+              <button type="button" class="btn btn-secondary" id="chng_psw">Ajouter</button>
+              <button type="button" class="btn btn-secondary" id="abort_psw">Annuler</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="btn-toolbar mb-3" role="toolbar" id="mod-buttons">
-      <div class="input-group">
-        <label for="Website" id="mod-Website"></label>
-        <div class="input-group-prepend"></div>
-        <label for="Login">Identifiant</label>
-        <input type="text" name="login" id="mod-Login" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
-        <label for="Password">Mot de passe</label>
-        <input type="password" name="mdp" id="mod-Password" placeholder="Entrez nouveau mdp" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
+  </div>
+<br>
+  <div class="container">
+    <div class="row">
+     <div class="col-sm-4">
+        <div class="panel panel-primary">
+          <div id="Affichage" class="panel-heading" style="cursor:pointer"><span class="glyphicon glyphicon-list">  AFFICHER LES SITES</div>
+          <div class="panel-footer">Permet de lister les données locales</div>
+        </div>
       </div>
-      <div class="btn-group mr-2" role="group" aria-label="First group">
-        <button type="button" class="btn btn-secondary" id="mod_tuple">Valider</button>
-        <button type="button" class="btn btn-secondary" id="abort_mod">Annuler</button>
+      <div class="col-sm-4">
+        <div class="panel panel-primary">
+          <div id="Delete" class="panel-heading" style="cursor:pointer"><span class="glyphicon glyphicon-remove">  SUPPRIMER LES SITES</div>
+          <div class="panel-footer">Permet de supprimer les données locales</div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="panel panel-primary">
+          <div class="panel-heading" style="cursor:pointer" id="upload"><span class="glyphicon glyphicon-upload">  SAUVEGARDER LA BASE DE DONNÉES </div>
+          <div class="panel-footer">Permet d'envoyer les données locales sur un serveur distant</div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="panel panel-primary">
+          <div class="panel-heading" style="cursor:pointer" id="saisie-mdp-maitre"><span class="glyphicon glyphicon-pencil">  SAISIR LE MOT DE PASSE MAÎTRE </div>
+          <div class="panel-footer">Permet la saisie du mot de passe de déchiffrement</div>
+          <div class="form-group" id=add-MstrPsw>
+            <label for="NewMstrPsw"> mot de passe Maître</label>
+            <input type="password" class="form-control" id="MtsrPwd" placeholder="Entrez votre mot de passe maître" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()" minlength="1" maxlength="32">
+            <div class="btn-group mr-2" role="group" aria-label="First group">
+              <button type="button" class="btn btn-secondary" id="saisie_Mtrspsw">Ajouter</button>
+              <button type="button" class="btn btn-secondary" id="abort_Mtrspsw">Annuler</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>  -->
-  </body>
+  </div>
+</div>
+<div class="container" id="mod-buttons">
+  <div class="row">
+    <div class="col-sm-4">
+      <div class="panel panel-primary">
+        <div class="panel-heading"><span class="glyphicon glyphicon-pencil">  Modification des champs </div>
+        <div style="text-align:center" class="btn-toolbar mb-3" role="toolbar">
+          <div class="input-group">
+            <label for="Website" id="mod-Website"></label>
+            <input type="text" name="website" id="new-Website" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
+            <div class="input-group-prepend"></div>
+            <label for="Login">Identifiant</label>
+            <input type="text" name="login" id="mod-Login" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
+            <label for="Password">Mot de passe</label>
+            <input type="password" name="mdp" id="mod-Password" placeholder="Entrez nouveau mdp" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
+          </div>
+          <div class="btn-group mr-2" role="group" aria-label="First group">
+            <button type="button" class="btn btn-secondary" id="mod_tuple">Valider</button>
+            <button type="button" class="btn btn-secondary" id="abort_mod">Annuler</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<br>
+<br>
+
+</body>
 </html>
