@@ -15,9 +15,8 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script type="text/javascript" src="js/client.js"></script>
   </head>
-  <ons-navigator swipeable id="navigator" page="logPage.html"></ons-navigator>
-  <template id="logPage.html">
-    <ons-page onload="checkEmpty()" id="logPage">
+  <ons-navigator id="navigator">
+    <ons-page onload="checkEmpty()" id="pagePsw">
       <div style="text-align: center; margin-top: 50px">
         <h1>Client monCoffre</h1>
       </div>
@@ -31,17 +30,49 @@
         <ons-button id="first-mstrPsw" disabled="true">Valider</ons-button>
       </div>
     </ons-page>
-  </template>
-  <template id="mainPage.html">
+
+    <!-- <ons-splitter>
+      <ons-splitter-side id="menu" side="left" width="220px" collapse swipeable>
+        <ons-page>
+          <ons-list>
+            <ons-list-item id="DL" tappable>
+              Récup. sites
+            </ons-list-item>
+            <ons-list-item id="ADD" tappable>
+              Ajout. sites
+            </ons-list-item>
+            <ons-list-item id="PasswordChange" tappable>
+              Changer MDP Maître
+            </ons-list-item>
+            <ons-list-item id="Delete" tappable>
+              Supprimer
+            </ons-list-item>
+            <ons-list-item id="Affichage" tappable>
+              Afficher
+            </ons-list-item>
+            <ons-list-item tappable>
+              Sauvegarder
+            </ons-list-item>
+            <ons-list-item tappable>
+              A propos
+            </ons-list-item>
+          </ons-list>
+        </ons-page>
+      </ons-splitter-side>
+      <ons-splitter-content id="content" page="home.html"></ons-splitter-content>
+    </ons-splitter> -->
+
     <ons-page id="mainPage">
 
       <div style="text-align: center; margin-top: 10px">
         <h1>Client monCoffre</h1>
       </div>
-
       <ons-toolbar id="home-toolbar">
+        <ons-toolbar-button>
+          <ons-icon icon="ion-navicon, material:md-menu"></ons-icon>
+        </ons-toolbar-button>
         <ons-toolbar-button modifier="outline" href="#" id="DL">
-          <div class="left">Récup. sites</div>
+          <div>Récup. sites</div>
         </ons-toolbar-button>
         <ons-toolbar-button modifier="outline" href="#" id="ADD">
           <div>Ajout. sites</div>
@@ -63,115 +94,82 @@
         </ons-toolbar-button>
       </ons-toolbar>
 
-    </ons-page>
-  </template>
-  <template id="addPage.html">
-    <ons-page id="addPage">
-
-      <div style="text-align: center; margin-top: 10px">
-        <h1>Client monCoffre</h1>
-        <h2>Ajout d'un site</h2>
-      </div>
-      <div class="left"><ons-back-button>Retour</ons-back-button></div>
-
       <div class="add-trip" id="add-buttons">
-        <div class="form-group">
-          <i class="material-icons">language</i>
-          <ons-input modifier="material underbar" type="text" name="Website" class="form-control" id="Website" placeholder="Entrez le site" onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
-        </div>
-        <div class="form-group">
-          <i class="material-icons">face</i>
-          <ons-input modifier="material underbar"  type="text" name="login" class="form-control" id="Login" placeholder="Entrez votre login" onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
-        </div>
-        <div class="form-group">
-          <i class="material-icons">lock</i>
-          <ons-input modifier="material underbar"  type="password" name="mdp" class="form-control" id="Password" placeholder="Entrez votre mot de passe" onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
-        </div>
-        <div class="btn-group mr-2" role="group" aria-label="First group">
-          <ons-button type="button" class="btn btn-secondary" id="add_tuple" disabled="true">Ajouter</ons-button>
-          <!-- <button type="reset" id="reset">Reset</button> -->
-          <ons-button type="button" class="btn btn-secondary" id="abort_add">Annuler</ons-button>
-        </div>
-      </div>
-
-    </ons-page>
-  </template>
-  <template id="passwordPage.html">
-    <ons-page id="passwordPage">
-
-      <div style="text-align: center; margin-top: 10px">
-        <h1>Client monCoffre</h1>
-        <h2>Changement du mot de passe Maître</h2>
-      </div>
-      <div class="left"><ons-back-button>Retour</ons-back-button></div>
-
-      <div class="add-trip" id="psw-buttons">
-        <div class="form-group">
-          <i class="material-icons">vpn_key</i>
-          <ons-input modifier="material underbar"  type="password" name="oldmstrpsw" class="form-control" id="OldMstrPsw" placeholder="MDP actuel" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">
-        </div>
-        <div class="form-group">
-          <i class="material-icons">vpn_key</i>
-          <ons-input modifier="material underbar"  type="password" name="newmstrpsw" class="form-control" id="NewMstrPsw" placeholder="Nouveau MDP" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">
-        </div>
-        <div class="form-group">
-          <i class="material-icons">vpn_key</i>
-          <ons-input modifier="material underbar"  type="password" name="confmstrpsw" class="form-control" id="ConfMstrPsw" placeholder="Confirmation MDP" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">
-        </div>
-        <p>
-          <label id="failpsw" onfocus="checkSame()" onblur="checkSame()" onkeyup="checkSame()">Nouveaux mots de passe différents !</label>
-        </p>
-        <div class="btn-group mr-2" role="group" aria-label="First group">
-          <ons-button type="button" class="btn btn-secondary" id="chng_psw" disabled="true">Ajouter</ons-button>
-          <ons-button type="button" class="btn btn-secondary" id="abort_psw">Annuler</ons-button>
+        <div style="text-align: center; margin-top: 10px">
+          <h2>Ajout d'un site</h2>
+          <div class="form-group">
+            <i class="material-icons">language</i>
+            <ons-input modifier="material underbar" type="text" name="Website" class="form-control" id="Website" placeholder="Entrez le site" onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
+          </div>
+          <div class="form-group">
+            <i class="material-icons">face</i>
+            <ons-input modifier="material underbar"  type="text" name="login" class="form-control" id="Login" placeholder="Entrez votre login" onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
+          </div>
+          <div class="form-group">
+            <i class="material-icons">lock</i>
+            <ons-input modifier="material underbar"  type="password" name="mdp" class="form-control" id="Password" placeholder="Entrez votre mot de passe" onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
+          </div>
+          <div class="btn-group mr-2" role="group" aria-label="First group">
+          <p></p>
+            <ons-button type="button" class="btn btn-secondary" id="add_tuple" disabled="true">Ajouter</ons-button>
+            <!-- <button type="reset" id="reset">Reset</button> -->
+            <ons-button type="button" class="btn btn-secondary" id="abort_add">Annuler</ons-button>
+          </div>
         </div>
       </div>
 
-    </ons-page>
-  </template>
-  <template id="modPage.html">
-    <ons-page id="modPage">
-
-      <div style="text-align: center; margin-top: 10px">
-        <h1>Client monCoffre</h1>
-        <h2>Modification d'un site</h2>
+      <div class="mod-pass" id="psw-buttons">
+        <div style="text-align: center; margin-top: 10px">
+          <h2>Changer de mot de passe Maître</h2>
+          <div class="form-group">
+            <i class="material-icons">vpn_key</i>
+            <ons-input modifier="material underbar"  type="password" name="oldmstrpsw" class="form-control" id="OldMstrPsw" placeholder="MDP actuel" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">
+          </div>
+          <div class="form-group">
+            <i class="material-icons">vpn_key</i>
+            <ons-input modifier="material underbar"  type="password" name="newmstrpsw" class="form-control" id="NewMstrPsw" placeholder="Nouveau MDP" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">
+          </div>
+          <div class="form-group">
+            <i class="material-icons">vpn_key</i>
+            <ons-input modifier="material underbar"  type="password" name="confmstrpsw" class="form-control" id="ConfMstrPsw" placeholder="Confirmation MDP" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">
+          </div>
+          <p>
+            <label id="failpsw">Nouveaux mots de passe différents !</label>
+          </p>
+          <div class="btn-group mr-2" role="group" aria-label="First group">
+            <ons-button type="button" class="btn btn-secondary" id="chng_psw" disabled="true">Ajouter</ons-button>
+            <ons-button type="button" class="btn btn-secondary" id="abort_psw">Annuler</ons-button>
+            <p></p>
+          </div>
+        </div>
       </div>
-      <div class="left"><ons-back-button>Retour</ons-back-button></div>
+
 
       <div class="mod-trip" id="mod-buttons">
-        <div class="form-group">
-          <label for="Website" id="mod-Website">Website</label>
-          <ons-input modifier="material underbar"  type="text" name="website" class="form-control" id="new-Website" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
-        </div>
-        <p></p>
-        <div class="form-group">
-          <label for="Login">Identifiant</label>
-          <ons-input modifier="material underbar"  type="text" name="login" id="mod-Login" class="form-control" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
-        </div>
-        <div class="form-group">
-          <label for="Password">Mot de passe</label>
-          <ons-input modifier="material underbar"  type="password" name="mdp" class="form-control" id="mod-Password" placeholder="Entrez nouveau mdp" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
-        </div>
-        <div class="btn-group mr-2" role="group" aria-label="First group">
-          <ons-button type="button" class="btn btn-secondary" id="mod_tuple">Valider</ons-button>
-          <ons-button type="button" class="btn btn-secondary" id="abort_mod">Annuler</ons-button>
+        <div style="text-align: center; margin-top: 10px">
+          <h2>Modification d'un site</h2>
+          <div class="form-group">
+            <i class="material-icons" id="mod-Website">language</i>
+            <ons-input modifier="material underbar"  type="text" name="website" class="form-control" id="new-Website" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
+          </div>
+          <div class="form-group">
+            <i class="material-icons">face</i>
+            <ons-input modifier="material underbar"  type="text" name="login" id="mod-Login" class="form-control" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
+          </div>
+          <div class="form-group">
+            <i class="material-icons">lock</i>
+            <ons-input modifier="material underbar"  type="password" name="mdp" class="form-control" id="mod-Password" placeholder="Entrez nouveau mdp" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
+          </div>
+          <p></p>
+          <div class="btn-group mr-2" role="group" aria-label="First group">
+            <ons-button type="button" class="btn btn-secondary" id="mod_tuple">Valider</ons-button>
+            <ons-button type="button" class="btn btn-secondary" id="abort_mod">Annuler</ons-button>
+            <p></p>
+          </div>
         </div>
       </div>
-          <!-- Optional JavaScript -->
-          <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-          <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-          <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>  -->
-
-    </ons-page>
-  </template>
-  <template id="afficPage.html">
-    <ons-page id="afficPage">
-      <div style="text-align: center; margin-top: 10px">
-        <h1>Client monCoffre</h1>
-        <h2>Affichage des sites</h2>
-      </div>
-      <div class="left"><ons-back-button>Retour</ons-back-button></div>
-      <ons-list></ons-list>
-    </ons-page>
-  </template>
+      <ons-list>
+      </ons-list>
+    </ons-navigator>
+  </ons-page>
 </html>
