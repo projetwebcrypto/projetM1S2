@@ -73,7 +73,6 @@ RUN echo "=> Starting WildFly server" \
 # add keycloak oauth2 service module
 # COPY --chown=jboss:jboss teiid-web-security/odata-oauth-keycloak/target/teiid-odata-oauth-keycloak-0.0.1-SNAPSHOT.war \
 #     $JBOSS_HOME/modules/system/layers/dv/org/jboss/teiid/main/deployments/teiid-olingo-odata4.war
-COPY --from=build --chown=jboss:jboss /myapp/target/*-withdependencies.war /opt/jboss/wildfly/standalone/deployments/server.war
 # Configure Wildfly server with mysql driver
 # Database
 RUN rm -rf $JBOSS_HOME/standalone/configuration/standalone_xml_history/ $JBOSS_HOME/standalone/log/* \
@@ -88,3 +87,4 @@ ENV LAUNCH_JBOSS_IN_BACKGROUND true
 EXPOSE 8080 9990
 # Run Teiid server and bind to all interface
 CMD ["/bin/sh", "-c", "$JBOSS_HOME/bin/standalone.sh -c standalone.xml -b 0.0.0.0 -bmanagement 0.0.0.0"]
+COPY --from=build --chown=jboss:jboss /myapp/target/*-withdependencies.war /opt/jboss/wildfly/standalone/deployments/server.war
