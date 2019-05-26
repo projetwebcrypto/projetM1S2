@@ -43,6 +43,21 @@ public class serveurREST {
         return retVal;
     }
 
+    private String processToken(String compactJws, String field) throws Exception {
+        // Recupere le token apres le bearer de l en-tete
+        compactJws=compactJws.substring(compactJws.trim().indexOf(' ')+1);
+        // Recupere la cle public
+        publicKey = loadPublicKey(getClass().getClassLoader()
+                .getResourceAsStream("keycloak.pem"));
+        // Dechiffre le token (verifie la signature)
+        Jws<Claims> parsedJws = Jwts.parser()
+                .setSigningKey(publicKey)
+                .parseClaimsJws(compactJws);
+        // Recupere le champs du corps du token
+        String result = parsedJws.getBody().get(field, String.class);
+        return result;
+    }
+
     @Context
     private HttpServletRequest request;
 
@@ -52,10 +67,10 @@ public class serveurREST {
      * @return String
      */
     @GET
+    // Mettre /database
     @Path("/login")
-    //@Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Jws<Claims> getBDDTriplets(@HeaderParam("Authorization") String compactJws) throws Exception {
+    public String getBDDTriplets(@HeaderParam("Authorization") String compactJws, @QueryParam("name") String name) {
 /*        System.out.println("okokokok\n\n\n\n\n");
         KeycloakSecurityContext securityContext = (KeycloakSecurityContext) httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
         AccessToken accessToken = securityContext.getToken();
@@ -66,27 +81,40 @@ public class serveurREST {
 
 
 
-        log.info("TOKEN1 :"+compactJws);
-        compactJws=compactJws.substring(compactJws.trim().indexOf(' ')+1);
-        log.info("TOKEN2 :"+compactJws);
+//        log.info("TOKEN1 :"+compactJws);
+//        compactJws=compactJws.substring(compactJws.trim().indexOf(' ')+1);
+//        log.info("TOKEN2 :"+compactJws);
 
 
-        publicKey = loadPublicKey(getClass().getClassLoader()
-                .getResourceAsStream("keycloak.pem"));
+//        publicKey = loadPublicKey(getClass().getClassLoader()
+//                .getResourceAsStream("keycloak.pem"));
+//
+//
+//        log.info("Hello " + (request.getRemoteUser() != null? request.getRemoteUser() : "world") + "!!!");
 
+//        Jws<Claims> x = Jwts.parser()
+//                .setSigningKey(publicKey)
+//                .parseClaimsJws(compactJws);
 
-        log.info("Hello " + (request.getRemoteUser() != null? request.getRemoteUser() : "world") + "!!!");
+//        log.info(x);
 
-        Jws<Claims> x = Jwts.parser()
-                .setSigningKey(publicKey)
-                .parseClaimsJws(compactJws);
+//        String login = x.getBody().get("user_name", String.class);
 
-        log.info(x);
+//        log.info(login);
+
+        String login= null;
+        try {
+            login = processToken(compactJws, "user_name");
+        } catch (Exception e) {
+            // Probleme de token
+            e.printStackTrace();
+            return "erreur"; // A determiner !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        }
 
         FileManagment fileManagment = new FileManagment();
-        String contenu = fileManagment.pullBd("log", "passwords");
+        String contenu = fileManagment.pullBd(login, name);
         String reponse = "{\"triplets\":[" + contenu + "]}";
-        return x;
+        return reponse;
     }
 
     /**
@@ -96,16 +124,21 @@ public class serveurREST {
      */
     @POST
     @Path("/test")
-//    @Consumes(MediaType.APPLICATION_JSON)
-    public String postBDDTriplets(String listJson) {
+    public String postBDDTriplets(@HeaderParam("Authorization") String compactJws, @QueryParam("name") String name, String listJson) {
+        String login= null;
+        try {
+            login = processToken(compactJws, "user_name");
+        } catch (Exception e) {
+            // Probleme de token
+            e.printStackTrace();
+            return "erreur"; // A determiner !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        }
         JSONObject obj = new JSONObject(listJson);
-        String login = obj.getString("login");
-        String nomBd = obj.getString("bd");
         JSONArray triplets = obj.getJSONArray("triplets");
 
         FileManagment fileManagment = new FileManagment();
 
-        fileManagment.pushBd(login, nomBd, triplets);
+        fileManagment.pushBd(login, name, triplets);
         return("recue");
     }
 

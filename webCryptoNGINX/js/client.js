@@ -14,7 +14,7 @@ var store;
 var cryptogrammeComplet = "";
 var currentPassword = "";
 var liste = []
-var urlc = "https://192.168.99.100:443/moncoffre";
+var urlc = "https://192.168.99.100:443/myresource";
 var crypto = window.crypto;
 var keycloak = Keycloak({
 "realm": "ragnarok",
@@ -24,7 +24,7 @@ var keycloak = Keycloak({
 "ssl-required": "external",
 "resource": "customer-portal",
 "credentials": {
-"secret": "Achanger"
+"secret": "de0f0f9c-c70f-4c35-8b35-73e566d21265"
 },
 "enable-cors": true
 });
@@ -426,14 +426,14 @@ $(document).ready(function(){
   };
 
   var loadFailure = function () {
-    document.getElementById('customers').innerHTML = '<b>Failed to load data.  Check console log</b>';
+    console.log("Erreur de chargement");
   };
 
   var reloadData = function () {
-    keycloak.updateToken(10)
+    keycloak.updateToken(30)
             .success(loadData)
             .error(function() {
-              document.getElementById('customers').innerHTML = '<b>Failed to load data.  User is logged out.</b>';
+              console.log("Déconnecté");
             });
   };
 
@@ -771,13 +771,14 @@ $(document).ready(function(){
     getdatas.onsuccess = function(){
       if (getdatas.result != 0){
         var tmp = encodeB64(getdatas.result);
+        keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
 
-        data = {"login":"log2","bd":"passwords","triplets": tmp};
-        // var urlc = "https://192.168.99.100:8080/moncoffre";
+        data = {"triplets": tmp};
+        
         $.ajax({
           type:"POST",
           headers:{"Authorization": "Bearer " + keycloak.token},
-          url:urlc + "/test",
+          url:urlc + "/test" + "?name=" + "passwords",
           data:JSON.stringify(data),
           dataType:"text",
           contentType:"application/json",
@@ -811,18 +812,17 @@ $(document).ready(function(){
       if (conf){
         // data = {"login":"log","bd":"passwords"};
         data = {"login":"log2","bd":"passwords"};
-
+        keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
         $.ajax({
-          type:"POST",
+          type:"GET",
           headers:{"Authorization": "Bearer " + keycloak.token},
-          url:urlc + "/login",
-          data:JSON.stringify(data),
-          dataType:"text",
+          url:urlc + "/login" + "?name=" + "passwords",
           contentType:"application/json",
           success:function(json,status){
             // variable de stockage ( liste de données post traitement)
             // variable stockage d'un triplet
-            var myobj = JSON.parse(json);
+            console.log(json);
+            var myobj = json;
             let bdd_js = []
             if (myobj.triplets.length > 0){
               for (var i=0; i<myobj.triplets.length; i++){
