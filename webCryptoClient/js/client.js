@@ -136,10 +136,12 @@ createDb();
 // S'assure que le .html est bien lance.
 $(document).ready(function(){
 
-  // Fonction qui definit le mot de passe maitre initial. Si base de donnée locale existante,
-  // verifie la valeur du mot de passe donne.
+  console.log('Mais ... pourquoi ?');
+
+  // Fonction qui initialise le client, affiche la saisie initiale du mot de passe maître
   function initIHM(){
-    $("#logPage").show();
+    console.log('pourquoi');
+    $("#pagePsw").show();
     $("#mainPage").hide();
   };
 
@@ -176,7 +178,7 @@ $(document).ready(function(){
   // Fonction qui affiche le login et le mdp en clair du site demande.
   function afficheClair(testlogin, testpassword, website){
     var ident = website + "Exp";
-    document.getElementById(ident).innerHTML = ("<i class='material-icons'>face</i> " + testlogin + "<p></p><i class='material-icons'>lock</i> " + testpassword + "<div class='right'><ons-button onclick='copyClpBrd()'><i class='material-icons'>file_copy</i></ons-button></div>");
+    document.getElementById(ident).innerHTML = ("<i class='material-icons blue500'>face</i> " + testlogin + "<p></p><i class='material-icons blue500'>lock</i> " + testpassword + "<div class='right'><ons-button onclick='copyClpBrd()'><i class='material-icons blue500'>file_copy</i></ons-button></div>");
   };
 
   // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
@@ -359,8 +361,8 @@ $(document).ready(function(){
       for (var i=0; i<myobj.length; i++){
         if(myobj[i].Website != "0________"){
           tableau += '<ons-list-item expandable class="center" name="' + myobj[i].Website + '" id="website"><div class="left">' + myobj[i].Website + '</div><div id="' + myobj[i].Website + 'Exp" class="expandable-content"></div>';
-          tableau += '<div class="right"><i class="material-icons" id="edit" name="' + myobj[i].Website + '"onmouseover="this.style.cursor=\'pointer\'">create</i>';
-          tableau += '<i class="material-icons" id="deleteTrip" name="' + myobj[i].Website + '"onmouseover="this.style.cursor=\'pointer\'">delete_forever</i></div></ons-list-item>';
+          tableau += '<div class="right"><i class="material-icons blue500" id="edit" name="' + myobj[i].Website + '"onmouseover="this.style.cursor=\'pointer\'">create</i>';
+          tableau += '<i class="material-icons blue500" id="deleteTrip" name="' + myobj[i].Website + '"onmouseover="this.style.cursor=\'pointer\'">delete_forever</i></div></ons-list-item>';
         }
       }
       // Fermeture des balises et du tableau

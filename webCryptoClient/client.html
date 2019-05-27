@@ -7,13 +7,15 @@
   <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsenui.css">
   <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsen-css-components.min.css">
   <script src="https://unpkg.com/onsenui/js/onsenui.min.js"></script>
-  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"> -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> -->
   <script type="text/javascript" src="js/jquery-ui/jquery-ui.min.js"></script>
-  <!-- <script type="text/javascript" src="js/firefox.js"></script> -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script type="text/javascript" src="js/client.js"></script>
+
+  <style type="text/css">
+    .material-icons.blue500 { color: #2196F3; }"
+  </style>
+
   </head>
   <ons-navigator id="navigator">
     <ons-page onload="checkEmpty()" id="pagePsw">
@@ -97,15 +99,15 @@
         <div style="text-align: center; margin-top: 10px">
           <h2>Ajout d'un site</h2>
           <div class="form-group">
-            <i class="material-icons">language</i>
+            <i class="material-icons blue500">language</i>
             <ons-input modifier="material underbar" type="text" name="Website" class="form-control" id="Website" placeholder="Entrez le site" onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
           </div>
           <div class="form-group">
-            <i class="material-icons">face</i>
+            <i class="material-icons blue500">face</i>
             <ons-input modifier="material underbar"  type="text" name="login" class="form-control" id="Login" placeholder="Entrez votre login" onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
           </div>
           <div class="form-group">
-            <i class="material-icons">lock</i>
+            <i class="material-icons blue500">lock</i>
             <ons-input modifier="material underbar"  type="password" name="mdp" class="form-control" id="Password" placeholder="Entrez votre mot de passe" onfocus="checkEmpty()" onblur="checkEmpty()" onkeyup="checkEmpty()">
           </div>
           <div class="btn-group mr-2" role="group" aria-label="First group">
@@ -122,15 +124,15 @@
         <div style="text-align: center; margin-top: 10px">
           <h2>Changer de mot de passe Maître</h2>
           <div class="form-group">
-            <i class="material-icons">vpn_key</i>
+            <i class="material-icons blue500">vpn_key</i>
             <ons-input modifier="material underbar"  type="password" name="oldmstrpsw" class="form-control" id="OldMstrPsw" placeholder="MDP actuel" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">
           </div>
           <div class="form-group">
-            <i class="material-icons">vpn_key</i>
+            <i class="material-icons blue500">vpn_key</i>
             <ons-input modifier="material underbar"  type="password" name="newmstrpsw" class="form-control" id="NewMstrPsw" placeholder="Nouveau MDP" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">
           </div>
           <div class="form-group">
-            <i class="material-icons">vpn_key</i>
+            <i class="material-icons blue500">vpn_key</i>
             <ons-input modifier="material underbar"  type="password" name="confmstrpsw" class="form-control" id="ConfMstrPsw" placeholder="Confirmation MDP" onfocus="checkMstr()" onblur="checkMstr()" onkeyup="checkMstr()">
           </div>
           <p>
@@ -149,15 +151,15 @@
         <div style="text-align: center; margin-top: 10px">
           <h2>Modification d'un site</h2>
           <div class="form-group">
-            <i class="material-icons" id="mod-Website">language</i>
+            <i class="material-icons blue500" id="mod-Website">language</i>
             <ons-input modifier="material underbar"  type="text" name="website" class="form-control" id="new-Website" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
           </div>
           <div class="form-group">
-            <i class="material-icons">face</i>
+            <i class="material-icons blue500">face</i>
             <ons-input modifier="material underbar"  type="text" name="login" id="mod-Login" class="form-control" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
           </div>
           <div class="form-group">
-            <i class="material-icons">lock</i>
+            <i class="material-icons blue500">lock</i>
             <ons-input modifier="material underbar"  type="password" name="mdp" class="form-control" id="mod-Password" placeholder="Entrez nouveau mdp" onfocus="checkEmptyMod()" onblur="checkEmptyMod()" onkeyup="checkEmptyMod()"/>
           </div>
           <p></p>
