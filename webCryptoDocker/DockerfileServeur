@@ -14,14 +14,26 @@ RUN mvn -s /tmp/settings.xml -B -e -C -T 1C package
 
 # stage 2
 
-FROM jetty:9.4
-
-COPY --from=build /myapp/target/*-withdependencies.war /var/lib/jetty/webapps/server.war
-
-# RUN mkdir -p /etc/keystore
-# RUN mkdir -p /etc/truststore
-# ADD config/ /usr/local/jetty/start.d/
-# ADD xml/jetty-bytebufferpool.xml /usr/local/jetty/etc/jetty-bytebufferpool.xml
-
-# RUN java -jar "$JETTY_HOME/start.jar" #--add-to-startd=https
-CMD ["java", "-jar", "/usr/local/jetty/start.jar"]
+FROM jboss/wildfly:15.0.0.Final
+COPY keycloak-wildfly-adapter-dist-6.0.1.tar.gz /tmp/keycloak-wildfly-adapter-dist.tar.gz
+RUN /opt/jboss/wildfly/bin/add-user.sh admin admin --silent
+ENV WILDFLY_HOME=/opt/jboss
+WORKDIR /opt/jboss/wildfly/bin
+COPY configCLI.txt configCLI.cli
+RUN mv configCLI.cli ../configCLI.cli
+# RUN ./jboss-cli.sh -c --controller=0.0.0.0 -u=admin -p=admin --file=../configCLI.cli
+# RUN ./jboss-cli.sh --file=../configCLI.cli
+RUN cd $WILDFLY_HOME/wildfly &&\
+    tar zxvf /tmp/keycloak-wildfly-adapter-dist.tar.gz &&\
+    ./bin/jboss-cli.sh --file=bin/adapter-elytron-install-offline.cli &&\
+    rm -rf $WILDFLY_HOME/wildfly/standalone/configuration/standalone_xml_history
+#    rm /tmp/keycloak-wildfly-adapter-dist.tar.gz
+COPY standalone.xml /opt/jboss/wildfly/standalone/configuration/standalone.xml
+# RUN wildfly/bin/jboss-cli.sh --command=:shutdown
+# RUN pgrep -d" " -f "wildfly" | xargs kill;
+# RUN ./jboss-cli.sh --file=../configCLI.cli
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
+WORKDIR /opt/jboss/wildfly/standalone/configuration/
+COPY keycloak.pem keycloak.pem
+RUN keytool -importcert -keystore keycloak.jks -storepass jwtKey -file keycloak.pem -alias keycloak -trustcacerts -noprompt
+COPY --from=build /myapp/target/*-withdependencies.war /opt/jboss/wildfly/standalone/deployments/server.war

@@ -1,0 +1,7 @@
+connect
+/subsystem=elytron/key-store=jwt-key-store:add(type="JKS", relative-to=jboss.server.config.dir, path="keycloak.jks", credential-reference={clear-text="jwtKey"})
+/subsystem=elytron/token-realm=jwt-realm:add(jwt={issuer=["http://localhost:8080/auth/realms/wildflytest"], audience=["wildfly"], key-store=jwt-key-store, certificate="keycloak"}, principal-claim="preferred_username")
+/subsystem=elytron/security-domain=jwt-domain:add(realms=[{realm=jwt-realm}], permission-mapper=default-permission-mapper, default-realm=jwt-realm)
+/subsystem=elytron/http-authentication-factory=jwt-http-authentication:add(security-domain=jwt-domain, http-server-mechanism-factory=global, mechanism-configurations=[{mechanism-name="BEARER_TOKEN", mechanism-realm-configurations=[{realm-name="jwt-realm"}]}])
+/subsystem=undertow/application-security-domain=jwt-domain:add(http-authentication-factory=jwt-http-authentication
+q
