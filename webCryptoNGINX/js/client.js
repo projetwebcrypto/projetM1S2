@@ -16,16 +16,16 @@ var currentPassword = "";
 var liste = []
 var urlc = "https://192.168.99.100:443/myresource";
 var crypto = window.crypto;
-var dbName = '';//passwords
+var dbName = "";//passwords
 var keycloak = Keycloak({
 "realm": "ragnarok",
 "auth-server-url": "https://192.168.99.100/keycloak/auth",
 "url": "https://192.168.99.100/keycloak/auth",
-"clientId": 'customer-portal',
+"clientId": "customer-portal",
 "ssl-required": "external",
 "resource": "customer-portal",
 "credentials": {
-"secret": "91ba6cd3-a905-4e00-af7c-b6e4ad777011"
+"secret": "8c56ded5-abd0-4866-abe6-659273a6fd17"
 },
 "enable-cors": true
 });
@@ -122,7 +122,6 @@ function checkEmptyMod(){
 // Fonction qui vérifie si les champs de "modifier le mot de passe maître" sont vides
 // et qui vérifie si les deux derniers champs de "modifier le mot de passe maître" sont identiques
 function checkMstr(){
-
   if((document.getElementById("OldMstrPsw").value !="") && (document.getElementById("NewMstrPsw").value!="") && (document.getElementById("ConfMstrPsw").value!="") && (document.getElementById("NewMstrPsw").value == document.getElementById("ConfMstrPsw").value)){
     document.getElementById("chng_psw").disabled = false;
     $("#failpsw").hide();
@@ -143,18 +142,18 @@ createDb();
 // S'assure que le .html est bien lance.
 $(document).ready(function(){
 
-  keycloak.init({})
+  keycloak.init()
           .success(function(){if (keycloak.authenticated){
                                 $("#loged1").show();
                                 $("#loged2").show();
                                 $("#unloged").hide();
                               }
                               else{
-                                console.log("Erreur keycloak");
+                                console.log("Pas connecté");
                                 $("#loged1").hide();
                                 $("#loged2").hide();
                                 $("#unloged").show();}})
-          .error(function(){return false;})
+          .error(function(){console.log("Erreur Keycloak");})
 
   // Fonction qui definit le mot de passe maitre initial. Si base de donnée locale existante,
   // verifie la valeur du mot de passe donne.
@@ -178,7 +177,7 @@ $(document).ready(function(){
     getdatas.onsuccess = function(){
       // console.log(getdatas.result);
       $("#show-menu").show();
-      $('.collapse').collapse();
+      $(".collapse").collapse();
       addTable(getdatas.result);
     };
   };
@@ -188,7 +187,8 @@ $(document).ready(function(){
     document.getElementById("mod-Password").value = testpassword;
     document.getElementById("mod-Login").value = testlogin;
     document.getElementById("mod-Login").placeholder = testlogin;
-    document.getElementById("mod-Website").innerHTML = "Website";
+    document.getElementById("mod-Website").value = website;
+    document.getElementById("mod-Website").placeholder = website;
     document.getElementById("new-Website").value = website;
   }
 
@@ -223,7 +223,7 @@ $(document).ready(function(){
   function addBase(myobj){
     console.log("inaddBase");
     $("#show-menu").show();
-    $('.collapse').collapse();
+    $(".collapse").collapse();
     // Effacement d'eventuels affichage precedents
     $("table").remove();
       // Initialisation des champs du tableau
@@ -754,20 +754,15 @@ $(document).ready(function(){
   Affichage et interactions avec le client.html
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
-  $(window).blur(function () {
-    // currentPassword='';
-  });
-
    // Dissimulation initiale des champs d'entrees d' "ajouter un triplet"
   $("#add-buttons").hide();
   $("#mod-buttons").hide();
   $("#psw-buttons").hide();
-  $('#add-MstrPsw').hide();
   $("#show-menu").hide();
 
   $("#show-menu").click(function(){
     // $("#show-menu").hide();
-    $(this).toggleClass('glyphicon-minus');
+    $(this).toggleClass("glyphicon-minus");
   });
 
   // Initialisation du lien "Supprimer tout" qui supprime la base de données locale
@@ -904,9 +899,19 @@ $(document).ready(function(){
 
   // Initialisation des champs d'entrees de "changer le mot de passe Maître" (champ mot de passe)
   $("#PasswordChange").click(function(){
-    $("#psw-buttons").show();
-    document.getElementById("chng_psw").disabled = true;
-  });
+      var x = document.getElementById("psw-buttons");
+      if (x.style.display === "none") {
+        x.style.display = "block";
+        document.getElementById("chng_psw").disabled = true;
+      } else {
+        x.style.display = "none";
+        reset_psw();
+        document.getElementById("chng_psw").disabled = false;
+      }
+    });
+    // $("#psw-buttons").show();
+    // document.getElementById("chng_psw").disabled = true;
+    // });
 
   // Initialisation du bouton "Valider" sous les champs d'entrees de "changer le mot de passe Maître"
   $("#chng_psw").click(function(){
@@ -925,24 +930,24 @@ $(document).ready(function(){
     };
   });
 
-  // Initialisation des champs d'entrees de "saisir le mot de passe Maître" (champ mot de passe)
-  $('#saisie-mdp-maitre').click(function(){
-    $('#add-MstrPsw').show();
-  });
+  // // Initialisation des champs d'entrees de "saisir le mot de passe Maître" (champ mot de passe)
+  // $("#saisie-mdp-maitre").click(function(){
+  //   $("#add-MstrPsw").show();
+  // });
 
-// Initialisation du bouton "Ajouter" sous les champs d'entrees de "saisir le mot de passe Maître"
-  $('#saisie_Mtrspsw').click(function(){
-    var pwd = document.getElementById("MtsrPwd").value;
-    currentPassword = pwd;
-    $('#add-MstrPsw').hide();
-    document.getElementById("MtsrPwd").value = '';
-  });
+  // // Initialisation du bouton "Ajouter" sous les champs d'entrees de "saisir le mot de passe Maître"
+  // $('#saisie_Mtrspsw').click(function(){
+  //   var pwd = document.getElementById("MtsrPwd").value;
+  //   currentPassword = pwd;
+  //   $('#add-MstrPsw').hide();
+  //   document.getElementById("MtsrPwd").value = '';
+  // });
 
-  // Initialisation du bouton "Annuler" sous les champs d'entrees de "saisir le mot de passe Maître"
-  $("#abort_Mtrspsw").click(function(){
-    $('#add-MstrPsw').hide();
-    document.getElementById("MtsrPwd").value = '';
-  });
+  // // Initialisation du bouton "Annuler" sous les champs d'entrees de "saisir le mot de passe Maître"
+  // $("#abort_Mtrspsw").click(function(){
+  //   $('#add-MstrPsw').hide();
+  //   document.getElementById("MtsrPwd").value = '';
+  // });
 
   // Initialisation du bouton "Ajouter" sous les champs d'entrees d' "ajouter un triplet"
   $("#add_tuple").click(function(){
@@ -982,8 +987,15 @@ $(document).ready(function(){
 
   // Initialisation des champs d'entrees d' "ajouter un triplet" (champ site, login et mot de passe)
   $("#ADD").click(function(){
-    $("#add-buttons").show();
-    document.getElementById("add_tuple").disabled = true;
+    var x = document.getElementById("add-buttons");
+    if (x.style.display === "none") {
+      x.style.display = "block";
+      document.getElementById("add_tuple").disabled = true;
+    } else {
+      x.style.display = "none";
+      reset_add();
+      document.getElementById("add_tuple").disabled = false;
+    }
   });
 
   // Modification des identifiants d'un site
@@ -1015,7 +1027,6 @@ $(document).ready(function(){
     $("#mod-buttons").show();
     document.getElementById("add_tuple").disabled = true;
     var website = $(this).attr("name");
-    document.getElementById("mod-Website").value = website;
     decryptAES128(website, currentPassword, placement);
     reset_mod();
   });

@@ -844,8 +844,18 @@ $(document).ready(function(){
 
   // Initialisation des champs d'entrees de "changer le mot de passe Maître" (champ mot de passe)
   $("#PasswordChange").click(function(){
-    $("#psw-buttons").show();
-    document.getElementById("chng_psw").disabled = true;
+      var x = document.getElementById("psw-buttons");
+      if (x.style.display === "none") {
+        x.style.display = "block";
+        document.getElementById("chng_psw").disabled = true;
+      } else {
+        x.style.display = "none";
+        reset_psw;
+        document.getElementById("chng_psw").disabled = false;
+      }
+    }
+    // $("#psw-buttons").show();
+    // document.getElementById("chng_psw").disabled = true;
   });
 
   // Initialisation du bouton "Valider" sous les champs d'entrees de "changer le mot de passe Maître"
