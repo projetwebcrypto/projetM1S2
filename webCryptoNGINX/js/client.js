@@ -121,7 +121,6 @@ function checkEmptyMod(){
 // Fonction qui vérifie si les champs de "modifier le mot de passe maître" sont vides
 // et qui vérifie si les deux derniers champs de "modifier le mot de passe maître" sont identiques
 function checkMstr(){
-
   if((document.getElementById("OldMstrPsw").value !="") && (document.getElementById("NewMstrPsw").value!="") && (document.getElementById("ConfMstrPsw").value!="") && (document.getElementById("NewMstrPsw").value == document.getElementById("ConfMstrPsw").value)){
     document.getElementById("chng_psw").disabled = false;
     $("#failpsw").hide();
@@ -133,6 +132,16 @@ function checkMstr(){
   else{
     document.getElementById("chng_psw").disabled = true;
     $("#failpsw").show();
+  };
+};
+
+// Fonction de vérification de validité du fichier à envoyer au serveur
+function checkSend(){
+  if(document.getElementById("select_db").value != ""){
+    document.getElementById("send_db").disabled = false;
+  }
+  else{
+    document.getElementById("send_db").disabled = true;
   };
 };
 
@@ -215,6 +224,11 @@ $(document).ready(function(){
     document.getElementById("NewMstrPsw").value = "";
     document.getElementById("ConfMstrPsw").value = "";
   };
+
+  // Fonction qui reinitialise le
+  function reset_send(){
+    $('#send-buttons').empty();
+  }
 
   // Fonction qui ajoute un triplet a la base de donnees
   function addTriplet(webs, crypt){
@@ -739,6 +753,7 @@ $(document).ready(function(){
   $("#psw-buttons").hide();
   $('#add-MstrPsw').hide();
   $("#show-menu").hide();
+  $("#send-buttons").hide();
 
   $("#show-menu").click(function(){
     // $("#show-menu").hide();
@@ -923,6 +938,12 @@ $(document).ready(function(){
     reset_psw();
   });
 
+  // Initialisation du bouton "Annuler" sous le champ "Envoyer une base de données"
+  $("#abort_send").click(function(){
+    $("#send-buttons").hide();
+    reset_send();
+  });
+
   // Initialisation des champs d'entrees d' "ajouter un triplet" (champ site, login et mot de passe)
   $("#ADD").click(function(){
     $("#add-buttons").show();
@@ -940,11 +961,35 @@ $(document).ready(function(){
     testlogin = testpassword = "";
   });
 
+  $('#send').click(function(){
+    $("#send-buttons").show();
+  });
+
+  $('#send_db').click(function(){
+    keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
+    if (keycloak.authenticated){
+      var fd = new FormData();
+      fd.append('userfile', $('#select_db')[0].files[0]);
+      $.ajax({
+        type: 'POST',
+        headers:{"Authorization": "Bearer " + keycloak.token},
+        url: 'https://192.168.99.100/upload',
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function(data){
+          console.log('upload success!')
+          $('#send-buttons').empty();
+          $('#send-buttons').append(data);
+        }
+      });
+    };
+  });
+
   // Initialisation d'interactions avec les champs site
   $("body").on("click", "#website", function(){
     var website = $(this).text().slice(2);
     decryptAES128(website, currentPassword, afficheClair);
-
   });
 
   // Initialisation d'interactions avec les images "Modifier"
