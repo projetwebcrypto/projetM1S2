@@ -24,7 +24,7 @@ var keycloak = Keycloak({
 "ssl-required": "external",
 "resource": "customer-portal",
 "credentials": {
-"secret": "de0f0f9c-c70f-4c35-8b35-73e566d21265"
+"secret": "8c56ded5-abd0-4866-abe6-659273a6fd17"
 },
 "enable-cors": true
 });
@@ -83,7 +83,7 @@ function createDb(){
   request.onsuccess = function (event){
     db = this.result;
     console.log("Creation: " + db);
-    alert("Creation reussie");
+    // alert("Creation reussie");
   };
 
   // Fonction lancee si le demarrage rate
@@ -142,11 +142,18 @@ createDb();
 // S'assure que le .html est bien lance.
 $(document).ready(function(){
 
-  keycloak.init({ onLoad: 'login-required' })
-          .success(reloadData)
-          .error(function(errorData) {
-            console.log("Oups, I did it again.");
-          });
+  keycloak.init({})
+          .success(function(){if (keycloak.authenticated){
+                                $("#loged1").show();
+                                $("#loged2").show();
+                                $("#unloged").hide();
+                              }
+                              else{
+                                console.log("Erreur keycloak");
+                                $("#loged1").hide();
+                                $("#loged2").hide();
+                                $("#unloged").show();}})
+          .error(function(){return false;})
 
   // Fonction qui definit le mot de passe maitre initial. Si base de donnée locale existante,
   // verifie la valeur du mot de passe donne.
@@ -774,24 +781,25 @@ $(document).ready(function(){
         keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
 
         data = {"triplets": tmp};
-        
-        $.ajax({
-          type:"POST",
-          headers:{"Authorization": "Bearer " + keycloak.token},
-          url:urlc + "/test" + "?name=" + "passwords",
-          data:JSON.stringify(data),
-          dataType:"text",
-          contentType:"application/json",
-          // accepts: "*/*",
-          success:function(json,status){
-            console.log(json);
-            alert("Envoie réussi");
-          },
-          error:function(data,status){
-            alert("Echec de l'envoie");
-            console.log("error POST"+data+" status :  "+status);
-          }
-        });
+        if (keycloak.authenticated){
+          $.ajax({
+            type:"POST",
+            headers:{"Authorization": "Bearer " + keycloak.token},
+            url:urlc + "/test" + "?name=" + "passwords",
+            data:JSON.stringify(data),
+            dataType:"text",
+            contentType:"application/json",
+            // accepts: "*/*",
+            success:function(json,status){
+              console.log(json);
+              alert("Envoie réussi");
+            },
+            error:function(data,status){
+              alert("Echec de l'envoie");
+              console.log("error POST"+data+" status :  "+status);
+            }
+          });
+        }
       }
     }
   });
@@ -813,31 +821,33 @@ $(document).ready(function(){
         // data = {"login":"log","bd":"passwords"};
         data = {"login":"log2","bd":"passwords"};
         keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
-        $.ajax({
-          type:"GET",
-          headers:{"Authorization": "Bearer " + keycloak.token},
-          url:urlc + "/login" + "?name=" + "passwords",
-          contentType:"application/json",
-          success:function(json,status){
-            // variable de stockage ( liste de données post traitement)
-            // variable stockage d'un triplet
-            console.log(json);
-            var myobj = json;
-            let bdd_js = []
-            if (myobj.triplets.length > 0){
-              for (var i=0; i<myobj.triplets.length; i++){
-                // addTriplet(myobj.triplets[i].site, base64DecToArr(myobj.triplets[i].crypto));
-                liste = liste.concat({"Website":myobj.triplets[i].site, "crypto":base64DecToArr(myobj.triplets[i].crypto)});
+        if (keycloak.authenticated){
+          $.ajax({
+            type:"GET",
+            headers:{"Authorization": "Bearer " + keycloak.token},
+            url:urlc + "/login" + "?name=" + "passwords",
+            contentType:"application/json",
+            success:function(json,status){
+              // variable de stockage ( liste de données post traitement)
+              // variable stockage d'un triplet
+              console.log(json);
+              var myobj = json;
+              let bdd_js = []
+              if (myobj.triplets.length > 0){
+                for (var i=0; i<myobj.triplets.length; i++){
+                  // addTriplet(myobj.triplets[i].site, base64DecToArr(myobj.triplets[i].crypto));
+                  liste = liste.concat({"Website":myobj.triplets[i].site, "crypto":base64DecToArr(myobj.triplets[i].crypto)});
+                };
+                store = getObjectStore("Triplet", "readwrite");
+                cpt = 0;
+                put_record(liste, store, cpt);
               };
-              store = getObjectStore("Triplet", "readwrite");
-              cpt = 0;
-              put_record(liste, store, cpt);
-            };
-            readTriplet();
-            document.getElementById("button-onload").className = "dot";
-          },
-          error:function(data,status){console.log("error POST"+data+" status :  "+status);}
-        });
+              readTriplet();
+              document.getElementById("button-onload").className = "dot";
+            },
+            error:function(data,status){console.log("error POST"+data+" status :  "+status);}
+          });
+        }
       }
     }
   });
