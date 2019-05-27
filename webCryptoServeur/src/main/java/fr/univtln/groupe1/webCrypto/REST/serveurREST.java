@@ -111,9 +111,9 @@ public class serveurREST {
         }
 
         FileManagment fileManagment = new FileManagment();
-        String contenu = fileManagment.pullBd(login, name);
-        String reponse = "{\"triplets\":[" + contenu + "]}";
-        return reponse;
+        String content = fileManagment.pullBd(login, name);
+        String response = "{\"triplets\":[" + content + "]}";
+        return response;
     }
 
     /**
@@ -156,8 +156,8 @@ public class serveurREST {
             return "erreur"; // A determiner !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
         FileManagment fileManagment = new FileManagment();
-        String reponse = fileManagment.listeBd(login);
-        return reponse;
+        String response = fileManagment.listeBd(login);
+        return response;
     }
 
     @GET

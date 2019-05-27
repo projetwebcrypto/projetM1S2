@@ -16,7 +16,7 @@ var currentPassword = "";
 var liste = []
 var urlc = "https://192.168.99.100:443/myresource";
 var crypto = window.crypto;
-var dbName = '';//passwords
+var dbName = "";//passwords
 var keycloak = Keycloak({
 "realm": "ragnarok",
 "auth-server-url": "https://192.168.99.100/keycloak/auth",
@@ -797,6 +797,9 @@ $(document).ready(function(){
 
   // Envoie de la base de donnée sur serveur
   $("#upload").click(function(){
+    if(dbName === undefined){
+      var dbName = window.prompt("Entrez un nom de base de données : ");
+    }
     var store = getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
     var conf = "true";
@@ -806,7 +809,7 @@ $(document).ready(function(){
         keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
 
         data = {"triplets": tmp};
-        if (keycloak.authenticated){
+        if ((keycloak.authenticated)&&(dbName)){
           $.ajax({
             type:"POST",
             headers:{"Authorization": "Bearer " + keycloak.token},
@@ -825,6 +828,9 @@ $(document).ready(function(){
               console.log("error POST"+data+" status :  "+status);
             }
           });
+        }
+        else {
+          alert("Echec de l'envoie, nom de base de données vide.");
         }
       }
     }
@@ -857,7 +863,8 @@ $(document).ready(function(){
   });
 
   // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
-  function downloadBdd(dbName){
+  function downloadBdd(name){
+    dbName = name;
     var store = getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
     var conf = "true";
@@ -876,7 +883,7 @@ $(document).ready(function(){
           $.ajax({
             type:"GET",
             headers:{"Authorization": "Bearer " + keycloak.token},
-            url:urlc + "/database" + "?name=" + dbName,
+            url:urlc + "/database" + "?name=" + name,
             contentType:"application/json",
             success:function(json,status){
               // variable de stockage ( liste de données post traitement)
@@ -953,6 +960,7 @@ $(document).ready(function(){
     var countRequest = store.count();
     countRequest.onsuccess = function() {
       if ( countRequest.result == 0){
+        var dbName = window.prompt("Entrez un nom de base de données : ");
         let checkpwd = new Uint8Array([ 0xff,0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
         encryptAES128(convertByteArrayToString(checkpwd.buffer), "", "0________", undefined, undefined, addTriplet,true);
       }

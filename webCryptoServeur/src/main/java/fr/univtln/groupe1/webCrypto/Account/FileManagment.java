@@ -10,8 +10,7 @@ import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 @ToString
 public class FileManagment{
@@ -54,19 +53,19 @@ public class FileManagment{
     public String pullBd(String login, String fileName) {
         File repository = new File(path + login + "/");
         File file = new File(path + login + "/" + fileName + ".db.sc");
-        String contenu = "";
+        String content = "";
         if (repository.exists() && repository.isDirectory()) {
             if (file.exists()) {
-                contenu = openFile(login, fileName);
+                content = openFile(login, fileName);
             }
             else {
-                contenu = "Fichier " + fileName + " inexistant";
+                content = "Fichier " + fileName + " inexistant";
             }
         }
         else {
-            contenu = "Utilisateur " + login + " inexistant";
+            content = "Utilisateur " + login + " inexistant";
         }
-        return contenu;
+        return content;
     }
 
 
@@ -76,28 +75,28 @@ public class FileManagment{
     public String openFile(String login, String fileName) {
         conn = new Connect();
         conn.connexion(path, login + "/", fileName + ".db.sc");
-        String contenu = "";
+        String content = "";
         try {
             byte[] bytes;
             this.stmt = conn.getConn().createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM PASSWORDS");
             // on construit la chaine de caractere dont le serveur a besoin
             while (rs.next()) {
-                contenu += "{\"site\":\"" + rs.getString("SITE_NAME") + "\",";
+                content += "{\"site\":\"" + rs.getString("SITE_NAME") + "\",";
                 bytes = rs.getBytes("CRYPTO");
-                contenu += "\"crypto\":\"" + DatatypeConverter.printBase64Binary(bytes) + "\"},";
+                content += "\"crypto\":\"" + DatatypeConverter.printBase64Binary(bytes) + "\"},";
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         // on enleve la virgule de la fin
-        if (contenu != null && contenu.length() > 0) {
-            contenu = contenu.substring(0, contenu.length() - 1);
+        if (content != null && content.length() > 0) {
+            content = content.substring(0, content.length() - 1);
         }
 
         conn.closeConnexion();
 
-        return contenu;
+        return content;
     }
 
 
@@ -177,7 +176,7 @@ public class FileManagment{
 
     // Liste les bases de donnees d'un utilisateur
     public String listeBd(String login) {
-        String contenu = "{\"Base\":";
+        String content = "{\"Base\":";
         String fileName = "";
         List<String> listeBd = new ArrayList<>();
         File repository = new File(path + login + "/");
@@ -195,10 +194,10 @@ public class FileManagment{
                     listeBd.add("\"" + fileName + "\"");
                 }
             }
-            contenu = contenu + listeBd.toString() + "}";
+            content = content + listeBd.toString() + "}";
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return contenu;
+        return content;
     }
 }
