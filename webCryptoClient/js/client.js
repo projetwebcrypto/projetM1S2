@@ -70,7 +70,7 @@ function createDb(){
   request.onsuccess = function (event){
     db = this.result;
     console.log("Creation: " + db);
-    alert("Creation reussie");                  // Alerte de bonne creation de la BD
+    // alert("Creation reussie");                  // Alerte de bonne creation de la BD
   };
 
   // Fonction lancee si le demarrage rate
@@ -136,11 +136,11 @@ createDb();
 // S'assure que le .html est bien lance.
 $(document).ready(function(){
 
-  console.log('Mais ... pourquoi ?');
+  // console.log('Mais ... pourquoi ?');
 
   // Fonction qui initialise le client, affiche la saisie initiale du mot de passe maître
   function initIHM(){
-    console.log('pourquoi');
+    // console.log('pourquoi');
     $("#pagePsw").show();
     $("#mainPage").hide();
   };
@@ -178,7 +178,7 @@ $(document).ready(function(){
   // Fonction qui affiche le login et le mdp en clair du site demande.
   function afficheClair(testlogin, testpassword, website){
     var ident = website + "Exp";
-    document.getElementById(ident).innerHTML = ("<i class='material-icons blue500'>face</i> " + testlogin + "<p></p><i class='material-icons blue500'>lock</i> " + testpassword + "<div class='right'><ons-button onclick='copyClpBrd()'><i class='material-icons blue500'>file_copy</i></ons-button></div>");
+    document.getElementById(ident).innerHTML = ("<i class='material-icons blue500'>face</i> " + testlogin + "<p></p><i class='material-icons blue500'>lock</i> " + testpassword + "<div side='right'><i name='" + testpassword + "' id='clpbrd' onclick='copyClpBrd()' class='material-icons blue500' onmouseover='this.style.cursor=\"pointer\"'>file_copy</i></div>");
   };
 
   // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
@@ -230,7 +230,7 @@ $(document).ready(function(){
       // console.log(this.error.name);
       if(this.error.message == "A mutation operation in the transaction failed because a constraint was not satisfied."){
         console.error("addTriplet error", this.error);
-        alert("Tuple(s) déjà présent(s)");
+        ons.notification.toast("Tuple(s) déjà présent(s)", {timeout: 2000});
         // displayActionFailure(this.error);
       };
     };
@@ -353,7 +353,7 @@ $(document).ready(function(){
     $("#table").remove();
     // document.querySelector('ons-list').refresh();
     if(myobj == 0){
-      alert("Aucun tuple contenu dans la base de données !");
+      ons.notification.toast("Aucun tuple contenu dans la base de données !", {timeout: 2000});
     }
     else{
       // Initialisation des champs du tableau
@@ -373,7 +373,7 @@ $(document).ready(function(){
 
   // Fonction qui ouvre une demande de confirmation de suppression de la base de donnees locale
   function confirmationSuppression(message){
-    var conf = confirm(message);
+    var conf = ons.notification.confirm(message);
     return conf;
   };
 
@@ -413,6 +413,14 @@ $(document).ready(function(){
       }
     };
   };
+
+  // Fonction de copie dans le clipboard du mdp selectionné
+  function copyClpBrd(){
+    var copyText = $(this).attr("name");
+    copyText.select();
+    document.execCommand("copy");
+    ons.notification.toast("Mot de passe copié !", {timeout: 2000});
+  }
 
   /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   Fonctions de chiffrement - dechiffrement
@@ -667,14 +675,14 @@ $(document).ready(function(){
       if (verif[0] == tailleLogin){
         for (var i=1; i<verif.length; i++){
           if (verif[i] != byteLogin[i-1]){
-            alert("Ancien Mot de passe erroné.");
+            ons.notification.toast("Ancien Mot de passe erroné.", {timeout: 2000});
             resolve(false);
           };
         };
         resolve(true, newmstrpsw, myobj);
       }
       else{
-        alert("Ancien Mot de passe erroné.");
+        ons.notification.toast("Ancien Mot de passe erroné.", {timeout: 2000});
         resolve(false);
       }
     });
@@ -819,7 +827,7 @@ $(document).ready(function(){
       reset_first_psw();
     }
     else{
-      alert("Mot de passe maître vide.");
+      ons.notification.toast("Mot de passe maître vide.", {timeout: 2000});
     }
   });
 
@@ -885,6 +893,11 @@ $(document).ready(function(){
   // $("expended").on("click", "#expended", function(){
   //   ("#expended").remove();
   // });
+
+  // Copie dans le clipboard du mdp sélectionné
+  $("#clpbrd").click(function(){
+    copyClpBrd();
+  })
 
   // Initialisation d'interactions avec les champs site
   $("ons-list").on("click", "#website", function(){
