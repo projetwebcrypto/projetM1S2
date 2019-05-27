@@ -24,7 +24,7 @@ var keycloak = Keycloak({
 "ssl-required": "external",
 "resource": "customer-portal",
 "credentials": {
-"secret": "de0f0f9c-c70f-4c35-8b35-73e566d21265"
+"secret": "69e41e4c-882f-400f-8b0b-6c6d8592a192"
 },
 "enable-cors": true
 });
@@ -774,7 +774,7 @@ $(document).ready(function(){
         keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
 
         data = {"triplets": tmp};
-        
+
         $.ajax({
           type:"POST",
           headers:{"Authorization": "Bearer " + keycloak.token},

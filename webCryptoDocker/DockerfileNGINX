@@ -3,5 +3,6 @@ FROM nginx:1.15
 ADD config/default.conf /etc/nginx/conf.d/
 ADD js /etc/nginx/html/js
 ADD css /etc/nginx/html/css
+ADD fonts /etc/nginx/html/fonts
 ADD keycloak-js-adapter-dist-6.0.1 /etc/nginx/html/keycloak-js-adapter-dist-6.0.1
 ADD client.html /etc/nginx/html/
