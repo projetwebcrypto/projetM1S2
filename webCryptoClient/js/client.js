@@ -349,11 +349,13 @@ $(document).ready(function(){
       // Initialisation des champs du tableau
       var tableau = '<div class="container"><table class="table"><thead><tr>';
       tableau += '<th scope="col">Base de données :</th>';
+      console.log("before for");
 
-      for (var i=0; i<myobj.b.length; i++){
+      for (var i=0; i<myobj.Base.length; i++){
+        console.log("in for")
         tableau += '<tr><td>';
-        tableau += '<li class="list-group-item">  ' + myobj.b[i] + '</td>';
-        tableau += '<td><span class="glyphicon glyphicon-download-alt" id="base" name="' + myobj.b[i] + '" style="cursor:pointer"></td></tr>';
+        tableau += '<li class="list-group-item">  ' + myobj.Base[i] + '</td>';
+        tableau += '<td><span class="glyphicon glyphicon-download-alt" id="base" name="' + myobj.Base[i] + '" style="cursor:pointer"></td></tr>';
       }
       // Fermeture des balises et du tableau
       tableau += '</tbody></table></div>';
@@ -601,7 +603,6 @@ $(document).ready(function(){
     }
   };
 
-decryptAES128("0________","azerty",placement);
   // Fonction de dechiffrement des identifiants
   function decryptAES128(website, currentPassword, fonction, newmstrpsw, myobj){
     var store =  getObjectStore("Triplet", "readonly");
@@ -741,7 +742,7 @@ decryptAES128("0________","azerty",placement);
   $("#psw-buttons").hide();
   $('#add-MstrPsw').hide();
   // $("#show-menu").hide();
-  addBase(JSON.parse('{"b":["passwords"]}'));
+
   $("#show-menu").click(function(){
     $(this).toggleClass('glyphicon-minus');
   });
@@ -785,8 +786,6 @@ decryptAES128("0________","azerty",placement);
         $.ajax({
           type:"POST",
           url:urlc + "/test",
-          data:JSON.stringify(data),
-          dataType:"text",
           contentType:"application/json",
           // accepts: "*/*",
           success:function(json,status){
@@ -816,7 +815,9 @@ decryptAES128("0________","azerty",placement);
             // variable de stockage ( liste de données post traitement)
             // variable stockage d'un triplet
             var myobj = JSON.parse(json);
-            if (myobj.length > 0){
+            console.log(myobj);
+            console.log(myobj.length)
+            if (myobj.Base.length > 0){
               addBase(myobj);
 
             };

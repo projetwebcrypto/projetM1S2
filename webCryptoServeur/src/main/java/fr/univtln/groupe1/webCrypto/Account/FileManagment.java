@@ -8,6 +8,8 @@ import org.json.JSONArray;
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -175,27 +177,28 @@ public class FileManagment{
 
     // Liste les bases de donnees d'un utilisateur
     public String listeBd(String login) {
-        String contenu ="";
+        String contenu = "{\"Base\":";
+        String fileName = "";
+        List<String> listeBd = new ArrayList<>();
         File repository = new File(path + login + "/");
         try {
             File[] listFile;
+            // recupere la reference de chaque fichier sous repository
             listFile = repository.listFiles();
             for (int i = 0; i < listFile.length; i++) {
-                System.out.println();
-                System.out.println(listFile[i].toString());
-                System.out.println(listFile[i].toString().substring(listFile[i].toString().lastIndexOf("/")));
+                fileName = listFile[i].toString().substring(listFile[i].toString().lastIndexOf("/"));
                 // on enleve le / avant le nom du fichier
                 // les 6 derniers carateres etant .db.sc ne nous interessent pas
-                if (contenu != null && contenu.length() > 0) {
-                    contenu = contenu.substring(1, contenu.length() - 6);
-                    System.out.println(contenu);
+                // le nom du fichier doit avoir plus de 7 caracteres (.db.sc) => fichier sans nom
+                if (fileName != null && fileName.length() > 7 && (fileName.substring(fileName.length() - 6, fileName.length())).equals(".db.sc")) {
+                    fileName = fileName.substring(1, fileName.length() - 6);
+                    listeBd.add("\"" + fileName + "\"");
                 }
             }
+            contenu = contenu + listeBd.toString() + "}";
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
         return contenu;
     }
 }

@@ -57,14 +57,11 @@ public class serveurREST {
     @Path("/listeBd")
     @Consumes(MediaType.APPLICATION_JSON)
     public String listerBdd(String listJson) {
-        System.out.println("ok");
         JSONObject obj = new JSONObject(listJson);
         String login = obj.getString("login");
         FileManagment fileManagment = new FileManagment();
-
-        fileManagment.listeBd(login);
-
-        return "";
+        String reponse = fileManagment.listeBd(login);
+        return reponse;
     }
 
     @GET
