@@ -40,8 +40,9 @@ public class serveurREST {
      */
     @POST
     @Path("/test")
-//    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     public String postBDDTriplets(String listJson) {
+        System.out.println("toto");
         JSONObject obj = new JSONObject(listJson);
         String login = obj.getString("login");
         String nomBd = obj.getString("bd");

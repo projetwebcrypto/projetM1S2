@@ -848,7 +848,7 @@ $(document).ready(function(){
       }
       if (conf){
         // data = {"login":"log","bd":"passwords"};
-        data = {"login":"log2","bd":"passwords"};
+        data = {"login":"log","bd":"passwords"};
 
         $.ajax({
           type:"POST",
