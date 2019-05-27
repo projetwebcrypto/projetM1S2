@@ -25,7 +25,7 @@ var keycloak = Keycloak({
 "ssl-required": "external",
 "resource": "customer-portal",
 "credentials": {
-"secret": "91ba6cd3-a905-4e00-af7c-b6e4ad777011"
+"secret": "e5869b85-c981-43f2-8c0c-8e8fd17f0b39"
 },
 "enable-cors": true
 });
@@ -810,7 +810,7 @@ $(document).ready(function(){
           $.ajax({
             type:"POST",
             headers:{"Authorization": "Bearer " + keycloak.token},
-            url:urlc + "/test" + "?name=" + dbName,
+            url:urlc + "/pushdb" + "?name=" + dbName,
             data:JSON.stringify(data),
             dataType:"text",
             contentType:"application/json",
@@ -842,7 +842,7 @@ $(document).ready(function(){
           success:function(json,status){
             // variable de stockage ( liste de données post traitement)
             // variable stockage d'un triplet
-            var myobj = JSON.parse(json);
+            var myobj = json;
             if (myobj.Base.length > 0){
               addBase(myobj);
 
@@ -850,7 +850,7 @@ $(document).ready(function(){
           },
           error:function(data,status){
             $("#OnabbortAjax").modal();
-            console.log("error POST"+data+" status :  "+status);
+            console.log("error GET"+ data + " status :  " + status);
           }
         });
     }
@@ -858,7 +858,6 @@ $(document).ready(function(){
 
   // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
   function downloadBdd(dbName){
-    console.log(dbName);
     var store = getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
     var conf = "true";
@@ -877,7 +876,7 @@ $(document).ready(function(){
           $.ajax({
             type:"GET",
             headers:{"Authorization": "Bearer " + keycloak.token},
-            url:urlc + "/login" + "?name=" + dbName,
+            url:urlc + "/database" + "?name=" + dbName,
             contentType:"application/json",
             success:function(json,status){
               // variable de stockage ( liste de données post traitement)
@@ -895,7 +894,7 @@ $(document).ready(function(){
               readTriplet();
               document.getElementById("button-onload").className = "dot";
             },
-            error:function(data,status){console.log("error POST"+data+" status :  "+status);}
+            error:function(data,status){console.log("error GET" + data + " status :  " + status);}
           });
         }
       }

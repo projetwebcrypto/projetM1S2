@@ -67,7 +67,6 @@ public class serveurREST {
      * @return String
      */
     @GET
-    // Mettre /database cote client !!
     @Path("/database")
     @Produces(MediaType.APPLICATION_JSON)
     public String getBDDTriplets(@HeaderParam("Authorization") String compactJws, @QueryParam("name") String name) {
@@ -123,7 +122,7 @@ public class serveurREST {
      * format: {"login": "X", "nomdb": "Y", "triplets": [...]}
      */
     @POST
-    @Path("/test")
+    @Path("/pushdb")
     @Consumes(MediaType.APPLICATION_JSON)
     public String postBDDTriplets(@HeaderParam("Authorization") String compactJws, @QueryParam("name") String name, String listJson) {
         String login= null;
@@ -143,12 +142,19 @@ public class serveurREST {
         return("recue");
     }
 
-    @POST
+    @GET
     @Path("/listeBd")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public String listerBdd(String listJson) {
-        JSONObject obj = new JSONObject(listJson);
-        String login = obj.getString("login");
+    @Produces(MediaType.APPLICATION_JSON)
+//    public String listerBdd(String listJson) {
+    public String listerBdd(@HeaderParam("Authorization") String compactJws, @QueryParam("name") String name) {
+        String login= null;
+        try {
+            login = processToken(compactJws, "user_name");
+        } catch (Exception e) {
+            // Probleme de token
+            e.printStackTrace();
+            return "erreur"; // A determiner !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        }
         FileManagment fileManagment = new FileManagment();
         String reponse = fileManagment.listeBd(login);
         return reponse;
