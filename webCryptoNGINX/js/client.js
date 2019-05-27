@@ -16,7 +16,7 @@ var currentPassword = "";
 var liste = []
 var urlc = "https://192.168.99.100:443/myresource";
 var crypto = window.crypto;
-var dbName = "";//passwords
+var dbName = "";
 var keycloak = Keycloak({
 "realm": "ragnarok",
 "auth-server-url": "https://192.168.99.100/keycloak/auth",
