@@ -349,7 +349,6 @@ $(document).ready(function(){
       // Initialisation des champs du tableau
       var tableau = '<div class="container"><table class="table"><thead><tr>';
       tableau += '<th scope="col">Base de données :</th>';
-      console.log("before for");
 
       for (var i=0; i<myobj.Base.length; i++){
         console.log("in for")
