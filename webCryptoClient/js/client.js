@@ -896,22 +896,20 @@ $(document).ready(function(){
     $('#add-MstrPsw').show();
   });
 
-  $("#DL_Base_local").click(function(){
+  $(".download-link").click(function(event) {
     var store = getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
     var conf = "true";
     getdatas.onsuccess = function(){
-      if (getdatas.result != 0){
-        var dl_base_local = document.getElementById("DL_Base_local");
-        var blob = new Blob([JSON.stringify(getdatas.result, null, 2)], {type : 'application/json'});
-        dl_base_local.href  = URL.createObjectURL(blob);
-        dl_base_local.download = "BDD"
-        // var link = $(".DL_Base_local");
-        // link.attr("href", url);
-        // link.attr("download", "victor-hugo.txt");
-      }
+      var blob = new Blob([JSON.stringify(getdatas.result)], {type : 'application/json'});
+      var url  = URL.createObjectURL(blob);
+
+      var link = $(".download-link");
+      link.attr("href", url);
+      link.attr("download", "bdd.db.sc");
     }
   });
+
 // Initialisation du bouton "Ajouter" sous les champs d'entrees de "saisir le mot de passe Maître"
   $('#saisie_Mtrspsw').click(function(){
     var pwd = document.getElementById("MtsrPwd").value;
