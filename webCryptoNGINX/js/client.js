@@ -781,26 +781,6 @@ $(document).ready(function(){
         keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
 
         data = {"triplets": tmp};
-<<<<<<< HEAD
-
-        $.ajax({
-          type:"POST",
-          headers:{"Authorization": "Bearer " + keycloak.token},
-          url:urlc + "/test" + "?name=" + "passwords",
-          data:JSON.stringify(data),
-          dataType:"text",
-          contentType:"application/json",
-          // accepts: "*/*",
-          success:function(json,status){
-            console.log(json);
-            alert("Envoie réussi");
-          },
-          error:function(data,status){
-            alert("Echec de l'envoie");
-            console.log("error POST"+data+" status :  "+status);
-          }
-        });
-=======
         if (keycloak.authenticated){
           $.ajax({
             type:"POST",
@@ -820,7 +800,6 @@ $(document).ready(function(){
             }
           });
         }
->>>>>>> 76a8faa8d45572405b203a616e3aab8e148c0ea3
       }
     }
   });
