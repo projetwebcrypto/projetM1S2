@@ -170,7 +170,9 @@ $(document).ready(function(){
 
   // Fonction qui affiche le login et le mdp en clair du site demande.
   function afficheClair(testlogin, testpassword, website){
-    alert("Identifiant :" + testlogin + "\n" + "mdp :" + testpassword);
+    document.getElementById("pseudo").innerHTML = "Identifiant : " + testlogin;
+    document.getElementById("motdepasseclair").innerHTML = "mdp : " + testpassword;
+    $("#afficheClairModal").modal();
   }
 
   // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
