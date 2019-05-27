@@ -791,7 +791,8 @@ $(document).ready(function(){
             contentType:"application/json",
             // accepts: "*/*",
             success:function(json,status){
-              console.log(json);
+              // console.log(json);
+              document.getElementById("button-onload").className = "dot";
               alert("Envoie réussi");
             },
             error:function(data,status){
