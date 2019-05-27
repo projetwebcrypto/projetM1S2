@@ -87,6 +87,9 @@ function createDb(){
   };
 };
 
+function chargeBdd(){
+  console.log(document.getElementById("file"));
+}
 // Fonction qui vérifie si les champs d' "ajouter un triplet" sont vides
 function checkEmpty(){
   if((document.getElementById("Website").value !="") && (document.getElementById("Login").value!="") && (document.getElementById("Password").value!="")){
@@ -867,7 +870,9 @@ $(document).ready(function(){
       }
     }
   };
-
+  $("#testpush").click(function(){
+    alert("z");
+  });
   // Initialisation des champs d'entrees de "changer le mot de passe Maître" (champ mot de passe)
   $("#PasswordChange").click(function(){
     $("#psw-buttons").show();
@@ -903,7 +908,6 @@ $(document).ready(function(){
     getdatas.onsuccess = function(){
       var blob = new Blob([JSON.stringify(getdatas.result)], {type : 'application/json'});
       var url  = URL.createObjectURL(blob);
-
       var link = $(".download-link");
       link.attr("href", url);
       link.attr("download", "bdd.db.sc");
@@ -986,6 +990,27 @@ $(document).ready(function(){
     var website = $(this).text().slice(2);
     decryptAES128(website, currentPassword, afficheClair);
 
+  });
+
+  $("#testbutton").click(function(){
+    var fileInput = document.querySelector('#file');
+
+    fileInput.addEventListener('change', function() {
+
+        var reader = new FileReader();
+
+        reader.addEventListener('load', function() {
+            var bdd = JSON.parse(reader.result);
+            // addTable(bdd);
+            for (var i = 0; i < bdd.length; i++) {
+              console.log((Object.values(bdd[i].crypto)))
+              addTriplet(bdd[i].Website,new Uint8Array(Object.values(bdd[i].crypto)));
+            }
+        });
+
+        reader.readAsText(fileInput.files[0]);
+
+    });
   });
 
   $("body").on("click", "#base", function(){
