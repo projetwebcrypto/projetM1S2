@@ -170,7 +170,9 @@ $(document).ready(function(){
 
   // Fonction qui affiche le login et le mdp en clair du site demande.
   function afficheClair(testlogin, testpassword, website){
-    alert("Identifiant :" + testlogin + "\n" + "mdp :" + testpassword);
+    document.getElementById("pseudo").innerHTML = "Identifiant : " + testlogin;
+    document.getElementById("motdepasseclair").innerHTML = "mdp : " + testpassword;
+    $("#afficheClairModal").modal();
   }
 
   // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
@@ -422,7 +424,6 @@ $(document).ready(function(){
     var countRequest = store.count();
     countRequest.onsuccess = function() {
       if( liste.length == countRequest.result){
-        console.log(liste);
         store = getObjectStore("Triplet", "readwrite");
         cpt = 0;
         put_record(liste, store, cpt);
@@ -444,12 +445,7 @@ $(document).ready(function(){
     else {
       var taille = [testlogin.length];
       var word = Uint8Array.from(taille.concat(message));
-      console.log("variables");
-      console.log(mdp);
-      console.log(word);
     }
-
-
     sel = new Uint8Array(16);
     window.crypto.getRandomValues(sel);
     // Recuperation du mdp en tant que cle
@@ -601,7 +597,6 @@ $(document).ready(function(){
     }
   };
 
-decryptAES128("0________","azerty",placement);
   // Fonction de dechiffrement des identifiants
   function decryptAES128(website, currentPassword, fonction, newmstrpsw, myobj){
     var store =  getObjectStore("Triplet", "readonly");
@@ -668,7 +663,7 @@ decryptAES128("0________","azerty",placement);
     tailleLogin = new Uint8Array(clair)[0];
     testpassword = messageClair.slice( tailleLogin + 1);
     testlogin = messageClair.slice(1, tailleLogin + 1);
-    console.log("tailleLogin :"+tailleLogin)
+    // console.log("tailleLogin :"+tailleLogin)
     fonction(testlogin, testpassword, website, newmstrpsw, myobj);
   };
 
@@ -684,8 +679,8 @@ decryptAES128("0________","azerty",placement);
     var verif = new Uint8Array([0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
     byteLogin = new Uint8Array(convertStringToByteArray(testlogin));
     var val = false;
-    console.log(verif);
-    console.log(byteLogin);
+    // console.log(verif);
+    // console.log(byteLogin);
     if (verif.length == (byteLogin.length) + 1){
       var tentative = promCheckModPsw(verif, byteLogin, newmstrpsw, myobj);
       tentative.then(effectiveChangeMstrPsw(true, newmstrpsw, myobj));
@@ -694,13 +689,13 @@ decryptAES128("0________","azerty",placement);
 
   // Fonction de vérification de validite du mot de passe maitre
   function promCheckModPsw(verif, byteLogin, newmstrpsw, myobj){
-    console.log("promCheckModPsw");
-    console.log("pwd : " + newmstrpsw);
-    console.log("verif : "+ verif);
+    // console.log("promCheckModPsw");
+    // console.log("pwd : " + newmstrpsw);
+    // console.log("verif : "+ verif);
 
     return new Promise((resolve) => {
-      console.log(verif[0]);
-      console.log(tailleLogin);
+      // console.log(verif[0]);
+      // console.log(tailleLogin);
       if (verif[0] == tailleLogin){
         for (var i=1; i<verif.length; i++){
           if (verif[i] != byteLogin[i-1]){
@@ -721,7 +716,7 @@ decryptAES128("0________","azerty",placement);
   function effectiveChangeMstrPsw(booleanVal, newmstrpsw, myobj){
     if (booleanVal){
       for (var i=0; i<myobj.length; i++){
-        console.log("avant update"+myobj[i])
+        // console.log("avant update"+myobj[i])
         updateAES128(myobj[i].Website, currentPassword, addListe, newmstrpsw)
       }
       $("#psw-buttons").hide();
@@ -790,12 +785,12 @@ decryptAES128("0________","azerty",placement);
           contentType:"application/json",
           // accepts: "*/*",
           success:function(json,status){
-            console.log(json);
+            document.getElementById("button-onload").className = "dot";
             alert("Envoie réussi");
           },
           error:function(data,status){
             alert("Echec de l'envoie");
-            console.log("error POST"+data+" status :  "+status);
+            // console.log("error POST"+data+" status :  "+status);
           }
         });
       }
@@ -823,14 +818,11 @@ decryptAES128("0________","azerty",placement);
           },
           error:function(data,status){
             $("#OnabbortAjax").modal();
-            console.log("error POST"+data+" status :  "+status);
+            // console.log("error POST"+data+" status :  "+status);
           }
         });
       });
-  // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
-  $("#DL").click(function(){
-    downloadBdd("nom_de_la_Bdd")
-  });
+
 
   function downloadBdd(nom_de_la_Bdd){
     var store = getObjectStore("Triplet", "readonly");
@@ -846,7 +838,7 @@ decryptAES128("0________","azerty",placement);
       }
       if (conf){
         // data = {"login":"log","bd":"passwords"};
-        data = {"login":"log2","bd":"passwords"};
+        data = {"login":"log","bd":"passwords"};
 
         $.ajax({
           type:"POST",
@@ -886,7 +878,6 @@ decryptAES128("0________","azerty",placement);
   $("#chng_psw").click(function(){
     var oldmstrpsw = document.getElementById("OldMstrPsw").value;
     var newmstrpsw = document.getElementById("NewMstrPsw").value;
-    console.log(oldmstrpsw + "  " + newmstrpsw);
     var store = getObjectStore("Triplet", "readwrite");
     var getdatas = store.getAll();
     getdatas.onsuccess = function(){
@@ -986,8 +977,7 @@ decryptAES128("0________","azerty",placement);
   $("body").on("click", "#base", function(){
     document.getElementById("add_tuple").disabled = true;
     var nom_de_la_Bdd = $(this).attr("name");
-    console.log(nom_de_la_Bdd)
-    downloadBdd(nom_de_la_Bdd)
+    downloadBdd(nom_de_la_Bdd);
   });
 
   // Initialisation d'interactions avec les images "Modifier"
@@ -1005,7 +995,6 @@ decryptAES128("0________","azerty",placement);
     var conf = confirmationSuppression("Voulez-vous supprimer ce tuple de la base de donnée locale?");
     if (conf){
       var website = $(this).attr("name");
-      console.log("web= ", website);
       var store =  getObjectStore("Triplet", "readonly");
       var objectStoreRequest = store.get(website);
       objectStoreRequest.onsuccess = function(){

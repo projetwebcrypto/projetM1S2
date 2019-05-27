@@ -82,7 +82,7 @@
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
         <li class="active"><a href="#">Home</a></li>
-        <li><a href="https://github.com/projetwebcrypto/projetM1S2/blob/master/README.md">A propos</a></li>
+        <li><a href="https://github.com/projetwebcrypto/projetM1S2/">A propos</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li><a href="#" id="Account"><span class="glyphicon glyphicon-user"></span> Your Account</a></li>
@@ -134,7 +134,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Modal Header</h4>
+        <h4 class="modal-title">Base de données vide</h4>
       </div>
       <div class="modal-body">
         <p>Aucun tuple contenu dans la base de données .</p>
@@ -154,13 +154,36 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Modal Header</h4>
+        <h4 class="modal-title">Erreur téléchargement</h4>
       </div>
       <div class="modal-body">
         <p>Le téléchargement de l'application n'a pas abouti.</p>
         <p>Vérifiez votre connexion réseau ou contactez votre</p>
         <p>administrateur système ou votre fournisseur de services</p>
         <p>réseau.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal affiche clair mot de passe et site-->
+<div class="modal fade" id="afficheClairModal" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Identifiants</h4>
+      </div>
+      <div class="modal-body">
+        <p id="pseudo"></p>
+        <p id="motdepasseclair"></p>
+
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -271,12 +294,6 @@
           </div>
         </div>
       </div>
-      <div class="col-sm-4">
-        <div class="panel panel-primary">
-        <div id="DL-allBase" style="cursor:pointer" class="panel-heading"><span class="glyphicon glyphicon-list"><FONT face="Bitstream Vera Sans">  LISTER LES BASES DE DONNÉES</FONT></span></div>
-        <div class="panel-footer">Permet récupérer la liste des base de données présente sur le serveur </div>
-      </div>
-    </div>
     </div>
   </div>
 </div>
