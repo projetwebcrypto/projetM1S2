@@ -24,7 +24,6 @@ var keycloak = Keycloak({
 },
 "enable-cors": true
 });
-
 // Test de support d'IndexedDB
 if (!window.indexedDB){
   window.alert("Votre navigateur ne supporte pas une version stable d'IndexedDB. Quelques fonctionnalités ne seront pas disponibles.")
@@ -784,10 +783,6 @@ $(document).ready(function(){
   Affichage et interactions avec le client.html
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
-  $(window).blur(function () {
-    // currentPassword='';
-  });
-
    // Dissimulation initiale des champs d'entrees d' "ajouter un triplet"
   $("#add-buttons").hide();
   $("#mod-buttons").hide();
@@ -828,7 +823,7 @@ $(document).ready(function(){
 
   // Envoie de la base de donnée sur serveur
   $("#upload").click(function(){
-    if(dbName === undefined){
+    if(dbName === ""){
       let tmpname = window.prompt("Entrez un nom de base de données : ");
       dbName = tmpname
     }
@@ -841,7 +836,8 @@ $(document).ready(function(){
         keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
 
         data = {"triplets": tmp};
-        if ((keycloak.authenticated)&&(dbName)){
+        if((dbName)){
+        if (keycloak.authenticated){
           $.ajax({
             type:"POST",
             headers:{"Authorization": "Bearer " + keycloak.token},
@@ -861,6 +857,7 @@ $(document).ready(function(){
             }
           });
         }
+      }
         else {
           alert("Echec de l'envoie, nom de base de données vide.");
         }
@@ -896,7 +893,6 @@ $(document).ready(function(){
 
   // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
   function downloadBdd(name){
-    dbName = name;
     var store = getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
     var conf = "true";
@@ -906,7 +902,6 @@ $(document).ready(function(){
       }
       if (conf && getdatas.result != 0){
         deleteData();
-
       }
       if (conf){
         // data = {"login":"log","bd":"passwords"};
@@ -918,6 +913,7 @@ $(document).ready(function(){
             url:urlc + "/database" + "?name=" + name,
             contentType:"application/json",
             success:function(json,status){
+              dbName = name;
               // variable de stockage ( liste de données post traitement)
               // variable stockage d'un triplet
               var myobj = json;
@@ -992,7 +988,8 @@ $(document).ready(function(){
     var countRequest = store.count();
     countRequest.onsuccess = function() {
       if ( countRequest.result == 0){
-        var dbName = window.prompt("Entrez un nom de base de données : ");
+        var tmpname = window.prompt("Entrez un nom de base de données : ");
+        dbName = tmpname;
         let checkpwd = new Uint8Array([ 0xff,0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
         encryptAES128(convertByteArrayToString(checkpwd.buffer), "", "0________", undefined, undefined, addTriplet,true);
       }
