@@ -6,9 +6,11 @@ import lombok.*;
 import org.json.JSONArray;
 
 import javax.xml.bind.DatatypeConverter;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
 
 @ToString
 public class FileManagment{
@@ -51,19 +53,19 @@ public class FileManagment{
     public String pullBd(String login, String fileName) {
         File repository = new File(path + login + "/");
         File file = new File(path + login + "/" + fileName + ".db.sc");
-        String contenu = "";
+        String content = "";
         if (repository.exists() && repository.isDirectory()) {
             if (file.exists()) {
-                contenu = openFile(login, fileName);
+                content = openFile(login, fileName);
             }
             else {
-                contenu = "Fichier " + fileName + " inexistant";
+                content = "Fichier " + fileName + " inexistant";
             }
         }
         else {
-            contenu = "Utilisateur " + login + " inexistant";
+            content = "Utilisateur " + login + " inexistant";
         }
-        return contenu;
+        return content;
     }
 
 
@@ -73,28 +75,28 @@ public class FileManagment{
     public String openFile(String login, String fileName) {
         conn = new Connect();
         conn.connexion(path, login + "/", fileName + ".db.sc");
-        String contenu = "";
+        String content = "";
         try {
             byte[] bytes;
             this.stmt = conn.getConn().createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM PASSWORDS");
             // on construit la chaine de caractere dont le serveur a besoin
             while (rs.next()) {
-                contenu += "{\"site\":\"" + rs.getString("SITE_NAME") + "\",";
+                content += "{\"site\":\"" + rs.getString("SITE_NAME") + "\",";
                 bytes = rs.getBytes("CRYPTO");
-                contenu += "\"crypto\":\"" + DatatypeConverter.printBase64Binary(bytes) + "\"},";
+                content += "\"crypto\":\"" + DatatypeConverter.printBase64Binary(bytes) + "\"},";
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         // on enleve la virgule de la fin
-        if (contenu != null && contenu.length() > 0) {
-            contenu = contenu.substring(0, contenu.length() - 1);
+        if (content != null && content.length() > 0) {
+            content = content.substring(0, content.length() - 1);
         }
 
         conn.closeConnexion();
 
-        return contenu;
+        return content;
     }
 
 
@@ -170,5 +172,32 @@ public class FileManagment{
             }
         }
         return true;
+    }
+
+    // Liste les bases de donnees d'un utilisateur
+    public String listeBd(String login) {
+        String content = "{\"Base\":";
+        String fileName = "";
+        List<String> listeBd = new ArrayList<>();
+        File repository = new File(path + login + "/");
+        try {
+            File[] listFile;
+            // recupere la reference de chaque fichier sous repository
+            listFile = repository.listFiles();
+            for (int i = 0; i < listFile.length; i++) {
+                fileName = listFile[i].toString().substring(listFile[i].toString().lastIndexOf("/"));
+                // on enleve le / avant le nom du fichier
+                // les 6 derniers carateres etant .db.sc ne nous interessent pas
+                // le nom du fichier doit avoir plus de 7 caracteres (.db.sc) => fichier sans nom
+                if (fileName != null && fileName.length() > 7 && (fileName.substring(fileName.length() - 6, fileName.length())).equals(".db.sc")) {
+                    fileName = fileName.substring(1, fileName.length() - 6);
+                    listeBd.add("\"" + fileName + "\"");
+                }
+            }
+            content = content + listeBd.toString() + "}";
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return content;
     }
 }

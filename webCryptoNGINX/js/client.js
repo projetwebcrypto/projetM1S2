@@ -16,7 +16,7 @@ var currentPassword = "";
 var liste = []
 var urlc = "https://192.168.99.100:443/myresource";
 var crypto = window.crypto;
-var dbName = '';//passwords
+var dbName = "";
 var keycloak = Keycloak({
 "realm": "ragnarok",
 "auth-server-url": "https://192.168.99.100/keycloak/auth",
@@ -25,7 +25,7 @@ var keycloak = Keycloak({
 "ssl-required": "external",
 "resource": "customer-portal",
 "credentials": {
-"secret": "91ba6cd3-a905-4e00-af7c-b6e4ad777011"
+"secret": "e5869b85-c981-43f2-8c0c-8e8fd17f0b39"
 },
 "enable-cors": true
 });
@@ -801,6 +801,9 @@ $(document).ready(function(){
 
   // Envoie de la base de donnée sur serveur
   $("#upload").click(function(){
+    if(dbName === undefined){
+      var dbName = window.prompt("Entrez un nom de base de données : ");
+    }
     var store = getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
     var conf = "true";
@@ -810,11 +813,11 @@ $(document).ready(function(){
         keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
 
         data = {"triplets": tmp};
-        if (keycloak.authenticated){
+        if ((keycloak.authenticated)&&(dbName)){
           $.ajax({
             type:"POST",
             headers:{"Authorization": "Bearer " + keycloak.token},
-            url:urlc + "/test" + "?name=" + dbName,
+            url:urlc + "/pushdb" + "?name=" + dbName,
             data:JSON.stringify(data),
             dataType:"text",
             contentType:"application/json",
@@ -829,6 +832,9 @@ $(document).ready(function(){
               console.log("error POST"+data+" status :  "+status);
             }
           });
+        }
+        else {
+          alert("Echec de l'envoie, nom de base de données vide.");
         }
       }
     }
@@ -846,7 +852,7 @@ $(document).ready(function(){
           success:function(json,status){
             // variable de stockage ( liste de données post traitement)
             // variable stockage d'un triplet
-            var myobj = JSON.parse(json);
+            var myobj = json;
             if (myobj.Base.length > 0){
               addBase(myobj);
 
@@ -854,15 +860,15 @@ $(document).ready(function(){
           },
           error:function(data,status){
             $("#OnabbortAjax").modal();
-            console.log("error POST"+data+" status :  "+status);
+            console.log("error GET"+ data + " status :  " + status);
           }
         });
     }
   });
 
   // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
-  function downloadBdd(dbName){
-    console.log(dbName);
+  function downloadBdd(name){
+    dbName = name;
     var store = getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
     var conf = "true";
@@ -881,7 +887,7 @@ $(document).ready(function(){
           $.ajax({
             type:"GET",
             headers:{"Authorization": "Bearer " + keycloak.token},
-            url:urlc + "/login" + "?name=" + dbName,
+            url:urlc + "/database" + "?name=" + name,
             contentType:"application/json",
             success:function(json,status){
               // variable de stockage ( liste de données post traitement)
@@ -899,7 +905,7 @@ $(document).ready(function(){
               readTriplet();
               document.getElementById("button-onload").className = "dot";
             },
-            error:function(data,status){console.log("error POST"+data+" status :  "+status);}
+            error:function(data,status){console.log("error GET" + data + " status :  " + status);}
           });
         }
       }
@@ -958,6 +964,7 @@ $(document).ready(function(){
     var countRequest = store.count();
     countRequest.onsuccess = function() {
       if ( countRequest.result == 0){
+        var dbName = window.prompt("Entrez un nom de base de données : ");
         let checkpwd = new Uint8Array([ 0xff,0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
         encryptAES128(convertByteArrayToString(checkpwd.buffer), "", "0________", undefined, undefined, addTriplet,true);
       }

@@ -67,8 +67,7 @@ public class serveurREST {
      * @return String
      */
     @GET
-    // Mettre /database
-    @Path("/login")
+    @Path("/database")
     @Produces(MediaType.APPLICATION_JSON)
     public String getBDDTriplets(@HeaderParam("Authorization") String compactJws, @QueryParam("name") String name) {
 /*        System.out.println("okokokok\n\n\n\n\n");
@@ -112,9 +111,9 @@ public class serveurREST {
         }
 
         FileManagment fileManagment = new FileManagment();
-        String contenu = fileManagment.pullBd(login, name);
-        String reponse = "{\"triplets\":[" + contenu + "]}";
-        return reponse;
+        String content = fileManagment.pullBd(login, name);
+        String response = "{\"triplets\":[" + content + "]}";
+        return response;
     }
 
     /**
@@ -123,7 +122,8 @@ public class serveurREST {
      * format: {"login": "X", "nomdb": "Y", "triplets": [...]}
      */
     @POST
-    @Path("/test")
+    @Path("/pushdb")
+    @Consumes(MediaType.APPLICATION_JSON)
     public String postBDDTriplets(@HeaderParam("Authorization") String compactJws, @QueryParam("name") String name, String listJson) {
         String login= null;
         try {
@@ -140,6 +140,24 @@ public class serveurREST {
 
         fileManagment.pushBd(login, name, triplets);
         return("recue");
+    }
+
+    @GET
+    @Path("/listeBd")
+    @Produces(MediaType.APPLICATION_JSON)
+//    public String listerBdd(String listJson) {
+    public String listerBdd(@HeaderParam("Authorization") String compactJws, @QueryParam("name") String name) {
+        String login= null;
+        try {
+            login = processToken(compactJws, "user_name");
+        } catch (Exception e) {
+            // Probleme de token
+            e.printStackTrace();
+            return "erreur"; // A determiner !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        }
+        FileManagment fileManagment = new FileManagment();
+        String response = fileManagment.listeBd(login);
+        return response;
     }
 
     @GET
