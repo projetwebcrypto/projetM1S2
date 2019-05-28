@@ -10,15 +10,12 @@ import io.jsonwebtoken.Jwts;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.jboss.logging.Logger;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.PublicKey;
 import java.security.cert.Certificate;

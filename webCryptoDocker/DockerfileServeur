@@ -11,29 +11,37 @@ RUN mvn -s /tmp/settings.xml -B -e -C -T 1C org.apache.maven.plugins:maven-depen
 COPY src ./src
 RUN mvn -s /tmp/settings.xml -B -e -C -T 1C package
 
-
-# stage 2
-
 FROM jboss/wildfly:15.0.0.Final
+ENV JBOSS_HOME /opt/jboss/wildfly
+ENV JBOSS_CLI /opt/jboss/wildfly/bin/jboss-cli.sh
 COPY keycloak-wildfly-adapter-dist-6.0.1.tar.gz /tmp/keycloak-wildfly-adapter-dist.tar.gz
-RUN /opt/jboss/wildfly/bin/add-user.sh admin admin --silent
-ENV WILDFLY_HOME=/opt/jboss
-WORKDIR /opt/jboss/wildfly/bin
-COPY configCLI.txt configCLI.cli
-RUN mv configCLI.cli ../configCLI.cli
-# RUN ./jboss-cli.sh -c --controller=0.0.0.0 -u=admin -p=admin --file=../configCLI.cli
-# RUN ./jboss-cli.sh --file=../configCLI.cli
-RUN cd $WILDFLY_HOME/wildfly &&\
+RUN cd $JBOSS_HOME &&\
     tar zxvf /tmp/keycloak-wildfly-adapter-dist.tar.gz &&\
     ./bin/jboss-cli.sh --file=bin/adapter-elytron-install-offline.cli &&\
     rm -rf $WILDFLY_HOME/wildfly/standalone/configuration/standalone_xml_history
-#    rm /tmp/keycloak-wildfly-adapter-dist.tar.gz
-COPY standalone.xml /opt/jboss/wildfly/standalone/configuration/standalone.xml
-# RUN wildfly/bin/jboss-cli.sh --command=:shutdown
-# RUN pgrep -d" " -f "wildfly" | xargs kill;
-# RUN ./jboss-cli.sh --file=../configCLI.cli
-CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
+RUN /opt/jboss/wildfly/bin/add-user.sh admin admin --silent
 WORKDIR /opt/jboss/wildfly/standalone/configuration/
-COPY keycloak.pem keycloak.pem
+COPY src/main/resources/keycloak.pem keycloak.pem
 RUN keytool -importcert -keystore keycloak.jks -storepass jwtKey -file keycloak.pem -alias keycloak -trustcacerts -noprompt
-COPY --from=build /myapp/target/*-withdependencies.war /opt/jboss/wildfly/standalone/deployments/server.war
+RUN echo "=> Starting WildFly server" \
+    && bash -c '$JBOSS_HOME/bin/standalone.sh -c standalone.xml &' \
+    && echo "=> Waiting for the server to boot" \
+    && bash -c 'until `$JBOSS_CLI -c ":read-attribute(name=server-state)" 2> /dev/null | grep -q running`; do echo `$JBOSS_CLI -c ":read-attribute(name=server-state)" 2> /dev/null`; sleep 1; done' \
+    && echo "=> Configuring Keycloak adapter" \
+    && $JBOSS_CLI --connect --command="/subsystem=elytron/key-store=jwt-key-store:add(type="JKS", relative-to=jboss.server.config.dir, path="keycloak.jks", credential-reference={clear-text="jwtKey"})" \
+    && $JBOSS_CLI --connect --command="/subsystem=elytron/token-realm=wildflytest:add(jwt={issuer=["http://localhost:8080/auth/realms/wildflytest"], audience=["wildfly"], key-store=jwt-key-store, certificate="keycloak"}, principal-claim="preferred_username")" \
+    && $JBOSS_CLI --connect --command="/subsystem=elytron/security-domain=wildflytest:add(realms=[{realm=wildflytest}], permission-mapper=default-permission-mapper, default-realm=wildflytest)" \
+    && $JBOSS_CLI --connect --command="/subsystem=elytron/http-authentication-factory=jwt-http-authentication:add(security-domain=wildflytest, http-server-mechanism-factory=global, mechanism-configurations=[{mechanism-name="BEARER_TOKEN", mechanism-realm-configurations=[{realm-name="wildflytest"}]}])" \
+    && $JBOSS_CLI --connect --command="/subsystem=undertow/application-security-domain=wildflytest:add(http-authentication-factory=jwt-http-authentication)" \
+    && $JBOSS_CLI --connect --command="/:reload" \
+    && echo "=> Shutting down WildFly and Cleaning up" \
+    && $JBOSS_CLI --connect --command=":shutdown"
+
+RUN rm -rf $JBOSS_HOME/standalone/configuration/standalone_xml_history/ $JBOSS_HOME/standalone/log/* \
+    && rm -f /tmp/*.jar
+RUN sed -i -r 's/<http-listener name="default" socket-binding="http" redirect-socket="https" enable-http2="true"\/>/        <http-listener name="default" socket-binding="http" redirect-socket="https" proxy-address-forwarding="true"\/>/g' /opt/jboss/wildfly/standalone/configuration/standalone.xml
+USER jboss
+ENV LAUNCH_JBOSS_IN_BACKGROUND true
+EXPOSE 8080 9990
+CMD ["/bin/sh", "-c", "$JBOSS_HOME/bin/standalone.sh -c standalone.xml -b 0.0.0.0 -bmanagement 0.0.0.0"]
+COPY --from=build --chown=jboss:jboss /myapp/target/*-withdependencies.war /opt/jboss/wildfly/standalone/deployments/server.war
