@@ -16,7 +16,7 @@
 
   <script type="text/javascript" src="js/jquery-ui/jquery-ui.min.js"></script>
   <script type="text/javascript" src="js/client.js"></script>
-  <script type="text/javascript" src="js/createIndexedDB.js"></script>
+  <!-- <script type="text/javascript" src="js/createIndexedDB.js"></script> -->
 </head>
 <body>
 
@@ -68,6 +68,32 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal saisir mot de passe maitre-->
+<div class="modal fade" id="grabmstrpswd" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">saisissez mot de passe maître</h4>
+      </div>
+      <div class="modal-body">
+        <p>Entrez le mot de passe chiffrant/déchiffrant la base de données</p>
+        <p>
+          <label for="pass">Password (1 characters minimum):</label>
+          <span class="glyphicon glyphicon-eye-close">
+          <input type="password" id="pass" name="password" maxlength="32" minlength="1" required>
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button id=passButton type="button" class="btn btn-default" data-dismiss="modal">Entrer</button>
       </div>
     </div>
 

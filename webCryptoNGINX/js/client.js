@@ -1,3 +1,7 @@
+// Variables de verification de support d'IndexedDB
+window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
 
 // Variables a demarrer
 var db;
@@ -16,11 +20,22 @@ var keycloak = Keycloak({
 "ssl-required": "external",
 "resource": "customer-portal",
 "credentials": {
-"secret": "e5869b85-c981-43f2-8c0c-8e8fd17f0b39"
+"secret": "91ba6cd3-a905-4e00-af7c-b6e4ad777011"
 },
 "enable-cors": true
 });
 
+// Test de support d'IndexedDB
+if (!window.indexedDB){
+  window.alert("Votre navigateur ne supporte pas une version stable d'IndexedDB. Quelques fonctionnalités ne seront pas disponibles.")
+};
+
+if(crypto.subtle){
+  // alert("Cryptography API Supported");
+}
+else{
+  alert("Cryptography API not Supported");
+};
 // Fonction qui convertit un array en string
 function convertByteArrayToString(buffer){
   let data_view = new DataView(buffer);
@@ -55,6 +70,32 @@ function ascii(lettre){
 // Fonction qui convertit un string en array
 function convertStringToByteArray(str){
   return Uint8Array.from(str.split("").map(ascii));
+};
+
+// Fonction d'initialisation d'indexedDB
+function createDb(){
+  console.log("Init openDb ...");
+
+  // Version 3 car seul chromium semble marcher à la fac, et uniquement sur cette version
+  var request = window.indexedDB.open("MyTestDatabase", 3);
+
+  // Fonction lancee si le demarrage reussit
+  request.onsuccess = function (event){
+    db = this.result;
+    console.log("Creation: " + db);
+    // alert("Creation reussie");
+  };
+
+  // Fonction lancee si le demarrage rate
+  request.onerror = function(event){
+    alert("Erreur onerror:" + event.target.errorCode);
+  };
+
+  // Fonction lancee a l'appel une fois lancee
+  request.onupgradeneeded = function(event){
+    store = event.currentTarget.result.createObjectStore("Triplet", {keyPath: "Website"});
+    store.createIndex("Website", "Website", { unique: true, multiEntry: true});
+  };
 };
 
 // Fonction qui vérifie si les champs d' "ajouter un triplet" sont vides
@@ -104,8 +145,17 @@ function checkSend(){
   };
 };
 
+// Initialisation de l'indexedDB
+createDb();
+
 // S'assure que le .html est bien lance.
 $(document).ready(function(){
+  $("#grabmstrpswd").modal();
+
+//   function stateMstrPsw(){
+//   var newpassw = window.prompt("Entrez le mot de passe maitre : ");
+//   currentPassword = newpassw;
+// };
 
   keycloak.init({})
           .success(function(){if (keycloak.authenticated){
@@ -348,7 +398,12 @@ $(document).ready(function(){
     var objectStore = transaction.objectStore("Triplet");
     var objectStoreRequest = objectStore.clear();
     objectStoreRequest.onsuccess = function(event){
-      // console.log("Suppression de la bd" + objectStore + "réussie !");
+      dbName = "";
+      currentPassword = "";
+      $("#grabmstrpswd").modal();
+    };
+    objectStoreRequest.onerror = function(event){
+      alert("Erreur onerror:" + event.target.errorCode);
     };
   };
 
@@ -665,7 +720,7 @@ $(document).ready(function(){
 
   // Fonction qui fait les traitements necessaire sur l'objet "clair" (uint8array[taille+chiffré(login+mdp)])
   // puis envois le résultat du traitement a "fctn"
-  // Accepte : afficheClair(), function placement(),
+  // Accepte : afficheClair(), function placement(),checkTest()
   function traitement(clair, currentPassword, website, newmstrpsw, myobj, fonction){
     messageClair = convertByteArrayToString(clair);
     tailleLogin = new Uint8Array(clair)[0];
@@ -685,6 +740,7 @@ $(document).ready(function(){
   function checkTest(testlogin, testpassword, website, newmstrpsw, myobj, tailleLogin){
     var verif = new Uint8Array([0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
     byteLogin = new Uint8Array(convertStringToByteArray(testlogin));
+    console.log(verif.length+"&&"+(byteLogin.length) + 1);
     var val = false;
     if (verif.length == (byteLogin.length) + 1){
       var tentative = promCheckModPsw(verif, byteLogin, newmstrpsw, myobj);
@@ -773,7 +829,8 @@ $(document).ready(function(){
   // Envoie de la base de donnée sur serveur
   $("#upload").click(function(){
     if(dbName === undefined){
-      var dbName = window.prompt("Entrez un nom de base de données : ");
+      let tmpname = window.prompt("Entrez un nom de base de données : ");
+      dbName = tmpname
     }
     var store = getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
@@ -988,6 +1045,13 @@ $(document).ready(function(){
   $('#send').click(function(){
     $("#send-buttons").show();
   });
+
+  $('#passButton').click(function(){
+    let newpassw = document.getElementById("pass").value;
+    currentPassword = newpassw;
+    document.getElementById("pass").value = "";
+  });
+
 
   $('#send_db').click(function(){
     keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
