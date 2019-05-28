@@ -113,7 +113,7 @@ function checkGrab(){
 }
 // Fonction qui verifie si les champs d"ajouter un triplet" sont vides
 function checkEmpty(){
-  if((document.getElementById("Website").value !="") && (document.getElementById("Login").value!="") && (document.getElementById("Password").value!="")){
+  if((document.getElementById("Website").value !="") && (document.getElementById("Login").value!="") && (document.getElementById("Password").value!="") &&(currentPassword!="")){
     document.getElementById("add_tuple").disabled = false;
   }
   else{
@@ -720,17 +720,22 @@ $(document).ready(function(){
                   })
                 })
                 .catch(function(err){
-                  var store = getObjectStore("Triplet", "readonly");
-                  var getdatas = store.getAll();
-                  var conf = "true";
-                  getdatas.onsuccess = function(){
-                    if (getdatas.result != 0){
-                      conf = confirmationSuppression("Mauvais mot de passe, \nVoulez-vous supprimer la base de données locale?");
+                  if(currentPassword ==""){
+                    var store = getObjectStore("Triplet", "readonly");
+                    var getdatas = store.getAll();
+                    var conf = "true";
+                    getdatas.onsuccess = function(){
+                      if (getdatas.result != 0){
+                        conf = confirmationSuppression("Mauvais mot de passe, \nVoulez-vous supprimer la base de données locale?");
+                      }
+                      if (conf && getdatas.result != 0){
+                        deleteData(false);
+                      }
+                      else{traitementModal();}
                     }
-                    if (conf && getdatas.result != 0){
-                      deleteData(false);
-                    }
-                    else{traitementModal();}
+                  }
+                  else{
+                    alert("Ancien Mot de passe erroné.");
                   }
                 });
               })
@@ -746,6 +751,7 @@ $(document).ready(function(){
     document.getElementById("ContentModalSession").innerHTML = "Veuillez ressaisir le mot de passe maître";
     $("#GrabMstrPsw").modal("show");
   }
+
   // Fonction qui fait les traitements necessaire sur l'objet "clear" (uint8array[size+chiffré(login+mdp)])
   // puis envoie le resultat du traitement a une fonction
   // Accepte : postClear(), placement(), checkTest()
@@ -771,7 +777,7 @@ $(document).ready(function(){
     if (verif.length == (byteLogin.length) + 1){
       for (var i=1; i<verif.length; i++){
         if (verif[i] != byteLogin[i-1]){
-          console.log("Ancien Mot de passe erroné1.");
+          console.log("Ancien Mot de passe erroné");
         };
       };
     }
@@ -1011,7 +1017,7 @@ $(document).ready(function(){
           var getwebs = stored.get("0________");
           getwebs.onsuccess = function(){
             var testWeb = getwebs.result;
-            decryptAES128(testWeb.Website, currentPassword, checkTest, newMstrPsw, myobj);
+            decryptAES128(testWeb.Website, oldMstrPsw, checkTest, newMstrPsw, myobj);
           };
         };
       };
@@ -1104,7 +1110,11 @@ $(document).ready(function(){
     var countRequest = store.count();
     countRequest.onsuccess = function() {
       if(countRequest.result != 0){
+        $("#GrabMstrPsw").modal("hide");
         decryptAES128("0________", currentPassword,checkMstrPsw);
+      }
+      else{
+          $("#GrabMstrPsw").modal("hide");
       }
     }
   });
