@@ -1,0 +1,46 @@
+.modal-header, h4, .close {
+  background-color: #337ab7;
+  color:white !important;
+  text-align: center;
+  font-size: 30px;
+}
+.modal-footer {
+  background-color: #f9f9f9;
+}
+.dot {
+  height: 15px;
+  width: 15px;
+  background-color: #0f0;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot.grey {
+  height: 15px;
+  width: 15px;
+  background-color: #999;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot.red{
+  height: 15px;
+  width: 15px;
+  background-color: #f00;
+  border-radius: 50%;
+  display: inline-block;
+}
+  /* Remove the navbar's default rounded borders and increase the bottom margin */
+  .navbar {
+    margin-bottom: 50px;
+    border-radius: 0;
+  }
+
+  /* Remove the jumbotron's default bottom margin */
+   .jumbotron {
+    margin-bottom: 0;
+  }
+
+  /* Add a gray background color and some padding to the footer */
+  footer {
+    background-color: #f2f2f2;
+    padding: 25px;
+  }
