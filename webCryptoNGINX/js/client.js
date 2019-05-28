@@ -102,8 +102,16 @@ function createDb(){
   };
 };
 
-
-// Fonction qui verifie si les champs d' "ajouter un triplet" sont vides
+// Fonction qui verifie si les mdp du modal grab sont remplsi
+function checkGrab(){
+  if(document.getElementById("pass").value !=""){
+    document.getElementById("passButton").disabled = false;
+  }
+  else{
+    document.getElementById("passButton").disabled = true;
+  }
+}
+// Fonction qui verifie si les champs d"ajouter un triplet" sont vides
 function checkEmpty(){
   if((document.getElementById("Website").value !="") && (document.getElementById("Login").value!="") && (document.getElementById("Password").value!="")){
     document.getElementById("add_tuple").disabled = false;
@@ -155,15 +163,6 @@ createDb();
 
 // S'assure que le .html est bien lance.
 $(document).ready(function(){
-  document.getElementById("titleGrabMtrPsw").innerHTML = "saisissez mot de passe maître";
-  document.getElementById("ContentModalSession").innerHTML = "Entrez le mot de passe chiffrant/déchiffrant la base de données";
-  $("#GrabMstrPsw").modal("show");
-
-//   function stateMstrPsw(){
-//   var newpassw = window.prompt("Entrez le mot de passe maitre : ");
-//   currentPassword = newpassw;
-// };
-
   keycloak.init()
           .success(function(){if (keycloak.authenticated){
                                 $("#loged1").show();
@@ -405,8 +404,8 @@ $(document).ready(function(){
       dbName = "";
       if (bool === undefined){
         currentPassword = "";
-        document.getElementById("titleGrabMtrPsw").innerHTML = "saisissez mot de passe maître";
-        document.getElementById("ContentModalSession").innerHTML = "Entrez le mot de passe chiffrant/déchiffrant la base de données";
+        document.getElementById("titleGrabMtrPsw").innerHTML = "saisissez un nouveau mot de passe maître";
+        document.getElementById("ContentModalSession").innerHTML = "Base de données supprimer.\nEntrez le mot de passe chiffrant/déchiffrant la \n nouvelle base de données";
         $("#GrabMstrPsw").modal("show");
       }
     };
@@ -844,7 +843,7 @@ $(document).ready(function(){
     var conf = "true";
     getdatas.onsuccess = function(){
       if (getdatas.result != 0){
-        conf = confirmationSuppression("Voulez-vous supprimer la base de données locale?");
+        conf = confirmationSuppression("Voulez-vous supprimer la base de données locale\n afin télécharger la nouvelle base de données?");
       };
       if (conf){
         deleteData();
@@ -874,7 +873,11 @@ $(document).ready(function(){
     getdatas.onsuccess = function(){
       if (getdatas.result != 0){
         var tmp = encodeB64(getdatas.result);
-        keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
+        keycloak.updateToken(30).success(function(){
+        })
+        .error(function(){
+          $("#OnConnectionNeeded").modal("show");
+        });
         data = {"triplets": tmp};
         if((dbName)){
         if (keycloak.authenticated){
@@ -908,7 +911,8 @@ $(document).ready(function(){
   // Initialisation du lien "Recuperer les bases de données" qui recupere la liste des bases de donnees présente sur le serveur
   $("#DL-allBase").click(function(){
       // data = {"login":"log"};
-      keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
+      keycloak.updateToken(30).success()
+      .error(function(){$("#OnConnectionNeeded").modal("show");});
       if (keycloak.authenticated){
         $.ajax({
           type:"GET",
@@ -945,7 +949,7 @@ $(document).ready(function(){
       }
       if (conf){
         // data = {"login":"log","bd":"passwords"};
-        keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
+        keycloak.updateToken(30).success(function(){}).error(function(){$("#OnConnectionNeeded").modal("show");});
         if (keycloak.authenticated){
           $.ajax({
             type:"GET",
@@ -1060,6 +1064,12 @@ $(document).ready(function(){
 
   // Initialisation des champs d'entrees d' "ajouter un triplet" (champ site, login et mot de passe)
   $("#ADD").click(function(){
+    if (currentPassword == "")
+    {
+      document.getElementById("titleGrabMtrPsw").innerHTML = "saisissez mot de passe maître";
+      document.getElementById("ContentModalSession").innerHTML = "Entrez le mot de passe chiffrant/déchiffrant la base de données";
+      $("#GrabMstrPsw").modal("show");
+    }
     var x = document.getElementById("add-buttons");
     if (x.style.display === "none") {
       x.style.display = "block";
@@ -1101,7 +1111,7 @@ $(document).ready(function(){
 
 
   $('#send_db').click(function(){
-    keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
+    keycloak.updateToken(30).success(function(){}).error(function(){$("#OnConnectionNeeded").modal("show");});
     if (keycloak.authenticated){
       var fd = new FormData();
       fd.append('userfile', $('#select_db')[0].files[0]);
@@ -1124,23 +1134,32 @@ $(document).ready(function(){
   // Initialisation d'interactions avec les champs site
   $("body").on("click", "#website", function(){
     var website = $(this).text().slice(2);
-    decryptAES128(website, currentPassword, postClear);
+    if(currentPassword == ""){
+      traitementModal();
+    }
+    else{
+      decryptAES128(website, currentPassword, postClear);
+    }
   });
 
   // appel la requête ajax download sur dbname au click utilisateur
   $("body").on("click", "#base", function(){
-    document.getElementById("add_tuple").disabled = true;
-    var dbName = $(this).attr("name");
-    downloadBdd(dbName)
+      var dbName = $(this).attr("name");
+      downloadBdd(dbName)
   });
 
   // Initialisation d'interactions avec les images "Modifier"
   $("body").on("click", "#edit", function(){
-    $("#mod-buttons").show();
-    document.getElementById("add_tuple").disabled = true;
-    var website = $(this).attr("name");
-    decryptAES128(website, currentPassword, placement);
-    reset_mod();
+    if(currentPassword == ""){
+      traitementModal();
+    }
+    else {
+      $("#mod-buttons").show();
+      document.getElementById("add_tuple").disabled = true;
+      var website = $(this).attr("name");
+      decryptAES128(website, currentPassword, placement);
+      reset_mod();
+    }
   });
 
   // Initialisation d'interactions avec les images "Effacer"
