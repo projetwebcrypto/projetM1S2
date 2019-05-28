@@ -4,17 +4,27 @@
   <title> MonCoffre </title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <script src="keycloak-js-adapter-dist-6.0.1/keycloak.js" type="text/javascript"></script>
   <script src="js/jquery.min.js"></script>
-  <script src="js/bootstrap.min.js"></script> -->
+  <script src="js/bootstrap.min.js"></script>
 
-  <link rel="stylesheet" href="../webCryptoNGINX/css/bootstrap.min.css">
+  <!-- <link rel="stylesheet" href="../webCryptoNGINX/css/bootstrap.min.css">
   <script src="../webCryptoNGINX/js/jquery.min.js"></script>
-  <script src="../webCryptoNGINX/js/bootstrap.min.js"></script>
+  <script src="../webCryptoNGINX/js/bootstrap.min.js"></script> -->
 
   <script type="text/javascript" src="js/jquery-ui/jquery-ui.min.js"></script>
   <script type="text/javascript" src="js/client.js"></script>
   <style>
+  .modal-header, h4, .close {
+    background-color: #337ab7;
+    color:white !important;
+    text-align: center;
+    font-size: 30px;
+  }
+  .modal-footer {
+    background-color: #f9f9f9;
+  }
   .dot {
     height: 15px;
     width: 15px;
@@ -78,17 +88,103 @@
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="file:///home/etudiants/cclain594/T%C3%A9l%C3%A9chargements/Re%20html/site2.html">Home</a></li>
+        <li class="active"><a href="https://192.168.99.100/monappli">Home</a></li>
         <li><a href="https://github.com/projetwebcrypto/projetM1S2/blob/master/README.md">A propos</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="#" onclick="keycloak.login()">Se connecter</a></li>
-        <li><a href="#" onclick="keycloak.logout()">Se déconnecter</a></li>
-        <li><a href="#" onclick="keycloak.accountManagement()"><span class="glyphicon glyphicon-user"></span>Gestion de compte</a></li>
+        <li id="unloged"><a href="#" onclick="keycloak.login()">Se connecter</a></li>
+          <li id="loged1"><a href="#" onclick="keycloak.logout()">Se déconnecter</a></li>
+          <li id="loged2"><a href="#" onclick="keycloak.accountManagement()"><span class="glyphicon glyphicon-user"></span>Gestion de compte</a></li>
       </ul>
     </div>
   </div>
 </nav>
+<!-- Modal affiche liste SITES-->
+<div class="modal fade" id="OnabbortaddTriplet" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Ajout impossible</h4>
+      </div>
+      <div class="modal-body">
+        <p>Tuple déjà présent dans la base de données .</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- Modal affiche liste SITES-->
+<div class="modal fade" id="OnabbortreadTriplet" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Base de données vide</h4>
+      </div>
+      <div class="modal-body">
+        <p>Aucun tuple contenu dans la base de données .</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- Modal Dl liste bdd échoué-->
+<div class="modal fade" id="OnabbortAjax" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Erreur téléchargement</h4>
+      </div>
+      <div class="modal-body">
+        <p>Le téléchargement de l'application n'a pas abouti.</p>
+        <p>Vérifiez votre connexion réseau ou contactez votre</p>
+        <p>administrateur système ou votre fournisseur de services</p>
+        <p>réseau.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal affiche clair mot de passe et site-->
+<div class="modal fade" id="afficheClairModal" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Identifiants</h4>
+      </div>
+      <div class="modal-body">
+        <p id="pseudo"></p>
+        <p id="motdepasseclair"></p>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
 <div style="text-align:right">
   <span class="dot grey" id="button-onload"></span>
 </div>
@@ -123,10 +219,10 @@
       </div>
       <div class="col-sm-4">
         <div class="panel panel-primary">
-          <div id="DL" style="cursor:pointer" class="panel-heading"><span class="glyphicon glyphicon-download"><FONT face="Bitstream Vera Sans">    RÉCUPÉRER LES SITES</FONT></span></div>
-          <div class="panel-footer">Permet récupérer les sites dans votre base de données distante ( sur le serveur de stockage) </div>
-        </div>
+        <div id="DL-allBase" style="cursor:pointer" class="panel-heading"><span class="glyphicon glyphicon-list"><FONT face="Bitstream Vera Sans">  LISTER LES BASES DE DONNÉES</FONT></span></div>
+        <div class="panel-footer">Permet récupérer la liste des base de données présente sur le serveur </div>
       </div>
+    </div>
       <div class="col-sm-4">
         <div class="panel panel-primary">
           <div id="PasswordChange" class="panel-heading" style="cursor:pointer"><span class="glyphicon glyphicon-pencil"><FONT face="Bitstream Vera Sans">    CHANGER DE MOT DE PASSE MAÎTRE</FONT></div>
@@ -191,12 +287,6 @@
           </div>
         </div>
       </div>
-      <div class="col-sm-4">
-        <div class="panel panel-primary">
-        <div id="DL-allBase" style="cursor:pointer" class="panel-heading"><span class="glyphicon glyphicon-list"><FONT face="Bitstream Vera Sans">  LISTER LES BASES DE DONNÉES</FONT></span></div>
-        <div class="panel-footer">Permet récupérer la liste des base de données présente sur le serveur </div>
-      </div>
-    </div>
     </div>
   </div>
 </div>

@@ -3,11 +3,6 @@ window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndex
 window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
 window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
 
-// Test de support d'IndexedDB
-if (!window.indexedDB){
-  window.alert("Votre navigateur ne supporte pas une version stable d'IndexedDB. Quelques fonctionnalités ne seront pas disponibles.")
-};
-
 // Variables a demarrer
 var db;
 var store;
@@ -16,7 +11,7 @@ var currentPassword = "";
 var list = []
 var urlc = "https://192.168.99.100:443/myresource";
 var crypto = window.crypto;
-var dbName = "";//passwords
+var dbName = "";
 var keycloak = Keycloak({
 "realm": "ragnarok",
 "auth-server-url": "https://192.168.99.100/keycloak/auth",
@@ -30,13 +25,17 @@ var keycloak = Keycloak({
 "enable-cors": true
 });
 
+// Test de support d'IndexedDB
+if (!window.indexedDB){
+  window.alert("Votre navigateur ne supporte pas une version stable d'IndexedDB. Quelques fonctionnalités ne seront pas disponibles.")
+};
+
 if(crypto.subtle){
   // alert("Cryptography API Supported");
 }
 else{
   alert("Cryptography API not Supported");
 };
-
 // Fonction qui convertit un array en string
 function convertByteArrayToString(buffer){
   let data_view = new DataView(buffer);
@@ -136,11 +135,27 @@ function checkMstr(){
   };
 };
 
+// Fonction de vérification de validité du fichier à envoyer au serveur
+function checkSend(){
+  if(document.getElementById("select_db").value != ""){
+    document.getElementById("send_db").disabled = false;
+  }
+  else{
+    document.getElementById("send_db").disabled = true;
+  };
+};
+
 // Initialisation de l'indexedDB
 createDb();
 
 // S'assure que le .html est bien lance.
 $(document).ready(function(){
+  $("#GrabMstrPsw").modal();
+
+//   function stateMstrPsw(){
+//   var newpassw = window.prompt("Entrez le mot de passe maitre : ");
+//   currentPassword = newpassw;
+// };
 
   keycloak.init()
           .success(function(){if (keycloak.authenticated){
@@ -219,9 +234,13 @@ $(document).ready(function(){
     document.getElementById("ConfMstrPsw").value = "";
   };
 
+  // Fonction qui reinitialise le
+  function reset_send(){
+    $('#send-buttons').empty();
+  }
+
   // Fonction de traitement de la base de donnees pour un affichage sur le client html
   function addBase(myobj){
-    console.log("inaddBase");
     $("#show-menu").show();
     $(".collapse").collapse();
     // Effacement d'eventuels affichage precedents
@@ -231,7 +250,6 @@ $(document).ready(function(){
       table += '<th scope="col">Base de données :</th>';
 
       for (var i=0; i<myobj.Base.length; i++){
-        console.log("in for")
         table += '<tr><td>';
         table += '<li class="list-group-item">  ' + myobj.Base[i] + '</td>';
         table += '<td><span class="glyphicon glyphicon-download-alt" id="base" name="' + myobj.Base[i] + '" style="cursor:pointer"></td></tr>';
@@ -241,6 +259,7 @@ $(document).ready(function(){
       $("body").append(table);
 
   };
+
 
   // Fonction qui ajoute un triplet a la base de donnees
   function addTriplet(webs, crypt){
@@ -263,7 +282,6 @@ $(document).ready(function(){
       // displayPubList(store);
     };
     req.onerror = function(){
-      // console.log(this.error.name);
       if(this.error.message == "A mutation operation in the transaction failed because a constraint was not satisfied."){
         console.error("addTriplet error", this.error);
         // alert("Tuple(s) déjà présent(s)");
@@ -287,7 +305,6 @@ $(document).ready(function(){
     try {
       req = store.put(tuple);
       } catch (e) {
-        console.log("Error In modTriplet : " + e);
         throw e;
       }
     req.onsuccess = function (evt){
@@ -378,7 +395,12 @@ $(document).ready(function(){
     var objectStore = transaction.objectStore("Triplet");
     var objectStoreRequest = objectStore.clear();
     objectStoreRequest.onsuccess = function(event){
-      // console.log("Suppression de la bd" + objectStore + "réussie !");
+      dbName = "";
+      currentPassword = "";
+      $("#GrabMstrPsw").modal();
+    };
+    objectStoreRequest.onerror = function(event){
+      alert("Erreur onerror:" + event.target.errorCode);
     };
   };
 
@@ -481,7 +503,7 @@ $(document).ready(function(){
     if (isCheckPsw){
       var word = Uint8Array.from(message);
     }
-    else{
+    else {
       var size = [testlogin.length];
       var word = Uint8Array.from(size.concat(message));
     }
@@ -530,8 +552,7 @@ $(document).ready(function(){
         })
       })
     })
-  };
-
+};
 
   // Fonction de dechiffrement avec oldMstrPsw et chiffrement avec newMstrPsw
   function updateAES128(website, oldMstrPsw, fonction, newMstrPsw){
@@ -764,6 +785,7 @@ $(document).ready(function(){
   $("#mod-buttons").hide();
   $("#psw-buttons").hide();
   $("#show-menu").hide();
+  $("#send-buttons").hide();
 
   $("#show-menu").click(function(){
     // $("#show-menu").hide();
@@ -797,6 +819,10 @@ $(document).ready(function(){
 
   // Envoie de la base de donnée sur serveur
   $("#upload").click(function(){
+    if(dbName === undefined){
+      let tmpname = window.prompt("Entrez un nom de base de données : ");
+      dbName = tmpname
+    }
     var store = getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
     var conf = "true";
@@ -805,11 +831,11 @@ $(document).ready(function(){
         var tmp = encodeB64(getdatas.result);
         keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
         data = {"triplets": tmp};
-        if (keycloak.authenticated){
+        if ((keycloak.authenticated)&&(dbName)){
           $.ajax({
             type:"POST",
             headers:{"Authorization": "Bearer " + keycloak.token},
-            url:urlc + "/test" + "?name=" + dbName,
+            url:urlc + "/pushdb" + "?name=" + dbName,
             data:JSON.stringify(data),
             dataType:"text",
             contentType:"application/json",
@@ -824,6 +850,9 @@ $(document).ready(function(){
               // console.log("error POST"+data+" status :  "+status);
             }
           });
+        }
+        else {
+          alert("Echec de l'envoie, nom de base de données vide.");
         }
       }
     }
@@ -842,22 +871,22 @@ $(document).ready(function(){
           success:function(json,status){
             // variable de stockage ( liste de donnees post traitement)
             // variable stockage d'un triplet
-            var myobj = JSON.parse(json);
+            var myobj = json;
             if (myobj.Base.length > 0){
               addBase(myobj);
             };
           },
           error:function(data,status){
             $("#OnAbbortAjax").modal();
-            console.log("error POST"+data+" status :  "+status);
+            console.log("error POST" + data + " status :  " + status);
           }
         });
     }
   });
 
   // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
-  function downloadBdd(dbName){
-    console.log(dbName);
+  function downloadBdd(name){
+    dbName = name;
     var store = getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
     var conf = "true";
@@ -876,7 +905,7 @@ $(document).ready(function(){
           $.ajax({
             type:"GET",
             headers:{"Authorization": "Bearer " + keycloak.token},
-            url:urlc + "/login" + "?name=" + dbName,
+            url:urlc + "/database" + "?name=" + name,
             contentType:"application/json",
             success:function(json,status){
               // variable de stockage ( liste de données post traitement)
@@ -894,7 +923,7 @@ $(document).ready(function(){
               readTriplet();
               document.getElementById("button-onload").className = "dot";
             },
-            error:function(data,status){console.log("error POST"+data+" status :  "+status);}
+            error:function(data,status){console.log("error GET" + data + " status :  " + status);}
           });
         }
       }
@@ -968,6 +997,7 @@ $(document).ready(function(){
     var countRequest = store.count();
     countRequest.onsuccess = function() {
       if ( countRequest.result == 0){
+        // var dbName = window.prompt("Entrez un nom de base de données : ");
         let checkPsw = new Uint8Array([ 0xff,0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
         encryptAES128(convertByteArrayToString(checkPsw.buffer), "", "0________", undefined, undefined, addTriplet,true);
       }
@@ -994,6 +1024,12 @@ $(document).ready(function(){
     reset_psw();
   });
 
+  // Initialisation du bouton "Annuler" sous le champ "Envoyer une base de données"
+  $("#abort_send").click(function(){
+    $("#send-buttons").hide();
+    reset_send();
+  });
+
   // Initialisation des champs d'entrees d' "ajouter un triplet" (champ site, login et mot de passe)
   $("#ADD").click(function(){
     var x = document.getElementById("add-buttons");
@@ -1016,6 +1052,38 @@ $(document).ready(function(){
     encryptAES128(login, password, website, undefined, undefined, modTriplet);
     $("#mod-buttons").hide();
     testlogin = testpassword = "";
+  });
+
+  $('#send').click(function(){
+    $("#send-buttons").show();
+  });
+
+  $('#passButton').click(function(){
+    let newpassw = document.getElementById("pass").value;
+    currentPassword = newpassw;
+    document.getElementById("pass").value = "";
+  });
+
+
+  $('#send_db').click(function(){
+    keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
+    if (keycloak.authenticated){
+      var fd = new FormData();
+      fd.append('userfile', $('#select_db')[0].files[0]);
+      $.ajax({
+        type: 'POST',
+        headers:{"Authorization": "Bearer " + keycloak.token},
+        url: 'https://192.168.99.100/upload',
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function(data){
+          console.log('upload success!')
+          $('#send-buttons').empty();
+          $('#send-buttons').append(data);
+        }
+      });
+    };
   });
 
   // Initialisation d'interactions avec les champs site

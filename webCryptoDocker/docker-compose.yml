@@ -10,7 +10,7 @@ services:
     ports:
     - 2:12345
     volumes:
-    - /home/docker/account:/usr/local/monCoffre/account
+    - account:/usr/local/monCoffre/account
 
 
   certificat:
@@ -153,6 +153,7 @@ volumes:
   volumeAuthentifie:
 #  keycloakDependency:
   keycloakCert:
+  account:
 
 networks:
   keycloak-network:
