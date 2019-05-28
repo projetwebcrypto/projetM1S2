@@ -149,7 +149,7 @@ createDb();
 
 // S'assure que le .html est bien lance.
 $(document).ready(function(){
-  $("#grabmstrpswd").modal();
+  $("#grabmstrpswd").modal("show");
 
 //   function stateMstrPsw(){
 //   var newpassw = window.prompt("Entrez le mot de passe maitre : ");
@@ -392,14 +392,16 @@ $(document).ready(function(){
   };
 
   // Fonction qui supprime la base de donnees locale
-  function deleteData(){
+  function deleteData(bool){
     var transaction = db.transaction(["Triplet"], "readwrite");
     var objectStore = transaction.objectStore("Triplet");
     var objectStoreRequest = objectStore.clear();
     objectStoreRequest.onsuccess = function(event){
       dbName = "";
-      currentPassword = "";
-      $("#grabmstrpswd").modal();
+      if (bool === undefined){
+        currentPassword = "";
+        $("#grabmstrpswd").modal("show");
+      }
     };
     objectStoreRequest.onerror = function(event){
       alert("Erreur onerror:" + event.target.errorCode);
@@ -707,9 +709,23 @@ $(document).ready(function(){
                     key,
                     chiffre);
                   promiseClair.then(function(clair){
-                    traitement(clair, currentPassword, website, newmstrpsw, myobj, fonction);
+                      traitement(clair, currentPassword, website, newmstrpsw, myobj, fonction);
                   })
                 })
+                .catch(function(err){
+                  var store = getObjectStore("Triplet", "readonly");
+                  var getdatas = store.getAll();
+                  var conf = "true";
+                  getdatas.onsuccess = function(){
+                    if (getdatas.result != 0){
+                      conf = confirmationSuppression("Voulez-vous supprimer la base de données locale?");
+                    }
+                    if (conf && getdatas.result != 0){
+                      deleteData(false);
+                    }
+                    else{ $("#grabmstrpswd").modal("show");}
+                  }
+                });
               })
             })
           }
@@ -735,11 +751,23 @@ $(document).ready(function(){
     }
   };
 
+  // Fonction de verification du mot de passe maitre lors d'une connexion sur une base de donnees déjà presente
+  function checkMstrPsw(testlogin, toverify, website, newmstrpsw, myobj){
+    var verif = new Uint8Array([0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
+    byteLogin = new Uint8Array(convertStringToByteArray(testlogin));
+    if (verif.length == (byteLogin.length) + 1){
+      for (var i=1; i<verif.length; i++){
+        if (verif[i] != byteLogin[i-1]){
+          console.log("Ancien Mot de passe erroné1.");
+        };
+      };
+    }
+
+  };
   // Fonction de verification du contenu du decrypte de l'entree 0
   function checkTest(testlogin, testpassword, website, newmstrpsw, myobj, tailleLogin){
     var verif = new Uint8Array([0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
     byteLogin = new Uint8Array(convertStringToByteArray(testlogin));
-    console.log(verif.length+"&&"+(byteLogin.length) + 1);
     var val = false;
     if (verif.length == (byteLogin.length) + 1){
       var tentative = promCheckModPsw(verif, byteLogin, newmstrpsw, myobj);
@@ -1047,6 +1075,13 @@ $(document).ready(function(){
     let newpassw = document.getElementById("pass").value;
     currentPassword = newpassw;
     document.getElementById("pass").value = "";
+    var store = getObjectStore("Triplet", "readonly");
+    var countRequest = store.count();
+    countRequest.onsuccess = function() {
+      if(countRequest.result != 0){
+        decryptAES128("0________", currentPassword,checkMstrPsw);
+      }
+    }
   });
 
 
