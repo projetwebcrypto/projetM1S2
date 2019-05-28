@@ -16,6 +16,7 @@ var currentPassword = "";
 var liste = []
 var urlc = "https://192.168.99.100:443/myresource";
 var crypto = window.crypto;
+var dbName = "";
 var keycloak = Keycloak({
 "realm": "ragnarok",
 "auth-server-url": "https://192.168.99.100/keycloak/auth",
@@ -24,7 +25,7 @@ var keycloak = Keycloak({
 "ssl-required": "external",
 "resource": "customer-portal",
 "credentials": {
-"secret": "69e41e4c-882f-400f-8b0b-6c6d8592a192"
+"secret": "e5869b85-c981-43f2-8c0c-8e8fd17f0b39"
 },
 "enable-cors": true
 });
@@ -166,12 +167,12 @@ $(document).ready(function(){
 
   // Fonction qui definit le mot de passe maitre initial. Si base de donnée locale existante,
   // verifie la valeur du mot de passe donne.
-  function stateMstrPsw(){
-    var newpassw = window.prompt("Entrez le mot de passe maitre : ");
-    currentPassword = newpassw;
-  };
-
-   stateMstrPsw();
+  // function stateMstrPsw(){
+  //   var newpassw = window.prompt("Entrez le mot de passe maitre : ");
+  //   currentPassword = newpassw;
+  // };
+  //
+  //  stateMstrPsw();
 
   // Test de raffraichissement en live de la bd
   function getObjectStore(store_name, mode){
@@ -202,7 +203,9 @@ $(document).ready(function(){
 
   // Fonction qui affiche le login et le mdp en clair du site demande.
   function afficheClair(testlogin, testpassword, website){
-    alert("Identifiant :" + testlogin + "\n" + "mdp :" + testpassword);
+    document.getElementById("pseudo").innerHTML = "Identifiant : " + testlogin;
+    document.getElementById("motdepasseclair").innerHTML = "mdp : " + testpassword;
+    $("#afficheClairModal").modal();
   }
 
   // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
@@ -230,6 +233,30 @@ $(document).ready(function(){
     $('#send-buttons').empty();
   }
 
+  // Fonction de traitement de la base de donnees pour un affichage sur le client html
+  function addBase(myobj){
+    console.log("inaddBase");
+    $("#show-menu").show();
+    $('.collapse').collapse();
+    // Effacement d'eventuels affichage precedents
+    $("table").remove();
+      // Initialisation des champs du tableau
+      var tableau = '<div class="container"><table class="table"><thead><tr>';
+      tableau += '<th scope="col">Base de données :</th>';
+
+      for (var i=0; i<myobj.Base.length; i++){
+        console.log("in for")
+        tableau += '<tr><td>';
+        tableau += '<li class="list-group-item">  ' + myobj.Base[i] + '</td>';
+        tableau += '<td><span class="glyphicon glyphicon-download-alt" id="base" name="' + myobj.Base[i] + '" style="cursor:pointer"></td></tr>';
+      }
+      // Fermeture des balises et du tableau
+      tableau += '</tbody></table></div>';
+      $("body").append(tableau);
+
+  };
+
+
   // Fonction qui ajoute un triplet a la base de donnees
   function addTriplet(webs, crypt){
     var tuple = {"Website":webs, "crypto":crypt};
@@ -254,8 +281,9 @@ $(document).ready(function(){
       // console.log(this.error.name);
       if(this.error.message == "A mutation operation in the transaction failed because a constraint was not satisfied."){
         console.error("addTriplet error", this.error);
-        alert("Tuple(s) déjà présent(s)");
+        // alert("Tuple(s) déjà présent(s)");
         // displayActionFailure(this.error);
+        $("#OnabbortaddTriplet").modal();
       };
     };
   };
@@ -382,7 +410,7 @@ $(document).ready(function(){
     // Effacement d'eventuels affichage precedents
     $("table").remove();
     if(myobj == 0){
-      alert("Aucun tuple contenu dans la base de données !")
+      $("#OnabbortreadTriplet").modal();
     }
     else{
       // Initialisation des champs du tableau
@@ -392,8 +420,7 @@ $(document).ready(function(){
         if(myobj[i].Website != "0________"){
           tableau += '<tr><td>';
           tableau += '<li class="list-group-item" id="website" onmouseover="this.style.cursor=\'pointer\'">  ' + myobj[i].Website + '</td>';
-          tableau += '<td><a href="https://www.' + myobj[i].Website + '.com" target="_blank"><span class="glyphicon glyphicon-globe"></a></td>';
-          tableau += '<td><a href="#"><img src="js/jquery-ui/images/modifier.png" id="edit" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></a></td>';
+          tableau += '<td><a href="#mod-buttons"><img src="js/jquery-ui/images/modifier.png" id="edit" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></a></td>';
           tableau += '<td><img src="js/jquery-ui/images/effacer.png" id="deleteTrip" name="' + myobj[i].Website + '" onmouseover="this.style.cursor=\'pointer\'"></td></tr>';
         }
       }
@@ -401,7 +428,8 @@ $(document).ready(function(){
       tableau += '</tbody></table></div>';
       $("body").append(tableau);
     };
-  };
+  };;
+
 
   // Fonction qui ouvre une demande de confirmation de suppression de la base de donnees locale
   function confirmationSuppression(message){
@@ -438,7 +466,6 @@ $(document).ready(function(){
     var countRequest = store.count();
     countRequest.onsuccess = function() {
       if( liste.length == countRequest.result){
-        console.log(liste);
         store = getObjectStore("Triplet", "readwrite");
         cpt = 0;
         put_record(liste, store, cpt);
@@ -619,63 +646,63 @@ $(document).ready(function(){
     }
   };
 
-  // Fonction de dechiffrement des identifiants
-  function decryptAES128(website, currentPassword, fonction, newmstrpsw, myobj){
-    var store =  getObjectStore("Triplet", "readonly");
-    var objectStoreRequest = store.get(website);
-    objectStoreRequest.onsuccess = function() {
-      cryptogrammeComplet = objectStoreRequest.result.crypto;
-      if (cryptogrammeComplet.length != 0) {
-        // On extrait les infos du cryptogramme complet
-        // Taille du sel 16
-        let ivChiffre = cryptogrammeComplet.slice(0, 32);
-        // Taille du ivChiffre 32
-        let sel = cryptogrammeComplet.slice(32, 48);
-        // Taille du chiffre le reste
-        let chiffre = cryptogrammeComplet.slice(48);
-        // Generation du IV a 0 pour faire du ECB en CBC
-        let ivZero = new Uint8Array(16);
-        var mdp = convertStringToByteArray(currentPassword);
-        if (mdp.length != 0) {
-          // Recuperation du mdp en tant que cle
-          let promiseMat = crypto.subtle.importKey(
-            "raw",
-            mdp,
-            {name: "PBKDF2"},
-            false,
-            ["deriveKey"]
-            );
-          promiseMat.then(function(mat){
-            // Derivation de la cle
-            let promiseKey = crypto.subtle.deriveKey(
-              {"name":"PBKDF2", salt: sel, "iterations":10000, "hash":"SHA-1"},
-              mat,
-              {"name":"AES-CBC", length:128},
+    // Fonction de dechiffrement des identifiants
+    function decryptAES128(website, currentPassword, fonction, newmstrpsw, myobj){
+      var store =  getObjectStore("Triplet", "readonly");
+      var objectStoreRequest = store.get(website);
+      objectStoreRequest.onsuccess = function() {
+        cryptogrammeComplet = objectStoreRequest.result.crypto;
+        if (cryptogrammeComplet.length != 0) {
+          // On extrait les infos du cryptogramme complet
+          // Taille du sel 16
+          let ivChiffre = cryptogrammeComplet.slice(0, 32);
+          // Taille du ivChiffre 32
+          let sel = cryptogrammeComplet.slice(32, 48);
+          // Taille du chiffre le reste
+          let chiffre = cryptogrammeComplet.slice(48);
+          // Generation du IV a 0 pour faire du ECB en CBC
+          let ivZero = new Uint8Array(16);
+          var mdp = convertStringToByteArray(currentPassword);
+          if (mdp.length != 0) {
+            // Recuperation du mdp en tant que cle
+            let promiseMat = crypto.subtle.importKey(
+              "raw",
+              mdp,
+              {name: "PBKDF2"},
               false,
-              ["decrypt"]
+              ["deriveKey"]
               );
-            promiseKey.then(function(key){
-              // Dechiffrement de l'IV chiffre
-              let promiseIv = crypto.subtle.decrypt(
-                {name: "AES-CBC", iv: ivZero},
-                key,
-                ivChiffre);
-              promiseIv.then(function(ivClair){
-                // Dechiffrement du chiffre
-                let promiseClair = crypto.subtle.decrypt(
-                  {name: "AES-CBC", iv: ivClair},
+            promiseMat.then(function(mat){
+              // Derivation de la cle
+              let promiseKey = crypto.subtle.deriveKey(
+                {"name":"PBKDF2", salt: sel, "iterations":10000, "hash":"SHA-1"},
+                mat,
+                {"name":"AES-CBC", length:128},
+                false,
+                ["decrypt"]
+                );
+              promiseKey.then(function(key){
+                // Dechiffrement de l'IV chiffre
+                let promiseIv = crypto.subtle.decrypt(
+                  {name: "AES-CBC", iv: ivZero},
                   key,
-                  chiffre);
-                promiseClair.then(function(clair){
-                  traitement(clair, currentPassword, website, newmstrpsw, myobj, fonction);
+                  ivChiffre);
+                promiseIv.then(function(ivClair){
+                  // Dechiffrement du chiffre
+                  let promiseClair = crypto.subtle.decrypt(
+                    {name: "AES-CBC", iv: ivClair},
+                    key,
+                    chiffre);
+                  promiseClair.then(function(clair){
+                    traitement(clair, currentPassword, website, newmstrpsw, myobj, fonction);
+                  })
                 })
               })
             })
-          })
+          }
         }
       }
-    }
-  };
+    };
 
   // Fonction qui fait les traitements necessaire sur l'objet "clair" (uint8array[taille+chiffré(login+mdp)])
   // puis envois le résultat du traitement a "fctn"
@@ -701,7 +728,6 @@ $(document).ready(function(){
     byteLogin = new Uint8Array(convertStringToByteArray(testlogin));
     var val = false;
     if (verif.length == (byteLogin.length) + 1){
-      console.log("if checkTest");
       var tentative = promCheckModPsw(verif, byteLogin, newmstrpsw, myobj);
       tentative.then(effectiveChangeMstrPsw(true, newmstrpsw, myobj));
     }
@@ -787,6 +813,9 @@ $(document).ready(function(){
 
   // Envoie de la base de donnée sur serveur
   $("#upload").click(function(){
+    if(dbName === undefined){
+      var dbName = window.prompt("Entrez un nom de base de données : ");
+    }
     var store = getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
     var conf = "true";
@@ -796,11 +825,11 @@ $(document).ready(function(){
         keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
 
         data = {"triplets": tmp};
-        if (keycloak.authenticated){
+        if ((keycloak.authenticated)&&(dbName)){
           $.ajax({
             type:"POST",
             headers:{"Authorization": "Bearer " + keycloak.token},
-            url:urlc + "/test" + "?name=" + "passwords",
+            url:urlc + "/pushdb" + "?name=" + dbName,
             data:JSON.stringify(data),
             dataType:"text",
             contentType:"application/json",
@@ -816,12 +845,42 @@ $(document).ready(function(){
             }
           });
         }
+        else {
+          alert("Echec de l'envoie, nom de base de données vide.");
+        }
       }
+    }
+  });
+  // Initialisation du lien "Recuperer les bases de données" qui recupere la liste des bases de donnees présente sur le serveur
+  $("#DL-allBase").click(function(){
+      // data = {"login":"log"};
+      keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
+      if (keycloak.authenticated){
+        $.ajax({
+          type:"GET",
+          headers:{"Authorization": "Bearer " + keycloak.token},
+          url:urlc + "/listeBd",
+          contentType:"application/json",
+          success:function(json,status){
+            // variable de stockage ( liste de données post traitement)
+            // variable stockage d'un triplet
+            var myobj = json;
+            if (myobj.Base.length > 0){
+              addBase(myobj);
+
+            };
+          },
+          error:function(data,status){
+            $("#OnabbortAjax").modal();
+            console.log("error GET"+ data + " status :  " + status);
+          }
+        });
     }
   });
 
   // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
-  $("#DL").click(function(){
+  function downloadBdd(name){
+    dbName = name;
     var store = getObjectStore("Triplet", "readonly");
     var getdatas = store.getAll();
     var conf = "true";
@@ -835,20 +894,17 @@ $(document).ready(function(){
       }
       if (conf){
         // data = {"login":"log","bd":"passwords"};
-        data = {"login":"log2","bd":"passwords"};
         keycloak.updateToken(30).success(function(){console.log("Token rafraichit");}).error(function(){console.log("Token NON rafraichit");});
         if (keycloak.authenticated){
           $.ajax({
             type:"GET",
             headers:{"Authorization": "Bearer " + keycloak.token},
-            url:urlc + "/login" + "?name=" + "passwords",
+            url:urlc + "/database" + "?name=" + name,
             contentType:"application/json",
             success:function(json,status){
               // variable de stockage ( liste de données post traitement)
               // variable stockage d'un triplet
-              console.log(json);
               var myobj = json;
-              let bdd_js = []
               if (myobj.triplets.length > 0){
                 for (var i=0; i<myobj.triplets.length; i++){
                   // addTriplet(myobj.triplets[i].site, base64DecToArr(myobj.triplets[i].crypto));
@@ -861,12 +917,12 @@ $(document).ready(function(){
               readTriplet();
               document.getElementById("button-onload").className = "dot";
             },
-            error:function(data,status){console.log("error POST"+data+" status :  "+status);}
+            error:function(data,status){console.log("error GET" + data + " status :  " + status);}
           });
         }
       }
     }
-  });
+  };
 
   // Initialisation des champs d'entrees de "changer le mot de passe Maître" (champ mot de passe)
   $("#PasswordChange").click(function(){
@@ -878,7 +934,6 @@ $(document).ready(function(){
   $("#chng_psw").click(function(){
     var oldmstrpsw = document.getElementById("OldMstrPsw").value;
     var newmstrpsw = document.getElementById("NewMstrPsw").value;
-    console.log(oldmstrpsw + "  " + newmstrpsw);
     var store = getObjectStore("Triplet", "readwrite");
     var getdatas = store.getAll();
     getdatas.onsuccess = function(){
@@ -916,7 +971,17 @@ $(document).ready(function(){
     var website = document.getElementById("Website").value;
     var login = document.getElementById("Login").value;
     var password = document.getElementById("Password").value;
-    encryptAES128(login, password, website, undefined, undefined, addTriplet);
+
+    var store = getObjectStore("Triplet", "readonly");
+    var countRequest = store.count();
+    countRequest.onsuccess = function() {
+      if ( countRequest.result == 0){
+        var dbName = window.prompt("Entrez un nom de base de données : ");
+        let checkpwd = new Uint8Array([ 0xff,0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
+        encryptAES128(convertByteArrayToString(checkpwd.buffer), "", "0________", undefined, undefined, addTriplet,true);
+      }
+      encryptAES128(login, password, website, undefined, undefined, addTriplet,false);
+    }
     $("#add-buttons").hide();
   });
 
@@ -992,6 +1057,13 @@ $(document).ready(function(){
     decryptAES128(website, currentPassword, afficheClair);
   });
 
+  // appel la requête ajax download sur dbname au click utilisateur
+  $("body").on("click", "#base", function(){
+    document.getElementById("add_tuple").disabled = true;
+    var dbName = $(this).attr("name");
+    downloadBdd(dbName)
+  });
+
   // Initialisation d'interactions avec les images "Modifier"
   $("body").on("click", "#edit", function(){
     $("#mod-buttons").show();
@@ -1007,7 +1079,6 @@ $(document).ready(function(){
     var conf = confirmationSuppression("Voulez-vous supprimer ce tuple de la base de donnée locale?");
     if (conf){
       var website = $(this).attr("name");
-      console.log("web= ", website);
       var store =  getObjectStore("Triplet", "readonly");
       var objectStoreRequest = store.get(website);
       objectStoreRequest.onsuccess = function(){
