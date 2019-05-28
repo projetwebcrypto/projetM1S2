@@ -16,6 +16,7 @@ public class FileManagment{
     private String path = "/usr/local/monCoffre/account/";
 
 
+    // Methode pour creer un fichier vide
     public boolean createFile(String login, String fileName) {
         FileDAO fileDAO = new FileDAO();
         try {
@@ -30,6 +31,7 @@ public class FileManagment{
     }
 
 
+    // Methode pour recuperer une BD sur le client
     public String pullBd(String login, String fileName) {
         File repository = new File(path + login + "/");
         File file = new File(path + login + "/" + fileName + ".db.sc");
@@ -50,6 +52,7 @@ public class FileManagment{
     }
 
 
+    // Methode pour sauvegarder une BD sur le serveur, avec toutes les regles de gestion des utilisateurs
     public Boolean pushBd(String login, String fileName, JSONArray triplets) {
         File repository = new File(path + login + "/");
         File file = new File(path + login + "/" + fileName + ".db.sc");

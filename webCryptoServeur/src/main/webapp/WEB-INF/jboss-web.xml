@@ -1,4 +1,3 @@
 <jboss-web>
-    <!--<security-domain>wildflytest</security-domain>-->
     <context-root>/</context-root>
 </jboss-web>

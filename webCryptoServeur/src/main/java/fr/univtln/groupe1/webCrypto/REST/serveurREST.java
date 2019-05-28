@@ -73,7 +73,7 @@ public class serveurREST {
         } catch (Exception e) {
             // Probleme de token
             e.printStackTrace();
-            return "erreur"; // A determiner !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            return "token invalide";
         }
 
         FileManagment fileManagment = new FileManagment();
@@ -97,7 +97,7 @@ public class serveurREST {
         } catch (Exception e) {
             // Probleme de token
             e.printStackTrace();
-            return "erreur"; // A determiner !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            return "token invalide";
         }
         JSONObject obj = new JSONObject(listJson);
         JSONArray triplets = obj.getJSONArray("triplets");
@@ -119,17 +119,10 @@ public class serveurREST {
         } catch (Exception e) {
             // Probleme de token
             e.printStackTrace();
-            return "erreur"; // A determiner !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            return "token invalide";
         }
         FileManagment fileManagment = new FileManagment();
         String response = fileManagment.listeBd(login);
         return response;
-    }
-
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String testServeur(){
-        log.info("Got it !");
-        return "Got it!";
     }
 }
