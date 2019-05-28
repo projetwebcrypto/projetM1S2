@@ -70,37 +70,6 @@ public class serveurREST {
     @Path("/database")
     @Produces(MediaType.APPLICATION_JSON)
     public String getBDDTriplets(@HeaderParam("Authorization") String compactJws, @QueryParam("name") String name) {
-/*        System.out.println("okokokok\n\n\n\n\n");
-        KeycloakSecurityContext securityContext = (KeycloakSecurityContext) httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
-        AccessToken accessToken = securityContext.getToken();
-        System.out.println(String.format("User '%s' with email '%s' made request to CustomerService REST endpoint", accessToken.getPreferredUsername(), accessToken.getEmail()));*/
-//        JSONObject request = new JSONObject(listJson);
-//        String login = request.getString("login");
-//        String nomdb = request.getString("bd");
-
-
-
-//        log.info("TOKEN1 :"+compactJws);
-//        compactJws=compactJws.substring(compactJws.trim().indexOf(' ')+1);
-//        log.info("TOKEN2 :"+compactJws);
-
-
-//        publicKey = loadPublicKey(getClass().getClassLoader()
-//                .getResourceAsStream("keycloak.pem"));
-//
-//
-//        log.info("Hello " + (request.getRemoteUser() != null? request.getRemoteUser() : "world") + "!!!");
-
-//        Jws<Claims> x = Jwts.parser()
-//                .setSigningKey(publicKey)
-//                .parseClaimsJws(compactJws);
-
-//        log.info(x);
-
-//        String login = x.getBody().get("user_name", String.class);
-
-//        log.info(login);
-
         String login= null;
         try {
             login = processToken(compactJws, "user_name");
