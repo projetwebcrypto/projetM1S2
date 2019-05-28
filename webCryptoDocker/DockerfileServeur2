@@ -51,7 +51,7 @@ RUN cd $JBOSS_HOME &&\
 # add required admin and application user
 RUN /opt/jboss/wildfly/bin/add-user.sh admin admin --silent
 WORKDIR /opt/jboss/wildfly/standalone/configuration/
-COPY keycloak.pem keycloak.pem
+COPY src/main/resources/keycloak.pem keycloak.pem
 RUN keytool -importcert -keystore keycloak.jks -storepass jwtKey -file keycloak.pem -alias keycloak -trustcacerts -noprompt
 # add keycloak adapter
 # COPY --chown=jboss:jboss keycloak-wildfly-adapter-dist-4.6.0.Final.zip $JBOSS_HOME
