@@ -475,11 +475,16 @@ $(document).ready(function(){
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
   // Fonction de chiffrement des identifiants
-  function encryptAES128(testlogin, testpassword, website, newmstrpsw, myobj, fonction){
+  function encryptAES128(testlogin, testpassword, website, newmstrpsw, myobj, fonction, isCheckpwd){
     var message = (testlogin+testpassword).split("").map(ascii);
-    var taille = [testlogin.length];
-    var word = Uint8Array.from(taille.concat(message));
     var mdp = currentPassword;
+    if (isCheckpwd){
+      var word = Uint8Array.from(message);
+    }
+    else {
+      var taille = [testlogin.length];
+      var word = Uint8Array.from(taille.concat(message));
+    }
     sel = new Uint8Array(16);
     window.crypto.getRandomValues(sel);
     // Recuperation du mdp en tant que cle
@@ -525,8 +530,7 @@ $(document).ready(function(){
         })
       })
     })
-  };
-
+};
 
   // Fonction de dechiffrement avec oldmstrpsw et chiffrement avec newmstrpsw
   function updateAES128(website, oldmstrpsw, fonction, newmstrpsw){
