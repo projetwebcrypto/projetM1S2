@@ -471,6 +471,8 @@ $(document).ready(function(){
     }
     if (row_index == data_array.length){
       list = [];
+      document.getElementById("button-onload").className = "dot red";
+
     }
   };
 
@@ -654,7 +656,7 @@ $(document).ready(function(){
                           completeCrypto = convertByteArrayToString(ivChiffre);
                           completeCrypto += convertByteArrayToString(sel.buffer) + convertByteArrayToString(chiffre);
                           completeCrypto = convertStringToByteArray(completeCrypto);
-                          addListe(website, completeCrypto);
+                          fonction(website, completeCrypto);
                         })
                       })
                     })
@@ -819,6 +821,7 @@ $(document).ready(function(){
       for (var i=0; i<myobj.length; i++){
         updateAES128(myobj[i].Website, currentPassword, addListe, newMstrPsw)
       }
+      document.getElementById("button-onload").className = "dot red";
       $("#psw-buttons").hide();
       reset_psw();
       readTriplet();
