@@ -1157,7 +1157,8 @@ $(document).ready(function(){
 
   // appel la requête ajax download sur dbname au click utilisateur
   $("body").on("click", "#base", function(){
-      var dbName = $(this).attr("name");
+      let tmpName = $(this).attr("name");
+      dbName = tmpName;
       downloadBdd(dbName)
   });
 
