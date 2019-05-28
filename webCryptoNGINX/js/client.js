@@ -155,6 +155,8 @@ createDb();
 
 // S'assure que le .html est bien lance.
 $(document).ready(function(){
+  document.getElementById("titleGrabMtrPsw").innerHTML = "saisissez mot de passe maître";
+  document.getElementById("ContentModalSession").innerHTML = "Entrez le mot de passe chiffrant/déchiffrant la base de données";
   $("#GrabMstrPsw").modal("show");
 
 //   function stateMstrPsw(){
@@ -403,6 +405,8 @@ $(document).ready(function(){
       dbName = "";
       if (bool === undefined){
         currentPassword = "";
+        document.getElementById("titleGrabMtrPsw").innerHTML = "saisissez mot de passe maître";
+        document.getElementById("ContentModalSession").innerHTML = "Entrez le mot de passe chiffrant/déchiffrant la base de données";
         $("#GrabMstrPsw").modal("show");
       }
     };
@@ -722,12 +726,12 @@ $(document).ready(function(){
                   var conf = "true";
                   getdatas.onsuccess = function(){
                     if (getdatas.result != 0){
-                      conf = confirmationSuppression("Voulez-vous supprimer la base de données locale?");
+                      conf = confirmationSuppression("Mauvais mot de passe, \nVoulez-vous supprimer la base de données locale?");
                     }
                     if (conf && getdatas.result != 0){
                       deleteData(false);
                     }
-                    else{ $("#GrabMstrPsw").modal("show");}
+                    else{traitementModal();}
                   }
                 });
               })
@@ -737,6 +741,12 @@ $(document).ready(function(){
       }
     };
 
+  //Fonction d'affichage modal si mot de passe maître incompatible avec la base de données.
+  function traitementModal(){
+    document.getElementById("titleGrabMtrPsw").innerHTML = "Mauvais mot de passe";
+    document.getElementById("ContentModalSession").innerHTML = "Veuillez ressaisir le mot de passe maître";
+    $("#GrabMstrPsw").modal("show");
+  }
   // Fonction qui fait les traitements necessaire sur l'objet "clear" (uint8array[size+chiffré(login+mdp)])
   // puis envoie le resultat du traitement a une fonction
   // Accepte : postClear(), placement(), checkTest()
