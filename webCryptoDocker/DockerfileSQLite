@@ -1,4 +1,5 @@
 FROM ubuntu:18.04
 RUN apt-get update && apt-get -y install rlwrap sqlite socat
 WORKDIR /usr/local/monCoffre
+RUN mkdir account && chmod o+w account
 EXPOSE 12345

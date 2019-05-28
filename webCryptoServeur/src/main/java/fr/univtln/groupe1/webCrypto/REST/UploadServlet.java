@@ -15,20 +15,17 @@ import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 
+import fr.univtln.groupe1.webCrypto.Account.FileManagment;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import org.apache.commons.io.FileUtils;
-import org.jboss.logging.Logger;
 
 import static java.lang.System.exit;
 
 @WebServlet("/upload")
 @MultipartConfig
 public class UploadServlet extends HttpServlet {
-
-    private static Logger log = Logger.getLogger(UploadServlet.class);
-
     private PublicKey publicKey;
 
     public static PublicKey loadPublicKey(InputStream inputStream)
@@ -55,7 +52,6 @@ public class UploadServlet extends HttpServlet {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        log.info("test");
         String auth = request.getHeader("Authorization");
         String login = null;
         try {
@@ -64,10 +60,17 @@ public class UploadServlet extends HttpServlet {
             e.printStackTrace();
             exit(0);
         }
+        String path = "/usr/local/monCoffre/account/";
+        FileManagment fileManagment = new FileManagment();
         Part filePart = request.getPart("userfile"); // Retrieves <input type="file" name="userfile">
         String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
         InputStream fileContent = filePart.getInputStream();
-        File database = new File("/usr/local/monCoffre/account/" + login + "/"+ fileName);
+        // Test de la présence du répertoire (login)
+        File repository = new File(path + login + "/");
+        if (!repository.exists() || !repository.isDirectory()) {
+            fileManagment.createAccount(repository);
+        }
+        File database = new File(path + login + "/"+ fileName);
         FileUtils.copyInputStreamToFile(fileContent, database);
     }
 }
