@@ -176,163 +176,21 @@ $(document).ready(function(){
                                 $("#unloged").show();}})
           .error(function(){console.log("Erreur Keycloak");})
 
-  // Fonction qui definit le mot de passe maitre initial. Si base de donnee locale existante,
-  // verifie la valeur du mot de passe donne.
-  // function stateMstrPsw(){
-  //   var newpassw = window.prompt("Entrez le mot de passe maitre : ");
-  //   currentPassword = newpassw;
-  // };
-  //
-  //  stateMstrPsw();
-
-  // Test de raffraichissement de la bd
-  function getObjectStore(store_name, mode){
-    var tx = db.transaction(store_name, mode);
-    return tx.objectStore(store_name);
-  };
-
-  // Fonction qui lit un triplet dans la base de donnees
-  function readTriplet(){
-    var store =  getObjectStore("Triplet", "readonly");
-    var getdatas = store.getAll();
-    getdatas.onsuccess = function(){
-      // console.log(getdatas.result);
-      $("#show-menu").show();
-      $(".collapse").collapse();
-      addTable(getdatas.result);
-    };
-  };
-
-  // Fonction qui met le login actuel en placeholder du champ "modifier login"
-  function placement(testlogin, testpassword, website){
-    document.getElementById("mod-Password").value = testpassword;
-    document.getElementById("mod-Login").value = testlogin;
-    document.getElementById("mod-Login").placeholder = testlogin;
-    document.getElementById("mod-Website").value = website;
-    document.getElementById("mod-Website").placeholder = website;
-    document.getElementById("new-Website").value = website;
-  }
-
-  // Fonction qui affiche le login et le mdp en clair du site demande.
-  function postClear(testlogin, testpassword, website){
-    document.getElementById("pseudo").innerHTML = "Identifiant : " + testlogin;
-    document.getElementById("motdepasseclair").innerHTML = "mdp : " + testpassword;
-    $("#AfficheClairModal").modal();
-  }
-
-  // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
-  function reset_add(){
-    document.getElementById("Website").value = "";
-    document.getElementById("Login").value = "";
-    document.getElementById("Password").value = "";
-  };
-
-  // Fonction qui reinitialise les champs d'entrees de "modifier un triplet"
-  function reset_mod(){
-    document.getElementById("mod-Login").value = "";
-    document.getElementById("mod-Password").value = "";
-  };
-
-  // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
-  function reset_psw(){
-    document.getElementById("OldMstrPsw").value = "";
-    document.getElementById("NewMstrPsw").value = "";
-    document.getElementById("ConfMstrPsw").value = "";
-  };
-
-  // Fonction qui reinitialise le
-  function reset_send(){
-    $('#send-buttons').empty();
-  }
-
-  // Fonction de traitement de la base de donnees pour un affichage sur le client html
-  function addBase(myobj){
-    $("#show-menu").show();
-    $(".collapse").collapse();
-    // Effacement d'eventuels affichage precedents
-    $("table").remove();
-      // Initialisation des champs du tableau
-      var table = '<div class="container"><table class="table"><thead><tr>';
-      table += '<th scope="col">Base de données :</th>';
-
-      for (var i=0; i<myobj.Base.length; i++){
-        table += '<tr><td>';
-        table += '<li class="list-group-item">  ' + myobj.Base[i] + '</td>';
-        table += '<td><span class="glyphicon glyphicon-download-alt" id="base" name="' + myobj.Base[i] + '" style="cursor:pointer"></td></tr>';
-      }
-      // Fermeture des balises et du tableau
-      table += '</tbody></table></div>';
-      $("body").append(table);
-
-  };
-
-
-  // Fonction qui ajoute un triplet a la base de donnees
-  function addTriplet(webs, crypt){
-    var tuple = {"Website":webs, "crypto":crypt};
-    var store = getObjectStore("Triplet", "readwrite");
-    var req;
-    try {
-      req = store.add(tuple);
-    } catch (e) {
-      console.log("Error In addTriplet : " + e);
-      throw e;
-    }
-    req.onsuccess = function (evt){
-      document.getElementById("button-onload").className = "dot red";
-      readTriplet();
-      console.log("Insertion in DB successful");
-      reset_add();
-      return 0;
-      // displayActionSuccess();
-      // displayPubList(store);
-    };
-    req.onerror = function(){
-      if(this.error.message == "A mutation operation in the transaction failed because a constraint was not satisfied."){
-        console.error("addTriplet error", this.error);
-        // alert("Tuple(s) déjà présent(s)");
-        // displayActionFailure(this.error);
-        $("#OnAbbortAddTriplet").modal();
-      };
-    };
-  };
-
-  // Fonction qui ajoute un triplet a la base de donnees
-  function modTriplet(webs, crypt){
-    var website = document.getElementById("new-Website").value;
-    if (website != webs){
-      var store = getObjectStore("Triplet", "readwrite");
-      store.delete(webs);
-      webs = website
-    }
-    var tuple = {"Website":webs, "crypto":crypt};
-    var store = getObjectStore("Triplet", "readwrite");
-    var req;
-    try {
-      req = store.put(tuple);
-      } catch (e) {
-        throw e;
-      }
-    req.onsuccess = function (evt){
-      document.getElementById("button-onload").className = "dot red";
-      readTriplet();
-      console.log("Insertion in DB successful");
-      reset_mod();
-      return 0;
-      };
-    };
+  /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Fonctions d'encodage / decodage en base 64 qui proviennent de developper.mozilla.org
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
   // Fonction qui decode une chaine en Base64 depuis un tableau d'octets
   function uint6ToB64(nUint6) {
-    return nUint6 < 26 ? // si mon caracteres est compris dans [0-25] c'est un caracteres
-        nUint6 + 65     // non imprimable, on fais donc +65 (ascii (A) = 65)
-      : nUint6 < 52 ?  // si le caracteres est une lettre minuscule +71 pour correspondre
+    return nUint6 < 26 ? // si mon caractere est dans [0-25] c'est un caractere
+        nUint6 + 65     // non imprimable, on fait donc +65 (ascii (A) = 65)
+      : nUint6 < 52 ?  // si le caractere est une lettre minuscule +71 pour correspondre
         nUint6 + 71   // au code ascii de la minuscule
-      : nUint6 < 62 ?   // si le caracteres est un chiffre -4 pour correspondre
+      : nUint6 < 62 ?   // si le caractere est un chiffre, -4 pour correspondre
         nUint6 - 4        // au code ascii du chiffre
-      : nUint6 === 62 ? // si le caracteres est + le codage deviens r
+      : nUint6 === 62 ? // si le caracteres est + le codage donne un r
         43
-      : nUint6 === 63 ? // si le caracteres est / le codage deviens v
+      : nUint6 === 63 ? // si le caracteres est / le codage donne un v
         47
       :
         65;
@@ -341,13 +199,10 @@ $(document).ready(function(){
   // Fonction d'encodage array en Base64
   function base64EncArr(aBytes){
     var eqLen = (3 - (aBytes.length % 3)) % 3, sB64Enc = "";
-
     for (var nMod3, nLen = aBytes.length, nUint24 = 0, nIdx = 0; nIdx < nLen; nIdx++) {
       nMod3 = nIdx % 3;
       /* Uncomment the following line in order to split the output in lines 76-character long: */
-      /*
-      if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) { sB64Enc += "\r\n"; }
-      */
+      /* if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) { sB64Enc += "\r\n"; } */
       nUint24 |= aBytes[nIdx] << (16 >>> nMod3 & 24);
       if (nMod3 === 2 || aBytes.length - nIdx === 1) {
         sB64Enc += String.fromCharCode(uint6ToB64(nUint24 >>> 18 & 63), uint6ToB64(nUint24 >>> 12 & 63), uint6ToB64(nUint24 >>> 6 & 63), uint6ToB64(nUint24 & 63));
@@ -378,10 +233,11 @@ $(document).ready(function(){
 
   // Fonction de decode d'une chaine de caracteres en Base64 en un tableau d'octets
   function base64DecToArr (sBase64, nBlockSize) {
-    // enleve les caracteres de fin du base64, stock la taile
+    // enleve les caracteres de fin du base64, stock la taille
     var
       sB64Enc = sBase64.replace(/[^A-Za-z0-9\+\/]/g, ""), nInLen = sB64Enc.length,
-      nOutLen = nBlockSize ? Math.ceil((nInLen * 3 + 1 >>> 2) / nBlockSize) * nBlockSize : nInLen * 3 + 1 >>> 2, aBytes = new Uint8Array(nOutLen);
+      nOutLen = nBlockSize ? Math.ceil((nInLen * 3 + 1 >>> 2) / nBlockSize) * nBlockSize : nInLen * 3 + 1 >>> 2,
+      aBytes = new Uint8Array(nOutLen);
     for (var nMod3, nMod4, nUint24 = 0, nOutIdx = 0, nInIdx = 0; nInIdx < nInLen; nInIdx++) {
       nMod4 = nInIdx & 3;
       nUint24 |= b64ToUint6(sB64Enc.charCodeAt(nInIdx)) << 18 - 6 * nMod4;
@@ -394,6 +250,147 @@ $(document).ready(function(){
     };
     return aBytes;
   };
+
+  /*!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Fonctions de reset des champs
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
+  // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
+  function reset_add(){
+    document.getElementById("Website").value = "";
+    document.getElementById("Login").value = "";
+    document.getElementById("Password").value = "";
+  };
+
+  // Fonction qui reinitialise les champs d'entrees de "modifier un triplet"
+  function reset_mod(){
+    document.getElementById("new-Website").value = "";
+    document.getElementById("mod-Login").value = "";
+    document.getElementById("mod-Password").value = "";
+  };
+
+  // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
+  function reset_psw(){
+    document.getElementById("OldMstrPsw").value = "";
+    document.getElementById("NewMstrPsw").value = "";
+    document.getElementById("ConfMstrPsw").value = "";
+  };
+
+  // Fonction qui reinitialise le champ d'entree du fichier a envoyer sur le serveur
+  function reset_send(){
+    $('#send-buttons').empty();
+  }
+
+  /*!!!!!!!!!!!!!!!!!
+  Fonctions du client
+  !!!!!!!!!!!!!!!!!*/
+
+  // Test de raffraichissement de la bd
+  function getObjectStore(store_name, mode){
+    var tx = db.transaction(store_name, mode);
+    return tx.objectStore(store_name);
+  };
+
+  // Fonction qui lit un triplet dans la base de donnees
+  function readTriplet(){
+    var store =  getObjectStore("Triplet", "readonly");
+    var getdatas = store.getAll();
+    getdatas.onsuccess = function(){
+      // console.log(getdatas.result);
+      $("#show-menu").show();
+      $(".collapse").collapse();
+      addTable(getdatas.result);
+    };
+  };
+
+  // Fonction qui met le login actuel en placeholder et value du champ "modifier login"
+  // ainsi que le mdp actuel en value du champ "modifier mdp" et le website actuel en
+  // placeholder et value
+  function placement(testlogin, testpassword, website){
+    document.getElementById("mod-Password").value = testpassword;
+    document.getElementById("mod-Login").value = testlogin;
+    document.getElementById("mod-Login").placeholder = testlogin;
+    document.getElementById("mod-Website").value = website;
+    document.getElementById("mod-Website").placeholder = website;
+    document.getElementById("new-Website").value = website;
+  }
+
+  // Fonction qui affiche le login et le mdp en clair du site demande.
+  function postClear(testlogin, testpassword, website){
+    document.getElementById("pseudo").innerHTML = "Identifiant : " + testlogin;
+    document.getElementById("motdepasseclair").innerHTML = "mdp : " + testpassword;
+    $("#AfficheClairModal").modal();
+  }
+
+  // Fonction d'affichage des bases de donnees disponibles depuis le serveur
+  function addBase(myobj){
+    $("#show-menu").show();
+    $(".collapse").collapse();
+    // Effacement d'eventuels affichage precedents
+    $("table").remove();
+      // Initialisation des champs du tableau
+      var table = '<div class="container"><table class="table"><thead><tr>';
+      table += '<th scope="col">Base de données :</th>';
+
+      for (var i=0; i<myobj.Base.length; i++){
+        table += '<tr><td>';
+        table += '<li class="list-group-item">  ' + myobj.Base[i] + '</td>';
+        table += '<td><span class="glyphicon glyphicon-download-alt" id="base" name="' + myobj.Base[i] + '" style="cursor:pointer"></td></tr>';
+      }
+      // Fermeture des balises et du tableau
+      table += '</tbody></table></div>';
+      $("body").append(table);
+
+  };
+
+  // Fonction qui ajoute un triplet a la base de donnees
+  function addTriplet(webs, crypt){
+    var tuple = {"Website":webs, "crypto":crypt};
+    var store = getObjectStore("Triplet", "readwrite");
+    var req;
+    try {
+      req = store.add(tuple);
+    } catch (e) {
+      console.log("Error In addTriplet : " + e);
+      throw e;
+    }
+    req.onsuccess = function (evt){
+      document.getElementById("button-onload").className = "dot red";
+      readTriplet();
+      reset_add();
+      return 0;
+    };
+    req.onerror = function(){
+      if(this.error.message == "A mutation operation in the transaction failed because a constraint was not satisfied."){
+        console.error("addTriplet error", this.error);
+        $("#OnAbbortAddTriplet").modal();
+      };
+    };
+  };
+
+  // Fonction qui ajoute un triplet a la base de donnees
+  function modTriplet(webs, crypt){
+    var website = document.getElementById("new-Website").value;
+    if (website != webs){
+      var store = getObjectStore("Triplet", "readwrite");
+      store.delete(webs);
+      webs = website
+    }
+    var tuple = {"Website":webs, "crypto":crypt};
+    var store = getObjectStore("Triplet", "readwrite");
+    var req;
+    try {
+      req = store.put(tuple);
+      } catch (e) {
+        throw e;
+      }
+    req.onsuccess = function (evt){
+      document.getElementById("button-onload").className = "dot red";
+      readTriplet();
+      reset_mod();
+      return 0;
+      };
+    };
 
   // Fonction qui supprime la base de donnees locale
   function deleteData(bool){
@@ -414,7 +411,7 @@ $(document).ready(function(){
     };
   };
 
-  // Fonction de traitement de la base de donnees avant envoie serveur
+  // Fonction de traitement de la base de donnees avant envoi sur le serveur
   function encodeB64(myobj){
     for (var i=0; i<myobj.length; i++){
       myobj[i].crypto = base64EncArr(myobj[i].crypto);
@@ -471,37 +468,145 @@ $(document).ready(function(){
     }
     if (row_index == data_array.length){
       list = [];
-      document.getElementById("button-onload").className = "dot red";
-
     }
   };
 
-  // Fonction qui prend en parametres un site et son chiffre et les stocke dans une
+  // Fonction qui prend en parametres un site et son chiffre et les stock dans une
   // variable globale pour les rentrer en BDD plus tard
   function addListe(website, completeCrypto){
     tuple = {"Website":website, "crypto":completeCrypto}
     list = list.concat([tuple]);
     var store = getObjectStore("Triplet", "readonly");
     var countRequest = store.count();
-    countRequest.onsuccess = function() {
+    countRequest.onsuccess = function(){
       if( list.length == countRequest.result){
         store = getObjectStore("Triplet", "readwrite");
         cpt = 0;
         put_record(list, store, cpt);
+        document.getElementById("button-onload").className = "dot red";
       }
     };
   };
 
-  var loadFailure = function () {
-    console.log("Erreur de chargement");
+  //Fonction d'affichage modal si mot de passe maître incompatible avec la base de données.
+  function traitementModal(){
+    document.getElementById("titleGrabMtrPsw").innerHTML = "Mauvais mot de passe";
+    document.getElementById("ContentModalSession").innerHTML = "Veuillez ressaisir le mot de passe maître";
+    $("#GrabMstrPsw").modal("show");
+  }
+
+  // Fonction qui fait les traitements necessaire sur l'objet "clear" (uint8array[size+chiffré(login+mdp)])
+  // puis envoie le resultat du traitement a une fonction
+  // Accepte : postClear(), placement(), checkTest()
+  function traitement(clear, currentPassword, website, newMstrPsw, myobj, fonction){
+    messageClear = convertByteArrayToString(clear);
+    sizeLogin = new Uint8Array(clear)[0];
+    testpassword = messageClear.slice( sizeLogin + 1);
+    testlogin = messageClear.slice(1, sizeLogin + 1);
+    fonction(testlogin, testpassword, website, newMstrPsw, myobj);
   };
 
-  var reloadData = function () {
-    keycloak.updateToken(30)
-            .success(loadData)
-            .error(function() {
-              console.log("Déconnecté");
-            });
+  // Fonction de verification du mot de passe maitre lors d'une connexion sur une base de donnees déjà presente
+  function checkMstrPsw(testlogin, toverify, website, newMstrPsw, myobj){
+    var verif = new Uint8Array([0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
+    byteLogin = new Uint8Array(convertStringToByteArray(testlogin));
+    if (verif.length == (byteLogin.length) + 1){
+      for (var i=1; i<verif.length; i++){
+        if (verif[i] != byteLogin[i-1]){
+          alert("Ancien Mot de passe erroné");
+        };
+      };
+    }
+
+  };
+  // Fonction de verification du contenu du decrypte de l'entree 0
+  function checkTest(testlogin, testpassword, website, newMstrPsw, myobj, sizeLogin){
+    var verif = new Uint8Array([0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
+    byteLogin = new Uint8Array(convertStringToByteArray(testlogin));
+    var val = false;
+    if (verif.length == (byteLogin.length) + 1){
+      var tentative = promCheckModPsw(verif, byteLogin, newMstrPsw, myobj);
+      tentative.then(effectiveChangeMstrPsw(true, newMstrPsw, myobj));
+    }
+  };
+
+  // Fonction de verification de validite du mot de passe maitre
+  function promCheckModPsw(verif, byteLogin, newMstrPsw, myobj){
+    return new Promise((resolve) => {
+      if (verif[0] == sizeLogin){
+        for (var i=1; i<verif.length; i++){
+          if (verif[i] != byteLogin[i-1]){
+            alert("Ancien Mot de passe erroné.");
+            resolve(false);
+          };
+        };
+        resolve(true, newMstrPsw, myobj);
+      }
+      else{
+        alert("Ancien Mot de passe erroné.");
+        resolve(false);
+      }
+    });
+  };
+
+  // Fonction de changement du contenu de la base de donnees locale avec le nouveau mot de passe maitre
+  function effectiveChangeMstrPsw(booleanVal, newMstrPsw, myobj){
+    if (booleanVal){
+      for (var i=0; i<myobj.length; i++){
+        updateAES128(myobj[i].Website, currentPassword, addListe, newMstrPsw)
+      }
+      document.getElementById("button-onload").className = "dot red";
+      $("#psw-buttons").hide();
+      reset_psw();
+      readTriplet();
+      currentPassword = newMstrPsw;
+    }
+  };
+
+  // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
+  function downloadBdd(name){
+    var store = getObjectStore("Triplet", "readonly");
+    var getdatas = store.getAll();
+    var conf = "true";
+    getdatas.onsuccess = function(){
+      if (getdatas.result != 0){
+        conf = confirmationSuppression("Voulez-vous supprimer la base de données locale?");
+      }
+      if (conf && getdatas.result != 0){
+        deleteData();
+      }
+      if (conf){
+        // data = {"login":"log","bd":"passwords"};
+        keycloak.updateToken(30).success(function(){}).error(function(){$("#OnConnectionNeeded").modal("show");});
+        if (keycloak.authenticated){
+          $.ajax({
+            type:"GET",
+            headers:{"Authorization": "Bearer " + keycloak.token},
+            url:urlc + "/database" + "?name=" + name,
+            contentType:"application/json",
+            success:function(json,status){
+              dbName = name;
+              currentPassword = "";
+              // variable de stockage ( liste de données post traitement)
+              // variable stockage d'un triplet
+              var myobj = json;
+              if (myobj.triplets.length > 0){
+                for (var i=0; i<myobj.triplets.length; i++){
+                  // addTriplet(myobj.triplets[i].site, base64DecToArr(myobj.triplets[i].crypto));
+                  list = list.concat({"Website":myobj.triplets[i].site, "crypto":base64DecToArr(myobj.triplets[i].crypto)});
+                };
+                store = getObjectStore("Triplet", "readwrite");
+                cpt = 0;
+                put_record(list, store, cpt);
+              };
+              readTriplet();
+              document.getElementById("button-onload").className = "dot";
+            },
+            error:function(data,status){console.log("error GET" + data + " status :  " + status);}
+          });
+        }
+      }
+    }
   };
 
   /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -573,7 +678,7 @@ $(document).ready(function(){
     var store =  getObjectStore("Triplet", "readonly");
     // recuperation du site
     var objectStoreRequest = store.get(website);
-    objectStoreRequest.onsuccess = function() {
+    objectStoreRequest.onsuccess = function(){
       completeCrypto = objectStoreRequest.result.crypto;
       if (completeCrypto.length != 0) {
         // On extrait les infos du cryptogramme complet
@@ -670,170 +775,88 @@ $(document).ready(function(){
     }
   };
 
-    // Fonction de dechiffrement des identifiants
-    function decryptAES128(website, password, fonction, newMstrPsw, myobj){
-      var store =  getObjectStore("Triplet", "readonly");
-      var objectStoreRequest = store.get(website);
-      objectStoreRequest.onsuccess = function() {
-        completeCrypto = objectStoreRequest.result.crypto;
-        if (completeCrypto.length != 0) {
-          // On extrait les infos du cryptogramme complet
-          // Taille du sel 16
-          let ivChiffre = completeCrypto.slice(0, 32);
-          // Taille du ivChiffre 32
-          let sel = completeCrypto.slice(32, 48);
-          // Taille du chiffre le reste
-          let chiffre = completeCrypto.slice(48);
-          // Generation du IV a 0 pour faire du ECB en CBC
-          let ivZero = new Uint8Array(16);
-          var mdp = convertStringToByteArray(password);
-          if (mdp.length != 0) {
-            // Recuperation du mdp en tant que cle
-            let promiseMat = crypto.subtle.importKey(
-              "raw",
-              mdp,
-              {name: "PBKDF2"},
+  // Fonction de dechiffrement des identifiants
+  function decryptAES128(website, password, fonction, newMstrPsw, myobj){
+    var store =  getObjectStore("Triplet", "readonly");
+    var objectStoreRequest = store.get(website);
+    objectStoreRequest.onsuccess = function(){
+      completeCrypto = objectStoreRequest.result.crypto;
+      if (completeCrypto.length != 0) {
+        // On extrait les infos du cryptogramme complet
+        // Taille du sel 16
+        let ivChiffre = completeCrypto.slice(0, 32);
+        // Taille du ivChiffre 32
+        let sel = completeCrypto.slice(32, 48);
+        // Taille du chiffre le reste
+        let chiffre = completeCrypto.slice(48);
+        // Generation du IV a 0 pour faire du ECB en CBC
+        let ivZero = new Uint8Array(16);
+        var mdp = convertStringToByteArray(password);
+        if (mdp.length != 0) {
+          // Recuperation du mdp en tant que cle
+          let promiseMat = crypto.subtle.importKey(
+            "raw",
+            mdp,
+            {name: "PBKDF2"},
+            false,
+            ["deriveKey"]
+            );
+          promiseMat.then(function(mat){
+            // Derivation de la cle
+            let promiseKey = crypto.subtle.deriveKey(
+              {"name":"PBKDF2", salt: sel, "iterations":10000, "hash":"SHA-1"},
+              mat,
+              {"name":"AES-CBC", length:128},
               false,
-              ["deriveKey"]
+              ["decrypt"]
               );
-            promiseMat.then(function(mat){
-              // Derivation de la cle
-              let promiseKey = crypto.subtle.deriveKey(
-                {"name":"PBKDF2", salt: sel, "iterations":10000, "hash":"SHA-1"},
-                mat,
-                {"name":"AES-CBC", length:128},
-                false,
-                ["decrypt"]
-                );
-              promiseKey.then(function(key){
-                // Dechiffrement de l'IV chiffre
-                let promiseIv = crypto.subtle.decrypt(
-                  {name: "AES-CBC", iv: ivZero},
+            promiseKey.then(function(key){
+              // Dechiffrement de l'IV chiffre
+              let promiseIv = crypto.subtle.decrypt(
+                {name: "AES-CBC", iv: ivZero},
+                key,
+                ivChiffre);
+              promiseIv.then(function(ivClear){
+                // Dechiffrement du chiffre
+                let promiseClear = crypto.subtle.decrypt(
+                  {name: "AES-CBC", iv: ivClear},
                   key,
-                  ivChiffre);
-                promiseIv.then(function(ivClear){
-                  // Dechiffrement du chiffre
-                  let promiseClear = crypto.subtle.decrypt(
-                    {name: "AES-CBC", iv: ivClear},
-                    key,
-                    chiffre);
-                  promiseClear.then(function(clear){
-                    traitement(clear, password, website, newMstrPsw, myobj, fonction);
-                  })
+                  chiffre);
+                promiseClear.then(function(clear){
+                  traitement(clear, password, website, newMstrPsw, myobj, fonction);
                 })
-                .catch(function(err){
-                  if(currentPassword ==""){
-                    var store = getObjectStore("Triplet", "readonly");
-                    var getdatas = store.getAll();
-                    var conf = "true";
-                    getdatas.onsuccess = function(){
-                      if (getdatas.result != 0){
-                        conf = confirmationSuppression("Mauvais mot de passe, \nVoulez-vous supprimer la base de données locale?");
-                      }
-                      if (conf && getdatas.result != 0){
-                        deleteData(false);
-                      }
-                      else{traitementModal();}
-                    }
-                  }
-                  else{
-                    alert("Ancien Mot de passe erroné.");
-                  }
-                });
               })
+              .catch(function(err){
+                if(currentPassword ==""){
+                  var store = getObjectStore("Triplet", "readonly");
+                  var getdatas = store.getAll();
+                  var conf = "true";
+                  getdatas.onsuccess = function(){
+                    if (getdatas.result != 0){
+                      conf = confirmationSuppression("Mauvais mot de passe, \nVoulez-vous supprimer la base de données locale?");
+                    }
+                    if (conf && getdatas.result != 0){
+                      deleteData(false);
+                    }
+                    else{traitementModal();}
+                  }
+                }
+                else{
+                  alert("Ancien Mot de passe erroné.");
+                }
+              });
             })
-          }
+          })
         }
       }
-    };
-
-  //Fonction d'affichage modal si mot de passe maître incompatible avec la base de données.
-  function traitementModal(){
-    document.getElementById("titleGrabMtrPsw").innerHTML = "Mauvais mot de passe";
-    document.getElementById("ContentModalSession").innerHTML = "Veuillez ressaisir le mot de passe maître";
-    $("#GrabMstrPsw").modal("show");
-  }
-
-  // Fonction qui fait les traitements necessaire sur l'objet "clear" (uint8array[size+chiffré(login+mdp)])
-  // puis envoie le resultat du traitement a une fonction
-  // Accepte : postClear(), placement(), checkTest()
-  function traitement(clear, currentPassword, website, newMstrPsw, myobj, fonction){
-    messageClear = convertByteArrayToString(clear);
-    sizeLogin = new Uint8Array(clear)[0];
-    testpassword = messageClear.slice( sizeLogin + 1);
-    testlogin = messageClear.slice(1, sizeLogin + 1);
-    fonction(testlogin, testpassword, website, newMstrPsw, myobj);
-  };
-
-  // // Fonction de verification du site de l'entree 0
-  // function modMstrPsw(testlogin, toverify, website, newMstrPsw, myobj){
-  //   if (myobj[0].Website == "0________"){
-  //     decryptAES128(myobj[0].Website, currentPassword, checkTest, newMstrPsw, myobj);
-  //   }
-  // };
-
-  // Fonction de verification du mot de passe maitre lors d'une connexion sur une base de donnees déjà presente
-  function checkMstrPsw(testlogin, toverify, website, newmstrpsw, myobj){
-    var verif = new Uint8Array([0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
-    byteLogin = new Uint8Array(convertStringToByteArray(testlogin));
-    if (verif.length == (byteLogin.length) + 1){
-      for (var i=1; i<verif.length; i++){
-        if (verif[i] != byteLogin[i-1]){
-          alert("Ancien Mot de passe erroné");
-        };
-      };
-    }
-
-  };
-  // Fonction de verification du contenu du decrypte de l'entree 0
-  function checkTest(testlogin, testpassword, website, newMstrPsw, myobj, sizeLogin){
-    var verif = new Uint8Array([0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
-    byteLogin = new Uint8Array(convertStringToByteArray(testlogin));
-    var val = false;
-    if (verif.length == (byteLogin.length) + 1){
-      var tentative = promCheckModPsw(verif, byteLogin, newMstrPsw, myobj);
-      tentative.then(effectiveChangeMstrPsw(true, newMstrPsw, myobj));
     }
   };
 
-  // Fonction de verification de validite du mot de passe maitre
-  function promCheckModPsw(verif, byteLogin, newMstrPsw, myobj){
-    return new Promise((resolve) => {
-      if (verif[0] == sizeLogin){
-        for (var i=1; i<verif.length; i++){
-          if (verif[i] != byteLogin[i-1]){
-            alert("Ancien Mot de passe erroné.");
-            resolve(false);
-          };
-        };
-        resolve(true, newMstrPsw, myobj);
-      }
-      else{
-        alert("Ancien Mot de passe erroné.");
-        resolve(false);
-      }
-    });
-  };
+  /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Affichages et interactions avec le client.html
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
-  // Fonction de changement du contenu de la base de donnees locale avec le nouveau mot de passe maitre
-  function effectiveChangeMstrPsw(booleanVal, newMstrPsw, myobj){
-    if (booleanVal){
-      for (var i=0; i<myobj.length; i++){
-        updateAES128(myobj[i].Website, currentPassword, addListe, newMstrPsw)
-      }
-      document.getElementById("button-onload").className = "dot red";
-      $("#psw-buttons").hide();
-      reset_psw();
-      readTriplet();
-      currentPassword = newMstrPsw;
-    }
-  };
-
-  /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  Affichage et interactions avec le client.html
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
-
-   // Dissimulation initiale des champs d'entrees d' "ajouter un triplet"
+  // Dissimulation initiale des champs d'entrees d' "ajouter un triplet"
   $("#add-buttons").hide();
   $("#mod-buttons").hide();
   $("#psw-buttons").hide();
@@ -919,89 +942,43 @@ $(document).ready(function(){
 
   // Initialisation du lien "Recuperer les bases de données" qui recupere la liste des bases de donnees présente sur le serveur
   $("#DL-allBase").click(function(){
-      // data = {"login":"log"};
-      keycloak.updateToken(30).success()
-      .error(function(){$("#OnConnectionNeeded").modal("show");});
-      if (keycloak.authenticated){
-        $.ajax({
-          type:"GET",
-          headers:{"Authorization": "Bearer " + keycloak.token},
-          url:urlc + "/listeBd",
-          contentType:"application/json",
-          success:function(json,status){
-            // variable de stockage ( liste de donnees post traitement)
-            // variable stockage d'un triplet
-            var myobj = json;
-            if (myobj.Base.length > 0){
-              addBase(myobj);
-            };
-          },
-          error:function(data,status){
-            $("#OnAbbortAjax").modal();
-            console.log("error POST" + data + " status :  " + status);
-          }
-        });
+    // data = {"login":"log"};
+    keycloak.updateToken(30).success()
+    .error(function(){$("#OnConnectionNeeded").modal("show");});
+    if (keycloak.authenticated){
+      $.ajax({
+        type:"GET",
+        headers:{"Authorization": "Bearer " + keycloak.token},
+        url:urlc + "/listeBd",
+        contentType:"application/json",
+        success:function(json,status){
+          // variable de stockage ( liste de donnees post traitement)
+          // variable stockage d'un triplet
+          var myobj = json;
+          if (myobj.Base.length > 0){
+            addBase(myobj);
+          };
+        },
+        error:function(data,status){
+          $("#OnAbbortAjax").modal();
+          console.log("error POST" + data + " status :  " + status);
+        }
+      });
     }
   });
 
-  // Initialisation du lien "Recuperer les sites" qui recupere les triplets d'une base de donnees situee sur le serveur
-  function downloadBdd(name){
-    var store = getObjectStore("Triplet", "readonly");
-    var getdatas = store.getAll();
-    var conf = "true";
-    getdatas.onsuccess = function(){
-      if (getdatas.result != 0){
-        conf = confirmationSuppression("Voulez-vous supprimer la base de données locale?");
-      }
-      if (conf && getdatas.result != 0){
-        deleteData();
-      }
-      if (conf){
-        // data = {"login":"log","bd":"passwords"};
-        keycloak.updateToken(30).success(function(){}).error(function(){$("#OnConnectionNeeded").modal("show");});
-        if (keycloak.authenticated){
-          $.ajax({
-            type:"GET",
-            headers:{"Authorization": "Bearer " + keycloak.token},
-            url:urlc + "/database" + "?name=" + name,
-            contentType:"application/json",
-            success:function(json,status){
-              dbName = name;
-              currentPassword = "";
-              // variable de stockage ( liste de données post traitement)
-              // variable stockage d'un triplet
-              var myobj = json;
-              if (myobj.triplets.length > 0){
-                for (var i=0; i<myobj.triplets.length; i++){
-                  // addTriplet(myobj.triplets[i].site, base64DecToArr(myobj.triplets[i].crypto));
-                  list = list.concat({"Website":myobj.triplets[i].site, "crypto":base64DecToArr(myobj.triplets[i].crypto)});
-                };
-                store = getObjectStore("Triplet", "readwrite");
-                cpt = 0;
-                put_record(list, store, cpt);
-              };
-              readTriplet();
-              document.getElementById("button-onload").className = "dot";
-            },
-            error:function(data,status){console.log("error GET" + data + " status :  " + status);}
-          });
-        }
-      }
-    }
-  };
-
   // Initialisation des champs d'entrees de "changer le mot de passe Maitre" (champ mot de passe)
   $("#PasswordChange").click(function(){
-      var x = document.getElementById("psw-buttons");
-      if (x.style.display === "none") {
-        x.style.display = "block";
-        document.getElementById("chng_psw").disabled = true;
-      } else {
-        x.style.display = "none";
-        reset_psw();
-        document.getElementById("chng_psw").disabled = false;
-      }
-    });
+    var x = document.getElementById("psw-buttons");
+    if (x.style.display === "none") {
+      x.style.display = "block";
+      document.getElementById("chng_psw").disabled = true;
+    } else {
+      x.style.display = "none";
+      reset_psw();
+      document.getElementById("chng_psw").disabled = false;
+    }
+  });
     // $("#psw-buttons").show();
     // document.getElementById("chng_psw").disabled = true;
     // });
@@ -1033,10 +1010,9 @@ $(document).ready(function(){
     var website = document.getElementById("Website").value;
     var login = document.getElementById("Login").value;
     var password = document.getElementById("Password").value;
-
     var store = getObjectStore("Triplet", "readonly");
     var countRequest = store.count();
-    countRequest.onsuccess = function() {
+    countRequest.onsuccess = function(){
       if ( countRequest.result == 0){
         var tmpname = window.prompt("Entrez un nom de base de données : ");
         dbName = tmpname;
@@ -1096,23 +1072,30 @@ $(document).ready(function(){
     var website = document.getElementById("mod-Website").value;
     var login = document.getElementById("mod-Login").value;
     var password = document.getElementById("mod-Password").value;
-
     encryptAES128(login, password, website, undefined, undefined, modTriplet);
     $("#mod-buttons").hide();
     testlogin = testpassword = "";
   });
 
+  // Affichage de la sauvegarde d'une base de donnees sur le serveur
   $('#send').click(function(){
-    $("#send-buttons").show();
+    var x = document.getElementById("send-buttons");
+    if (x.style.display === "none"){
+      x.style.display = "block";
+      document.getElementById("send_db").disabled = true;
+    } else{
+      x.style.display = "none";
+    }
   });
 
+  // Permet l'enregistrement du mot de passe maitre
   $('#passButton').click(function(){
     let newpassw = document.getElementById("pass").value;
     currentPassword = newpassw;
     document.getElementById("pass").value = "";
     var store = getObjectStore("Triplet", "readonly");
     var countRequest = store.count();
-    countRequest.onsuccess = function() {
+    countRequest.onsuccess = function(){
       if(countRequest.result != 0){
         $("#GrabMstrPsw").modal("hide");
         decryptAES128("0________", currentPassword,checkMstrPsw);
@@ -1123,7 +1106,7 @@ $(document).ready(function(){
     }
   });
 
-
+  // Envoie la base de donnees choisie sur le serveur
   $('#send_db').click(function(){
     keycloak.updateToken(30).success(function(){}).error(function(){$("#OnConnectionNeeded").modal("show");});
     if (keycloak.authenticated){
@@ -1156,11 +1139,11 @@ $(document).ready(function(){
     }
   });
 
-  // appel la requête ajax download sur dbname au click utilisateur
+  // Telecharge du serveur la base de donnee voulue en local
   $("body").on("click", "#base", function(){
-      let tmpName = $(this).attr("name");
-      dbName = tmpName;
-      downloadBdd(dbName)
+    let tmpName = $(this).attr("name");
+    dbName=tmpName;
+    downloadBdd(dbName);
   });
 
   // Initialisation d'interactions avec les images "Modifier"
