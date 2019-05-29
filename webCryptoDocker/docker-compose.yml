@@ -7,8 +7,6 @@ services:
       context: ../webCryptoServeur/
       dockerfile: ../webCryptoDocker/DockerfileSQLite
     container_name: SQLiteTriplet
-    ports:
-    - 2:12345
     volumes:
     - account:/usr/local/monCoffre/account
 
@@ -22,17 +20,11 @@ services:
       - certifok:/usr/local/certif/
 
 
-
-
   serveur:
     build:
       context: ../webCryptoServeur
       dockerfile: ../webCryptoDocker/DockerfileServeur
     container_name: Serveur
-    ports:
-    - "8880:8080"
-    - "8444:8443"
-    - "9999:9990"
     volumes_from:
     - sqlite:rw
     stdin_open: True
@@ -42,33 +34,8 @@ services:
     - keycloak_dependency
     links:
     - "sqlite:sqlite"
-#    volumes:
-#    - keycloakDependency:/keycloak
     networks:
     - revproxy-network
-
-#  serveur:
-#    build:
-#      context: ../webCryptoServeur/
-#      dockerfile: ../webCryptoDocker/DockerfileServeur
-#    container_name: Serveur
-#    # ports:
-#    # - "8080:8080"
-#    volumes:
-#      # - /home/docker/keycloak/:/opt/
-#      - keycloakDependency:/usr/local/jetty/lib/keycloak/
-#    volumes_from:
-#    - sqlite:rw
-#    stdin_open: True
-#    tty: True
-#    depends_on:
-#    - sqlite
-#    # - certificat
-#    links:
-#    - "sqlite:sqlite"
-#    - "authentification:serv"
-#    networks:
-#      - revproxy-network
 
   reverse_proxy:
     build:
@@ -80,15 +47,10 @@ services:
       - "443:443"
     volumes:
       - certifok:/etc/nginx/certif/
-      # - /home/docker/config/:/etc/nginx/conf.d/
     stdin_open: True
     tty: True
     depends_on:
       - serveur
-#      - certificat
-    # links:
-    #   - "serveur:app"
-    #   - "authentification:authent"
     networks:
       - revproxy-network
 
@@ -98,21 +60,13 @@ services:
       context: ../webCryptoNGINX/
       dockerfile: ../webCryptoDocker/DockerfileKeycloak
     container_name: Keycloak
-    # command: keycloak/bin/add-user-keycloak.sh -u admin -p admin
     depends_on:
       - postgres_auth
       - keycloak_dependency
-    #
-    # A enlever pour le https
-    #
     environment:
-      # - KEYCLOAK_HTTPS_PORT=8085
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
       - PROXY_ADDRESS_FORWARDING=true
-    ports:
-      - "8081:8080"
-      - "8443:8443"
     volumes:
       - keycloakCert:/etc/x509/https
     networks:
@@ -124,8 +78,6 @@ services:
   postgres_auth:
     image: postgres:11.3
     container_name: Postgres_auth
-    ports:
-      - "5432:5432"
     volumes:
       - volumeAuthentifie:/var/lib/postgresql/data
     networks:
@@ -142,16 +94,12 @@ services:
         - no_proxy
       dockerfile: DockerfileKeycloakDependency
     container_name: Keycloak_dependency
-#    env_file:
-#      - proxy.env
     volumes:
-#      - keycloakDependency:/keycloak/
       - keycloakCert:/usr/local/certif/
 
 volumes:
   certifok:
   volumeAuthentifie:
-#  keycloakDependency:
   keycloakCert:
   account:
 

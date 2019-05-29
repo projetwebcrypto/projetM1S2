@@ -1,5 +1,5 @@
 # dockerfile multistage
-# stage 1
+# Stage 1
 
 FROM maven:3.5.4-jdk-8-alpine AS build
 
@@ -10,6 +10,8 @@ ADD settings.xml /tmp
 RUN mvn -s /tmp/settings.xml -B -e -C -T 1C org.apache.maven.plugins:maven-dependency-plugin:3.1.1:go-offline
 COPY src ./src
 RUN mvn -s /tmp/settings.xml -B -e -C -T 1C package
+
+# Stage 2
 
 FROM jboss/wildfly:15.0.0.Final
 ENV JBOSS_HOME /opt/jboss/wildfly

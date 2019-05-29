@@ -26,7 +26,7 @@ var keycloak = Keycloak({
 "ssl-required": "external",
 "resource": "customer-portal",
 "credentials": {
-"secret": "91ba6cd3-a905-4e00-af7c-b6e4ad777011"
+"secret": "b60f86b5-67c8-4429-ba3d-dd7457b91266"
 },
 "enable-cors": true
 });
@@ -176,14 +176,114 @@ $(document).ready(function(){
                                 $("#unloged").show();}})
           .error(function(){console.log("Erreur Keycloak");})
 
-  // Fonction qui definit le mot de passe maitre initial. Si base de donnee locale existante,
-  // verifie la valeur du mot de passe donne.
-  // function stateMstrPsw(){
-  //   var newpassw = window.prompt("Entrez le mot de passe maitre : ");
-  //   currentPassword = newpassw;
-  // };
-  //
-  //  stateMstrPsw();
+  /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Fonctions d'encodage / decodage en base 64 qui proviennent de developper.mozilla.org
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
+  // Fonction qui decode une chaine en Base64 depuis un tableau d'octets
+  function uint6ToB64(nUint6) {
+    return nUint6 < 26 ? // si mon caractere est dans [0-25] c'est un caractere
+        nUint6 + 65     // non imprimable, on fait donc +65 (ascii (A) = 65)
+      : nUint6 < 52 ?  // si le caractere est une lettre minuscule +71 pour correspondre
+        nUint6 + 71   // au code ascii de la minuscule
+      : nUint6 < 62 ?   // si le caractere est un chiffre, -4 pour correspondre
+        nUint6 - 4        // au code ascii du chiffre
+      : nUint6 === 62 ? // si le caracteres est + le codage donne un r
+        43
+      : nUint6 === 63 ? // si le caracteres est / le codage donne un v
+        47
+      :
+        65;
+  };
+
+  // Fonction d'encodage array en Base64
+  function base64EncArr(aBytes){
+    var eqLen = (3 - (aBytes.length % 3)) % 3, sB64Enc = "";
+    for (var nMod3, nLen = aBytes.length, nUint24 = 0, nIdx = 0; nIdx < nLen; nIdx++) {
+      nMod3 = nIdx % 3;
+      /* Uncomment the following line in order to split the output in lines 76-character long: */
+      /* if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) { sB64Enc += "\r\n"; } */
+      nUint24 |= aBytes[nIdx] << (16 >>> nMod3 & 24);
+      if (nMod3 === 2 || aBytes.length - nIdx === 1) {
+        sB64Enc += String.fromCharCode(uint6ToB64(nUint24 >>> 18 & 63), uint6ToB64(nUint24 >>> 12 & 63), uint6ToB64(nUint24 >>> 6 & 63), uint6ToB64(nUint24 & 63));
+        nUint24 = 0;
+      }
+    }
+    return  eqLen === 0 ?
+        sB64Enc
+      :
+        sB64Enc.substring(0, sB64Enc.length - eqLen) + (eqLen === 1 ? "=" : "==");
+  }
+
+  // Fonction qui decode un tableau d'octets depuis une chaine en Base64
+  function b64ToUint6(nChr) {
+    return nChr > 64 && nChr < 91 ?
+        nChr - 65
+      : nChr > 96 && nChr < 123 ?
+        nChr - 71
+      : nChr > 47 && nChr < 58 ?
+        nChr + 4
+      : nChr === 43 ?
+        62
+      : nChr === 47 ?
+        63
+      :
+        0;
+  };
+
+  // Fonction de decode d'une chaine de caracteres en Base64 en un tableau d'octets
+  function base64DecToArr (sBase64, nBlockSize) {
+    // enleve les caracteres de fin du base64, stock la taille
+    var
+      sB64Enc = sBase64.replace(/[^A-Za-z0-9\+\/]/g, ""), nInLen = sB64Enc.length,
+      nOutLen = nBlockSize ? Math.ceil((nInLen * 3 + 1 >>> 2) / nBlockSize) * nBlockSize : nInLen * 3 + 1 >>> 2,
+      aBytes = new Uint8Array(nOutLen);
+    for (var nMod3, nMod4, nUint24 = 0, nOutIdx = 0, nInIdx = 0; nInIdx < nInLen; nInIdx++) {
+      nMod4 = nInIdx & 3;
+      nUint24 |= b64ToUint6(sB64Enc.charCodeAt(nInIdx)) << 18 - 6 * nMod4;
+      if (nMod4 === 3 || nInLen - nInIdx === 1) {
+        for (nMod3 = 0; nMod3 < 3 && nOutIdx < nOutLen; nMod3++, nOutIdx++) {
+          aBytes[nOutIdx] = nUint24 >>> (16 >>> nMod3 & 24) & 255;
+        }
+        nUint24 = 0;
+      };
+    };
+    return aBytes;
+  };
+
+  /*!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Fonctions de reset des champs
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
+  // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
+  function reset_add(){
+    document.getElementById("Website").value = "";
+    document.getElementById("Login").value = "";
+    document.getElementById("Password").value = "";
+  };
+
+  // Fonction qui reinitialise les champs d'entrees de "modifier un triplet"
+  function reset_mod(){
+    document.getElementById("new-Website").value = "";
+    document.getElementById("mod-Login").value = "";
+    document.getElementById("mod-Password").value = "";
+  };
+
+  // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
+  function reset_psw(){
+    document.getElementById("OldMstrPsw").value = "";
+    document.getElementById("NewMstrPsw").value = "";
+    document.getElementById("ConfMstrPsw").value = "";
+  };
+
+  // Fonction qui reinitialise le champ d'entree du fichier a envoyer sur le serveur
+  function reset_send(){
+    $('#send-buttons').empty();
+  }
+
+  /*!!!!!!!!!!!!!!!!!
+  Fonctions du client
+  !!!!!!!!!!!!!!!!!*/
 
   // Test de raffraichissement de la bd
   function getObjectStore(store_name, mode){
@@ -220,32 +320,6 @@ $(document).ready(function(){
     document.getElementById("pseudo").innerHTML = "Identifiant : " + testlogin;
     document.getElementById("motdepasseclair").innerHTML = "mdp : " + testpassword;
     $("#AfficheClairModal").modal();
-  }
-
-  // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
-  function reset_add(){
-    document.getElementById("Website").value = "";
-    document.getElementById("Login").value = "";
-    document.getElementById("Password").value = "";
-  };
-
-  // Fonction qui reinitialise les champs d'entrees de "modifier un triplet"
-  function reset_mod(){
-    document.getElementById("new-Website").value = "";
-    document.getElementById("mod-Login").value = "";
-    document.getElementById("mod-Password").value = "";
-  };
-
-  // Fonction qui reinitialise les champs d'entrees d' "ajouter un triplet"
-  function reset_psw(){
-    document.getElementById("OldMstrPsw").value = "";
-    document.getElementById("NewMstrPsw").value = "";
-    document.getElementById("ConfMstrPsw").value = "";
-  };
-
-  // Fonction qui reinitialise le champ d'entree du fichier a envoyer sur le serveur
-  function reset_send(){
-    $('#send-buttons').empty();
   }
 
   // Fonction d'affichage des bases de donnees disponibles depuis le serveur
@@ -319,79 +393,6 @@ $(document).ready(function(){
       return 0;
       };
     };
-
-  // Fonction qui decode une chaine en Base64 depuis un tableau d'octets
-  function uint6ToB64(nUint6) {
-    return nUint6 < 26 ? // si mon caractere est dans [0-25] c'est un caractere
-        nUint6 + 65     // non imprimable, on fait donc +65 (ascii (A) = 65)
-      : nUint6 < 52 ?  // si le caractere est une lettre minuscule +71 pour correspondre
-        nUint6 + 71   // au code ascii de la minuscule
-      : nUint6 < 62 ?   // si le caractere est un chiffre, -4 pour correspondre
-        nUint6 - 4        // au code ascii du chiffre
-      : nUint6 === 62 ? // si le caracteres est + le codage donne un r
-        43
-      : nUint6 === 63 ? // si le caracteres est / le codage donne un v
-        47
-      :
-        65;
-  };
-
-  // Fonction d'encodage array en Base64
-  function base64EncArr(aBytes){
-    var eqLen = (3 - (aBytes.length % 3)) % 3, sB64Enc = "";
-
-    for (var nMod3, nLen = aBytes.length, nUint24 = 0, nIdx = 0; nIdx < nLen; nIdx++) {
-      nMod3 = nIdx % 3;
-      /* Uncomment the following line in order to split the output in lines 76-character long: */
-      /*
-      if (nIdx > 0 && (nIdx * 4 / 3) % 76 === 0) { sB64Enc += "\r\n"; }
-      */
-      nUint24 |= aBytes[nIdx] << (16 >>> nMod3 & 24);
-      if (nMod3 === 2 || aBytes.length - nIdx === 1) {
-        sB64Enc += String.fromCharCode(uint6ToB64(nUint24 >>> 18 & 63), uint6ToB64(nUint24 >>> 12 & 63), uint6ToB64(nUint24 >>> 6 & 63), uint6ToB64(nUint24 & 63));
-        nUint24 = 0;
-      }
-    }
-    return  eqLen === 0 ?
-        sB64Enc
-      :
-        sB64Enc.substring(0, sB64Enc.length - eqLen) + (eqLen === 1 ? "=" : "==");
-  }
-
-  // Fonction qui decode un tableau d'octets depuis une chaine en Base64
-  function b64ToUint6(nChr) {
-    return nChr > 64 && nChr < 91 ?
-        nChr - 65
-      : nChr > 96 && nChr < 123 ?
-        nChr - 71
-      : nChr > 47 && nChr < 58 ?
-        nChr + 4
-      : nChr === 43 ?
-        62
-      : nChr === 47 ?
-        63
-      :
-        0;
-  };
-
-  // Fonction de decode d'une chaine de caracteres en Base64 en un tableau d'octets
-  function base64DecToArr (sBase64, nBlockSize) {
-    // enleve les caracteres de fin du base64, stock la taille
-    var
-      sB64Enc = sBase64.replace(/[^A-Za-z0-9\+\/]/g, ""), nInLen = sB64Enc.length,
-      nOutLen = nBlockSize ? Math.ceil((nInLen * 3 + 1 >>> 2) / nBlockSize) * nBlockSize : nInLen * 3 + 1 >>> 2, aBytes = new Uint8Array(nOutLen);
-    for (var nMod3, nMod4, nUint24 = 0, nOutIdx = 0, nInIdx = 0; nInIdx < nInLen; nInIdx++) {
-      nMod4 = nInIdx & 3;
-      nUint24 |= b64ToUint6(sB64Enc.charCodeAt(nInIdx)) << 18 - 6 * nMod4;
-      if (nMod4 === 3 || nInLen - nInIdx === 1) {
-        for (nMod3 = 0; nMod3 < 3 && nOutIdx < nOutLen; nMod3++, nOutIdx++) {
-          aBytes[nOutIdx] = nUint24 >>> (16 >>> nMod3 & 24) & 255;
-        }
-        nUint24 = 0;
-      };
-    };
-    return aBytes;
-  };
 
   // Fonction qui supprime la base de donnees locale
   function deleteData(bool){
@@ -469,8 +470,6 @@ $(document).ready(function(){
     }
     if (row_index == data_array.length){
       list = [];
-      document.getElementById("button-onload").className = "dot red";
-
     }
   };
 
@@ -481,14 +480,22 @@ $(document).ready(function(){
     list = list.concat([tuple]);
     var store = getObjectStore("Triplet", "readonly");
     var countRequest = store.count();
-    countRequest.onsuccess = function() {
+    countRequest.onsuccess = function(){
       if( list.length == countRequest.result){
         store = getObjectStore("Triplet", "readwrite");
         cpt = 0;
         put_record(list, store, cpt);
+        document.getElementById("button-onload").className = "dot red";
       }
     };
   };
+
+  //Fonction d'affichage modal si mot de passe maître incompatible avec la base de données.
+  function traitementModal(){
+    document.getElementById("titleGrabMtrPsw").innerHTML = "Mauvais mot de passe";
+    document.getElementById("ContentModalSession").innerHTML = "Veuillez ressaisir le mot de passe maître";
+    $("#GrabMstrPsw").modal("show");
+  }
 
   // Fonction qui fait les traitements necessaire sur l'objet "clear" (uint8array[size+chiffré(login+mdp)])
   // puis envoie le resultat du traitement a une fonction
@@ -501,26 +508,19 @@ $(document).ready(function(){
     fonction(testlogin, testpassword, website, newMstrPsw, myobj);
   };
 
-  // // Fonction de verification du site de l'entree 0
-  // function modMstrPsw(testlogin, toverify, website, newMstrPsw, myobj){
-  //   if (myobj[0].Website == "0________"){
-  //     decryptAES128(myobj[0].Website, currentPassword, checkTest, newMstrPsw, myobj);
-  //   }
-  // };
-
   // Fonction de verification du mot de passe maitre lors d'une connexion sur une base de donnees déjà presente
-  function checkMstrPsw(testlogin, toverify, website, newmstrpsw, myobj){
+  function checkMstrPsw(testlogin, toverify, website, newMstrPsw, myobj){
     var verif = new Uint8Array([0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
     byteLogin = new Uint8Array(convertStringToByteArray(testlogin));
     if (verif.length == (byteLogin.length) + 1){
       for (var i=1; i<verif.length; i++){
         if (verif[i] != byteLogin[i-1]){
-          console.log("Ancien Mot de passe erroné");
+          alert("Ancien Mot de passe erroné");
         };
       };
     }
-  };
 
+  };
   // Fonction de verification du contenu du decrypte de l'entree 0
   function checkTest(testlogin, testpassword, website, newMstrPsw, myobj, sizeLogin){
     var verif = new Uint8Array([0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0]);
@@ -588,6 +588,7 @@ $(document).ready(function(){
             contentType:"application/json",
             success:function(json,status){
               dbName = name;
+              currentPassword = "";
               // variable de stockage ( liste de données post traitement)
               // variable stockage d'un triplet
               var myobj = json;
@@ -679,7 +680,7 @@ $(document).ready(function(){
     var store =  getObjectStore("Triplet", "readonly");
     // recuperation du site
     var objectStoreRequest = store.get(website);
-    objectStoreRequest.onsuccess = function() {
+    objectStoreRequest.onsuccess = function(){
       completeCrypto = objectStoreRequest.result.crypto;
       if (completeCrypto.length != 0) {
         // On extrait les infos du cryptogramme complet
@@ -776,86 +777,86 @@ $(document).ready(function(){
     }
   };
 
-    // Fonction de dechiffrement des identifiants
-    function decryptAES128(website, currentPassword, fonction, newMstrPsw, myobj){
-      var store =  getObjectStore("Triplet", "readonly");
-      var objectStoreRequest = store.get(website);
-      objectStoreRequest.onsuccess = function() {
-        completeCrypto = objectStoreRequest.result.crypto;
-        if (completeCrypto.length != 0) {
-          // On extrait les infos du cryptogramme complet
-          // Taille du sel 16
-          let ivChiffre = completeCrypto.slice(0, 32);
-          // Taille du ivChiffre 32
-          let sel = completeCrypto.slice(32, 48);
-          // Taille du chiffre le reste
-          let chiffre = completeCrypto.slice(48);
-          // Generation du IV a 0 pour faire du ECB en CBC
-          let ivZero = new Uint8Array(16);
-          var mdp = convertStringToByteArray(currentPassword);
-          if (mdp.length != 0) {
-            // Recuperation du mdp en tant que cle
-            let promiseMat = crypto.subtle.importKey(
-              "raw",
-              mdp,
-              {name: "PBKDF2"},
+  // Fonction de dechiffrement des identifiants
+  function decryptAES128(website, password, fonction, newMstrPsw, myobj){
+    var store =  getObjectStore("Triplet", "readonly");
+    var objectStoreRequest = store.get(website);
+    objectStoreRequest.onsuccess = function(){
+      completeCrypto = objectStoreRequest.result.crypto;
+      if (completeCrypto.length != 0) {
+        // On extrait les infos du cryptogramme complet
+        // Taille du sel 16
+        let ivChiffre = completeCrypto.slice(0, 32);
+        // Taille du ivChiffre 32
+        let sel = completeCrypto.slice(32, 48);
+        // Taille du chiffre le reste
+        let chiffre = completeCrypto.slice(48);
+        // Generation du IV a 0 pour faire du ECB en CBC
+        let ivZero = new Uint8Array(16);
+        var mdp = convertStringToByteArray(password);
+        if (mdp.length != 0) {
+          // Recuperation du mdp en tant que cle
+          let promiseMat = crypto.subtle.importKey(
+            "raw",
+            mdp,
+            {name: "PBKDF2"},
+            false,
+            ["deriveKey"]
+            );
+          promiseMat.then(function(mat){
+            // Derivation de la cle
+            let promiseKey = crypto.subtle.deriveKey(
+              {"name":"PBKDF2", salt: sel, "iterations":10000, "hash":"SHA-1"},
+              mat,
+              {"name":"AES-CBC", length:128},
               false,
-              ["deriveKey"]
+              ["decrypt"]
               );
-            promiseMat.then(function(mat){
-              // Derivation de la cle
-              let promiseKey = crypto.subtle.deriveKey(
-                {"name":"PBKDF2", salt: sel, "iterations":10000, "hash":"SHA-1"},
-                mat,
-                {"name":"AES-CBC", length:128},
-                false,
-                ["decrypt"]
-                );
-              promiseKey.then(function(key){
-                // Dechiffrement de l'IV chiffre
-                let promiseIv = crypto.subtle.decrypt(
-                  {name: "AES-CBC", iv: ivZero},
+            promiseKey.then(function(key){
+              // Dechiffrement de l'IV chiffre
+              let promiseIv = crypto.subtle.decrypt(
+                {name: "AES-CBC", iv: ivZero},
+                key,
+                ivChiffre);
+              promiseIv.then(function(ivClear){
+                // Dechiffrement du chiffre
+                let promiseClear = crypto.subtle.decrypt(
+                  {name: "AES-CBC", iv: ivClear},
                   key,
-                  ivChiffre);
-                promiseIv.then(function(ivClear){
-                  // Dechiffrement du chiffre
-                  let promiseClear = crypto.subtle.decrypt(
-                    {name: "AES-CBC", iv: ivClear},
-                    key,
-                    chiffre);
-                  promiseClear.then(function(clear){
-                    traitement(clear, currentPassword, website, newMstrPsw, myobj, fonction);
-                  })
+                  chiffre);
+                promiseClear.then(function(clear){
+                  traitement(clear, password, website, newMstrPsw, myobj, fonction);
                 })
-                .catch(function(err){
-                  if(currentPassword ==""){
-                    var store = getObjectStore("Triplet", "readonly");
-                    var getdatas = store.getAll();
-                    var conf = "true";
-                    getdatas.onsuccess = function(){
-                      if (getdatas.result != 0){
-                        conf = confirmationSuppression("Mauvais mot de passe, \nVoulez-vous supprimer la base de données locale?");
-                      }
-                      if (conf && getdatas.result != 0){
-                        deleteData(false);
-                      }
-                      else{traitementModal();}
-                    }
-                  }
-                  else{
-                    alert("Ancien Mot de passe erroné.");
-                  }
-                });
               })
+              .catch(function(err){
+                if(currentPassword ==""){
+                  var store = getObjectStore("Triplet", "readonly");
+                  var getdatas = store.getAll();
+                  var conf = "true";
+                  getdatas.onsuccess = function(){
+                    if (getdatas.result != 0){
+                      conf = confirmationSuppression("Mauvais mot de passe, \nVoulez-vous supprimer la base de données locale?");
+                    }
+                    if (conf && getdatas.result != 0){
+                      deleteData(false);
+                    }
+                    else{traitementModal();}
+                  }
+                }
+                else{
+                  alert("Ancien Mot de passe erroné.");
+                }
+              });
             })
-          }
+          })
         }
       }
-    };
+    }
+  };
 
-  /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  Affichage et interactions avec le client.html
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+  /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Affichages et interactions avec le client.html
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
   // Dissimulation initiale des champs d'entrees d' "ajouter un triplet"
   $("#add-buttons").hide();
@@ -1011,10 +1012,9 @@ $(document).ready(function(){
     var website = document.getElementById("Website").value;
     var login = document.getElementById("Login").value;
     var password = document.getElementById("Password").value;
-
     var store = getObjectStore("Triplet", "readonly");
     var countRequest = store.count();
-    countRequest.onsuccess = function() {
+    countRequest.onsuccess = function(){
       if ( countRequest.result == 0){
         var tmpname = window.prompt("Entrez un nom de base de données : ");
         dbName = tmpname;
@@ -1097,7 +1097,7 @@ $(document).ready(function(){
     document.getElementById("pass").value = "";
     var store = getObjectStore("Triplet", "readonly");
     var countRequest = store.count();
-    countRequest.onsuccess = function() {
+    countRequest.onsuccess = function(){
       if(countRequest.result != 0){
         $("#GrabMstrPsw").modal("hide");
         decryptAES128("0________", currentPassword,checkMstrPsw);
@@ -1122,7 +1122,7 @@ $(document).ready(function(){
         processData: false,
         contentType: false,
         success: function(data){
-          console.log('upload success!')
+          // console.log('upload success!')
           $('#send-buttons').empty();
           $('#send-buttons').append(data);
         }
