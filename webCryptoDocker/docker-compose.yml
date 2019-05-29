@@ -13,8 +13,8 @@ services:
 
   certificat:
     build:
-      context: ../webCryptoCertificat
-      dockerfile: ../webCryptoDocker/DockerfileCertificat
+      context: .
+      dockerfile: DockerfileCertificat
     container_name: Certificat
     volumes:
       - certifok:/usr/local/certif/

@@ -26,7 +26,7 @@ var keycloak = Keycloak({
 "ssl-required": "external",
 "resource": "customer-portal",
 "credentials": {
-"secret": "e633ea20-8798-4238-b121-dc47a9781e7c"
+"secret": "368b768f-a394-4895-9b09-8e0ff80c8a79"
 },
 "enable-cors": true
 });

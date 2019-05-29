@@ -4,4 +4,4 @@ RUN apt-get update && apt-get -y install openssl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/local/certif/
 
-RUN echo "\n\n\nnomCertificat\n\n\n\n" > creation.txt && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./tls.key -out ./tls.crt < creation.txt
+RUN echo "\n\n\nCertificat\n\n\n\n" > creation.txt && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./tls.key -out ./tls.crt < creation.txt
