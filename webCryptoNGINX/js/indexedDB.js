@@ -47,7 +47,7 @@ $(function(){
       try {
           req = store.add(site);
       } catch (e) {
-          console.log("mabiteàmodifier");
+          console.log("AddTripletTest Error");
           throw e;
       }
       req.onsuccess = function (evt) {
@@ -69,7 +69,7 @@ $(function(){
         try {
             req = store.add(pers);
         } catch (e) {
-            console.log("????");
+            console.log("AddObjectTest Error");
             throw e;
         }
         req.onsuccess = function (evt) {
